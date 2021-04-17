@@ -29,3 +29,10 @@ dependencies {
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.1'
 
 }
+
+task copyDependencies(type: Copy, dependsOn: assemble) {
+    into layout.buildDirectory.dir("libs")
+    from configurations.runtimeClasspath
+}
+
+build.dependsOn copyDependencies

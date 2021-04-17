@@ -16,7 +16,7 @@ public class Service {
 
     protected Undertow build() {
         return Undertow.builder()
-            .addHttpListener(80, "0.0.0.0")
+            .addHttpListener(3702, "0.0.0.0")
             .setHandler(new HttpHandler() {
                 @Override
                 public void handleRequest(final HttpServerExchange exchange) throws Exception {
