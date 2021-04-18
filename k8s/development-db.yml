@@ -1,0 +1,86 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  namespace: development
+  name: inventory-db-volume
+  labels:
+    type: local
+    app: inventory-db
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data"
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: development
+  name: inventory-db-claim
+  labels:
+    app: inventory-db
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: development
+  name: inventory-db-deployment
+spec:
+  selector:
+    matchLabels:
+      app: inventory-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: inventory-db
+    spec:
+      containers:
+      - name: inventory-db
+        image: postgres:13.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: inventory
+        - name: POSTGRES_USER
+          value: admin
+        - name: POSTGRES_PASSWORD
+          value: M9bmiR8iuod9wFHskgFu
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: inventory-db
+      volumes:
+      - name: inventory-db
+        persistentVolumeClaim:
+          claimName: inventory-db-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: development
+  name: inventory-db
+  labels:
+    app: inventory-db
+spec:
+  type: NodePort
+  ports:
+  - port: 3703
+    targetPort: 5432
+    nodePort: 31703
+  selector:
+   app: inventory-db
