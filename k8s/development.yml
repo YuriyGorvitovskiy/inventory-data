@@ -16,9 +16,10 @@ spec:
     spec:
       containers:
       - name: innventory-data
-        image: yuriyg/inventory-data:0.0.1
+        image: yuriyg/inventory-data:latest
         ports:
         - containerPort: 80
+        imagePullPolicy: Always
 
 ---
 apiVersion: v1

@@ -21,7 +21,7 @@ public class Service {
                 @Override
                 public void handleRequest(final HttpServerExchange exchange) throws Exception {
                     exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
-                    exchange.getResponseSender().send("{'name': 'Inventory Data'}");
+                    exchange.getResponseSender().send("{\"name\": \"Inventory Data\"}");
                 }
             }).build();
     }
