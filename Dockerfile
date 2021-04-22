@@ -6,5 +6,5 @@ WORKDIR /inventory
 
 EXPOSE 3702
 
-CMD ["/opt/java/openjdk/bin/java", "-cp", "bin/*", "com.yg.inventory.data.service.Service"]
+CMD ["/opt/java/openjdk/bin/java", "-cp", "bin/*", "com.yg.inventory.data.server.Main"]
 

@@ -18,8 +18,13 @@ repositories {
 }
 
 dependencies {
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation group: 'io.undertow', name: 'undertow-core', version: '2.2.7.Final'
+    // Functional programming
+    implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
+
+    // JSON ObjectMapper support
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.12.3'
+    implementation group: 'io.vavr', name: 'vavr-jackson', version: '0.10.3'
 
     // Use JUnit test framework
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.1'
