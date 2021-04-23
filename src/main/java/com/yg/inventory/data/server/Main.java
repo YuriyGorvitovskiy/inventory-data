@@ -1,15 +1,13 @@
 package com.yg.inventory.data.server;
 
 import java.net.InetSocketAddress;
-import java.time.Instant;
 import java.util.function.Supplier;
 
 import com.sun.net.httpserver.HttpServer;
 
+import com.yg.inventory.data.rest.CrudHandler;
+import com.yg.inventory.data.rest.VersionHandler;
 import com.yg.util.Java;
-import com.yg.util.Rest;
-
-import io.vavr.collection.TreeMap;
 
 public class Main {
     static final int HTTP_PORT = 3702;
@@ -18,9 +16,8 @@ public class Main {
 
     HttpServer build() throws Exception {
         HttpServer server = HttpServer.create();
-        server.createContext("/",
-                e -> Rest.json(e, TreeMap.of("name", "Inventory Data", "version", "0.0.2", "time", Instant.now())));
-        server.setExecutor(null); // creates a default executor
+        server.createContext("/", new VersionHandler());
+        server.createContext("/crud/", new CrudHandler());
         return server;
     }
 

@@ -17,9 +17,20 @@ spec:
       containers:
       - name: innventory-data
         image: yuriyg/inventory-data:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
-        imagePullPolicy: Never
+        env:
+        - name: DB_ADDRESS
+          value: inventory-db
+        - name: DB_PORT
+          value: "3703"
+        - name: DB_NAME
+          value: inventory
+        - name: POSTGRES_USER
+          value: admin
+        - name: POSTGRES_PASSWORD
+          value: M9bmiR8iuod9wFHskgFu
 
 ---
 apiVersion: v1
@@ -55,3 +66,4 @@ spec:
             name: innventory-data-service
             port:
               number: 3702
+              

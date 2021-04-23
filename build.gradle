@@ -21,6 +21,10 @@ dependencies {
     // Functional programming
     implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
 
+    // JDBC
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.20'
+    implementation group: 'org.apache.commons', name: 'commons-dbcp2', version: '2.8.0'
+
     // JSON ObjectMapper support
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.12.3'
