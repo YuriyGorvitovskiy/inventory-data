@@ -4,12 +4,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.Function;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
+import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 
@@ -22,6 +25,63 @@ public interface DB {
         static final String DB_USERNAME = "DB_USERNAME";
         static final String DB_PASSWORD = "DB_PASSWORD";
     }
+
+    static interface DataType {
+        static final String BIGINT   = "bigint";
+        static final String INTEGER  = "integer";
+        static final String VARCHAR  = "character varying";
+        static final String TSVECTOR = "tsvector";
+    }
+
+    @FunctionalInterface
+    static interface Inject {
+        /// return next position
+        int set(PreparedStatement ps, int pos) throws SQLException;
+    }
+
+    static interface Injects {
+        static final Inject                    NOTHING = (ps, i) -> i;
+        static final Function<Long, Inject>    LONG    = (v) -> (ps, i) -> {
+                                                           ps.setLong(i, v);
+                                                           return i + 1;
+                                                       };
+        static final Function<Integer, Inject> INTEGER = (v) -> (ps, i) -> {
+                                                           ps.setInt(i, v);
+                                                           return i + 1;
+                                                       };
+        static final Function<String, Inject>  STRING  = (v) -> (ps, i) -> {
+                                                           ps.setString(i, v);
+                                                           return i + 1;
+                                                       };
+
+        static interface Str {
+            static final Function<String, Inject> LONG    = (v) -> Injects.LONG.apply(Long.parseLong(v));
+            static final Function<String, Inject> INTEGER = (v) -> Injects.INTEGER.apply(Integer.parseInt(v));
+            static final Function<String, Inject> STRING  = Injects.STRING;
+        }
+
+    }
+
+    static final Map<String, Function<String, Inject>> DATA_TYPE_STRING_INJECT = HashMap.ofEntries(
+            new Tuple2<>(DataType.BIGINT, Injects.Str.LONG),
+            new Tuple2<>(DataType.INTEGER, Injects.Str.INTEGER),
+            new Tuple2<>(DataType.VARCHAR, Injects.Str.STRING));
+
+    @FunctionalInterface
+    static interface Extract<T> {
+        T get(ResultSet rs, int pos) throws SQLException;
+    }
+
+    static interface Extracts {
+        static final Extract<Long>    LONG    = (rs, i) -> rs.getLong(i);
+        static final Extract<Integer> INTEGER = (rs, i) -> rs.getInt(i);
+        static final Extract<String>  STRING  = (rs, i) -> rs.getString(i);
+    }
+
+    static final Map<String, Extract<?>> DATA_TYPE_EXTRACT = HashMap.ofEntries(
+            new Tuple2<>(DataType.BIGINT, Extracts.LONG),
+            new Tuple2<>(DataType.INTEGER, Extracts.INTEGER),
+            new Tuple2<>(DataType.VARCHAR, Extracts.STRING));
 
     static BasicDataSource pool = create();
 
@@ -42,7 +102,7 @@ public interface DB {
         return dataSource;
     }
 
-    public static <T, E extends Exception> T call(FunctionEx<Connection, T, E> f) {
+    static <T, E extends Exception> T call(FunctionEx<Connection, T, E> f) {
         return Java.soft(() -> {
             try (Connection connection = pool.getConnection()) {
                 return f.apply(connection);
@@ -50,7 +110,7 @@ public interface DB {
         });
     }
 
-    public static <E extends Exception> void run(ConsumerEx<Connection, E> f) {
+    static <E extends Exception> void run(ConsumerEx<Connection, E> f) {
         Java.soft(() -> {
             try (Connection connection = pool.getConnection()) {
                 f.accept(connection);
@@ -58,7 +118,7 @@ public interface DB {
         });
     }
 
-    public static <E extends Exception> void execute(String statement, ConsumerEx<PreparedStatement, E> p) {
+    static <E extends Exception> void execute(String statement, ConsumerEx<PreparedStatement, E> p) {
         run(c -> {
             try (PreparedStatement ps = c.prepareStatement(statement)) {
                 p.accept(ps);
@@ -67,16 +127,16 @@ public interface DB {
         });
     }
 
-    public static <R, E extends SQLException> List<R> executeQuery(String statement,
-                                                                   ConsumerEx<PreparedStatement, E> prep,
-                                                                   FunctionEx<ResultSet, R, E> row) {
-        return call(c -> executeQuery(c, statement, prep, row));
+    static <R, E extends SQLException> List<R> query(String statement,
+                                                     ConsumerEx<PreparedStatement, E> prep,
+                                                     FunctionEx<ResultSet, R, E> row) {
+        return call(c -> query(c, statement, prep, row));
     }
 
-    static <R, E extends Exception> List<R> executeQuery(Connection connection,
-                                                         String statement,
-                                                         ConsumerEx<PreparedStatement, E> prep,
-                                                         FunctionEx<ResultSet, R, E> row) throws E, SQLException {
+    static <R, E extends Exception> List<R> query(Connection connection,
+                                                  String statement,
+                                                  ConsumerEx<PreparedStatement, E> prep,
+                                                  FunctionEx<ResultSet, R, E> row) throws E, SQLException {
         try (PreparedStatement ps = connection.prepareStatement(statement)) {
             prep.accept(ps);
             try (ResultSet rs = ps.executeQuery()) {
@@ -87,4 +147,9 @@ public interface DB {
             }
         }
     }
+
+    static Inject fold(Seq<Inject> injects) {
+        return injects.foldLeft(Injects.NOTHING, (f, j) -> (ps, i) -> j.set(ps, f.set(ps, i)));
+    }
+
 }

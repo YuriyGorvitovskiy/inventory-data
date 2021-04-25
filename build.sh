@@ -2,7 +2,7 @@
 
 ./gradlew build
 
-docker build -f Dockerfile -t "yuriyg/inventory-data:0.0.3" -t "yuriyg/inventory-data:latest" ./build/
+docker build -f Dockerfile -t "yuriyg/inventory-data:0.0.4" -t "yuriyg/inventory-data:latest" ./build/
 
 # run localy
 # kubectl delete -f k8s/docker.yml
@@ -11,5 +11,5 @@ docker build -f Dockerfile -t "yuriyg/inventory-data:0.0.3" -t "yuriyg/inventory
 
 # publish to Docker hub
 # docker login --username=yuriyg
-# docker push yuriyg/inventory-data:0.0.3 && docker push yuriyg/inventory-data:latest
+# docker push yuriyg/inventory-data:0.0.4 && docker push yuriyg/inventory-data:latest
 #
