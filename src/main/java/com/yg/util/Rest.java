@@ -96,6 +96,7 @@ public interface Rest {
         URI uri = exchange.getRequestURI();
         return Stream.of(Java.toString(uri.getQuery()).split("&"))
             .map(p -> p.split("=", 2))
+            .filter(p -> !p[0].isEmpty())
             .groupBy(a -> a[0])
             .mapValues(l -> l.map(a -> 2 == a.length ? a[1] : "").toList());
     }

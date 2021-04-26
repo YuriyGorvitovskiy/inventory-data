@@ -113,10 +113,17 @@ public class CrudHandler implements HttpHandler {
     }
 
     Map<String, String> getColumns(String table) {
-        return DB.query(QEURY_FOR_COLUMNS,
+        Map<String, String> columns = DB.query(QEURY_FOR_COLUMNS,
                 ps -> ps.setString(1, table),
                 rs -> new Tuple2<>(rs.getString(1), rs.getString(2)))
             .toLinkedMap(t -> t);
+
+        if (columns.isEmpty()) {
+            throw new Rest.Error(Rest.ErrorCode.NOT_FOUND,
+                    "Table ${0} was not found",
+                    table);
+        }
+        return columns;
     }
 
     List<Tuple2<String, DB.Extract<?>>> getSelect(Map<String, List<String>> query, Map<String, String> columns) {
