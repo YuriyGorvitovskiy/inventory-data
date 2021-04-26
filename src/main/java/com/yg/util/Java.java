@@ -2,6 +2,9 @@ package com.yg.util;
 
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.StackWalker.StackFrame;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
@@ -49,6 +52,18 @@ public interface Java {
 
     static String toString(Object val) {
         return null == val ? "" : val.toString();
+    }
+
+    static String toString(Throwable ex) {
+        try (StringWriter sw = new StringWriter()) {
+            try (PrintWriter pw = new PrintWriter(sw)) {
+                ex.printStackTrace(pw);
+                pw.flush();
+                return sw.toString();
+            }
+        } catch (IOException io) {
+            throw new RuntimeException(io);
+        }
     }
 
     static String format(String format, Object... params) {

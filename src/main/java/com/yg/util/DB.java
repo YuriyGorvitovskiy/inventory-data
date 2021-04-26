@@ -10,9 +10,11 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
+import io.vavr.collection.Set;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 
@@ -31,6 +33,8 @@ public interface DB {
         static final String INTEGER  = "integer";
         static final String VARCHAR  = "character varying";
         static final String TSVECTOR = "tsvector";
+
+        static final Set<String> SUPPORTED = HashSet.of(BIGINT, INTEGER, VARCHAR);
     }
 
     @FunctionalInterface

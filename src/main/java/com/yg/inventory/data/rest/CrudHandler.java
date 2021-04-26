@@ -20,7 +20,6 @@ public class CrudHandler implements HttpHandler {
 
     static interface QueryParam {
         static final String SELECT      = "$select";
-        static final String TEXT_SEARCH = "$text";
         static final String ORDER       = "$order";
         static final String SKIP        = "$skip";
         static final String LIMIT       = "$limit";
@@ -98,8 +97,7 @@ public class CrudHandler implements HttpHandler {
     }
 
     void getRow(HttpExchange exchange, String table, String id) {
-        Map<String, List<String>> query = Rest.queryParams(exchange);
-
+        Map<String, List<String>>           query   = Rest.queryParams(exchange);
         Map<String, String>                 columns = getColumns(table);
         List<Tuple2<String, DB.Extract<?>>> select  = getSelect(query, columns);
 
@@ -108,7 +106,9 @@ public class CrudHandler implements HttpHandler {
                         ps -> ps.setLong(1, Long.parseLong(id)),
                         rs -> select.zipWithIndex()
                             .toLinkedMap(t -> Java.soft(() -> new Tuple2<>(t._1._1, t._1._2.get(rs, t._2 + 1)))))
-                    .getOrNull());
+                    .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.NOT_FOUND,
+                            "No item with id = ${0} is not present in requested table",
+                            id)));
     }
 
     Map<String, String> getColumns(String table) {
@@ -123,23 +123,38 @@ public class CrudHandler implements HttpHandler {
 
         return param.map(l -> l.flatMap(s -> List.of(s.split(","))))
             .getOrElse(columns.toList()
-                .filter(t -> !DB.DataType.TSVECTOR.equals(t._2))
+                .filter(t -> DB.DataType.SUPPORTED.contains(t._2))
                 .map(t -> t._1))
-            .map(c -> new Tuple2<String, DB.Extract<?>>(c,
-                    columns.get(c)
-                        .flatMap(t -> DB.DATA_TYPE_EXTRACT.get(t))
-                        .getOrNull()))
+            .map(c -> getSelectColumn(c, columns))
             .filter(t -> null != t._2)
             .toList();
+    }
+
+    Tuple2<String, DB.Extract<?>> getSelectColumn(String column, Map<String, String> columns) {
+        String dataType = columns.get(column)
+            .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.BAD_REQUEST,
+                    "Column ${0} is not present on requested table",
+                    column));
+
+        DB.Extract<?> extract = DB.DATA_TYPE_EXTRACT.get(dataType)
+            .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.BAD_REQUEST,
+                    "Column ${0} is not supported for ${1} parameter",
+                    column,
+                    QueryParam.SELECT));
+
+        return new Tuple2<>(column, extract);
     }
 
     Tuple2<String, DB.Inject> getConditions(Map<String, List<String>> query, Map<String, String> columns) {
         return andSqlInjects(query
             .filterKeys(k -> !k.startsWith(QueryParam.AUX_PREFIX))
-            .filterKeys(k -> columns.containsKey(k))
-            .map(t -> conditionSqlInject(t._1, columns.get(t._1).get(), t._2))
-            .appendAll(query.get(QueryParam.TEXT_SEARCH).flatMap(s -> textSearch(columns, s.getOrNull()))));
-
+            .map(t -> conditionSqlInject(
+                    t._1,
+                    columns.get(t._1)
+                        .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.BAD_REQUEST,
+                                "Column ${0} is not present on requested table",
+                                t._1)),
+                    t._2)));
     }
 
     Tuple2<String, DB.Inject> andSqlInjects(Seq<Tuple2<String, DB.Inject>> conditions) {
@@ -153,6 +168,10 @@ public class CrudHandler implements HttpHandler {
     }
 
     Tuple2<String, DB.Inject> conditionSqlInject(String column, String dataType, List<String> values) {
+        if (DB.DataType.TSVECTOR.equals(dataType)) {
+            return new Tuple2<>("websearch_to_tsquery('english', ?) @@ " + column,
+                    DB.Injects.Str.STRING.apply(values.mkString(" ")));
+        }
         if (values.isEmpty()) {
             return new Tuple2<>(column + " IS NULL", DB.Injects.NOTHING);
         }
@@ -163,31 +182,25 @@ public class CrudHandler implements HttpHandler {
         return new Tuple2<>(column + " IN (" + Java.repeat("?", ", ", values.size()) + ")", DB.fold(values.map(inject)));
     }
 
-    Option<Tuple2<String, DB.Inject>> textSearch(Map<String, String> columns, String text) {
-        if (Java.isEmpty(text)) {
-            return Option.none();
-        }
-        Option<Tuple2<String, String>> column = columns.find(t -> DB.DataType.TSVECTOR.equals(t._2));
-        if (column.isEmpty()) {
-            return Option.none();
-        }
-        return Option.of(new Tuple2<>(
-                "websearch_to_tsquery('english', ?) @@ " + column.get()._1,
-                DB.Injects.Str.STRING.apply(text)));
-    }
-
     List<Tuple2<String, Boolean>> getOrder(Map<String, List<String>> query, Map<String, String> columns) {
         Option<List<String>> param = query.get(QueryParam.ORDER);
         if (param.isEmpty()) {
             return List.of(new Tuple2<>(columns.get()._1, true));
         }
 
-        return param.get()
+        List<Tuple2<String, Boolean>> orders = param.get()
             .flatMap(s -> List.of(s.split(",")))
             .map(c -> c.startsWith(QueryParam.DESC_PREFIX)
                     ? new Tuple2<>(c.substring(QueryParam.DESC_PREFIX.length()), false)
-                    : new Tuple2<>(c, true))
-            .filter(t -> columns.containsKey(t._1));
+                    : new Tuple2<>(c, true));
+
+        Option<String> nonPresentColumn = orders.map(t -> t._1).find(c -> !columns.containsKey(c));
+        if (nonPresentColumn.isDefined()) {
+            throw new Rest.Error(Rest.ErrorCode.BAD_REQUEST,
+                    "Column ${0} is not present on requested table",
+                    nonPresentColumn.get());
+        }
+        return orders;
     }
 
     Tuple2<Long, Integer> getSkipLimit(Map<String, List<String>> query) {

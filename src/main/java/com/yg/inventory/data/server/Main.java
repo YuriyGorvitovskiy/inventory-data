@@ -8,6 +8,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.yg.inventory.data.rest.CrudHandler;
 import com.yg.inventory.data.rest.VersionHandler;
 import com.yg.util.Java;
+import com.yg.util.Rest;
 
 public class Main {
     static final int HTTP_PORT = 3702;
@@ -16,8 +17,8 @@ public class Main {
 
     HttpServer build() throws Exception {
         HttpServer server = HttpServer.create();
-        server.createContext("/", new VersionHandler());
-        server.createContext("/crud/", new CrudHandler());
+        server.createContext("/", Rest.errorHandler(new VersionHandler()));
+        server.createContext("/crud/", Rest.errorHandler(new CrudHandler()));
         return server;
     }
 
