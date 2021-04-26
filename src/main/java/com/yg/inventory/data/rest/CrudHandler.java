@@ -107,8 +107,9 @@ public class CrudHandler implements HttpHandler {
                         rs -> select.zipWithIndex()
                             .toLinkedMap(t -> Java.soft(() -> new Tuple2<>(t._1._1, t._1._2.get(rs, t._2 + 1)))))
                     .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.NOT_FOUND,
-                            "No item with id = ${0} is not present in requested table",
-                            id)));
+                            "No item with id = ${0} is present in ${1} table",
+                            id,
+                            table)));
     }
 
     Map<String, String> getColumns(String table) {
