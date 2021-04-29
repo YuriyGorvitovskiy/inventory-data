@@ -5,12 +5,16 @@ import java.util.function.Function;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import com.yg.inventory.data.db.DataAccess;
+import com.yg.inventory.data.db.SchemaAccess;
 import com.yg.util.DB;
+import com.yg.util.DB.DataType;
+import com.yg.util.DB.Inject;
 import com.yg.util.Java;
 import com.yg.util.Rest;
+import com.yg.util.Rest.ErrorCode;
 
 import io.vavr.Tuple2;
-import io.vavr.Tuple3;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
@@ -27,11 +31,8 @@ public class CrudHandler implements HttpHandler {
         static final String DESC_PREFIX = "-";
     }
 
-    final String QEURY_FOR_TABLE       = Java.resource("QueryForTable.sql");
-    final String QEURY_FOR_COLUMNS     = Java.resource("QueryForColumns.sql");
-    final String QEURY_ALL             = Java.resource("QueryAll.sql");
-    final String QEURY_WITH_CONDITIONS = Java.resource("QueryWithConditions.sql");
-    final String QEURY_BY_ID           = Java.resource("QueryById.sql");
+    final SchemaAccess schema = new SchemaAccess();
+    final DataAccess   data   = new DataAccess();
 
     @Override
     public void handle(HttpExchange exchange) {
@@ -39,15 +40,27 @@ public class CrudHandler implements HttpHandler {
             case "GET":
                 get(exchange);
                 break;
+            case "POST":
+                insert(exchange);
+                break;
+            case "PUT":
+                merge(exchange);
+                break;
+            case "PATCH":
+                update(exchange);
+                break;
+            case "DELETE":
+                delete(exchange);
+                break;
             default:
                 break;
         }
     }
 
-    public void get(HttpExchange exchange) {
+    void get(HttpExchange exchange) {
         String path = Rest.subContextPath(exchange);
 
-        String[] items = path.split("/", 3);
+        String[] items = path.split("/", 2);
         if (0 == items.length || Java.isEmpty(items[0])) {
             getListOfTables(exchange);
             return;
@@ -56,68 +69,127 @@ public class CrudHandler implements HttpHandler {
             queryTable(exchange, items[0]);
             return;
         }
-        getRow(exchange, items[0], items[1]);
+        getRow(exchange, items[0], parseId(items[1]));
     }
 
-    void getListOfTables(HttpExchange exchange) {
-        Rest.json(exchange,
-                DB.query(QEURY_FOR_TABLE,
-                        ps -> {},
-                        rs -> new Tuple3<String, String, String>(rs.getString(1), rs.getString(2), rs.getString(3)))
-                    .groupBy(t -> t._1)
-                    .mapValues(tl -> tl
-                        .groupBy(t -> t._2)
-                        .mapValues(cl -> cl.get()._3)));
-    }
-
-    void queryTable(HttpExchange exchange, String table) {
+    void insert(HttpExchange exchange) {
+        String                    table = Rest.subContextPath(exchange);
         Map<String, List<String>> query = Rest.queryParams(exchange);
 
-        Map<String, String>                 columns   = getColumns(table);
-        List<Tuple2<String, DB.Extract<?>>> select    = getSelect(query, columns);
-        Tuple2<String, DB.Inject>           condition = getConditions(query, columns);
-        List<Tuple2<String, Boolean>>       order     = getOrder(query, columns);
-        Tuple2<Long, Integer>               skipLimit = getSkipLimit(query);
+        Map<String, DataType>               columns   = getColumns(table);
+        List<Tuple2<String, DB.Extract<?>>> returning = getSelect(query, columns);
 
-        String sql = Java.format(QEURY_WITH_CONDITIONS,
-                select.map(t -> t._1).mkString(", "),
-                table,
-                condition._1,
-                order.map(t -> t._1 + (t._2 ? " ASC" : " DESC")).mkString(", "));
+        @SuppressWarnings("unchecked")
+        Map<String, Object>          entity = Rest.extract(exchange, Map.class);
+        List<Tuple2<String, Inject>> insert = entity.flatMap(t -> getInject(columns, t._1, t._2)).toList();
 
-        Rest.json(exchange,
-                DB.query(sql,
-                        ps -> {
-                            int i = condition._2.set(ps, 1);
-                            ps.setInt(i++, skipLimit._2);
-                            ps.setLong(i++, skipLimit._1);
-                        },
-                        rs -> select.zipWithIndex()
-                            .toLinkedMap(t -> Java.soft(() -> new Tuple2<>(t._1._1, t._1._2.get(rs, t._2 + 1))))));
+        Rest.json(exchange, data.insert(table, insert, returning).get());
     }
 
-    void getRow(HttpExchange exchange, String table, String id) {
-        Map<String, List<String>>           query   = Rest.queryParams(exchange);
-        Map<String, String>                 columns = getColumns(table);
-        List<Tuple2<String, DB.Extract<?>>> select  = getSelect(query, columns);
+    void merge(HttpExchange exchange) {
+        String path = Rest.subContextPath(exchange);
+
+        String[] items = path.split("/", 2);
+        if (2 != items.length || Java.isEmpty(items[0]) || Java.isEmpty(items[1])) {
+            throw new Rest.Error(Rest.ErrorCode.BAD_REQUEST, "Request path ${0} is incorrect. Please, provide table/id.", path);
+        }
+
+        String table = items[0];
+        Long   id    = parseId(items[1]);
+
+        Map<String, List<String>>           query     = Rest.queryParams(exchange);
+        Map<String, DataType>               columns   = getColumns(table);
+        List<Tuple2<String, DB.Extract<?>>> returning = getSelect(query, columns);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object>          entity = Rest.extract(exchange, Map.class);
+        List<Tuple2<String, Inject>> values = entity.flatMap(t -> getInject(columns, t._1, t._2)).toList();
+
+        Rest.json(exchange, data.mergeById(table, id, values, returning).get());
+    }
+
+    void update(HttpExchange exchange) {
+        String path = Rest.subContextPath(exchange);
+
+        String[] items = path.split("/", 2);
+        if (2 != items.length || Java.isEmpty(items[0]) || Java.isEmpty(items[1])) {
+            throw new Rest.Error(Rest.ErrorCode.BAD_REQUEST, "Request path ${0} is incorrect. Please, provide table/id.", path);
+        }
+
+        String table = items[0];
+        Long   id    = parseId(items[1]);
+
+        Map<String, List<String>>           query     = Rest.queryParams(exchange);
+        Map<String, DataType>               columns   = getColumns(table);
+        List<Tuple2<String, DB.Extract<?>>> returning = getSelect(query, columns);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object>          entity = Rest.extract(exchange, Map.class);
+        List<Tuple2<String, Inject>> values = entity.flatMap(t -> getInject(columns, t._1, t._2)).toList();
 
         Rest.json(exchange,
-                DB.query(Java.format(QEURY_BY_ID, select.map(t -> t._1).mkString(", "), table),
-                        ps -> ps.setLong(1, Long.parseLong(id)),
-                        rs -> select.zipWithIndex()
-                            .toLinkedMap(t -> Java.soft(() -> new Tuple2<>(t._1._1, t._1._2.get(rs, t._2 + 1)))))
+                data.updateById(table, id, values, returning)
                     .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.NOT_FOUND,
                             "No item with id = ${0} is present in ${1} table",
                             id,
                             table)));
     }
 
-    Map<String, String> getColumns(String table) {
-        Map<String, String> columns = DB.query(QEURY_FOR_COLUMNS,
-                ps -> ps.setString(1, table),
-                rs -> new Tuple2<>(rs.getString(1), rs.getString(2)))
-            .toLinkedMap(t -> t);
+    void delete(HttpExchange exchange) {
+        String path = Rest.subContextPath(exchange);
 
+        String[] items = path.split("/", 2);
+        if (2 != items.length || Java.isEmpty(items[0]) || Java.isEmpty(items[1])) {
+            throw new Rest.Error(Rest.ErrorCode.BAD_REQUEST, "Request path ${0} is incorrect. Please, provide table/id.", path);
+        }
+
+        String table = items[0];
+        Long   id    = parseId(items[1]);
+
+        Map<String, List<String>>           query     = Rest.queryParams(exchange);
+        Map<String, DataType>               columns   = getColumns(table);
+        List<Tuple2<String, DB.Extract<?>>> returning = getSelect(query, columns);
+
+        Rest.json(exchange,
+                data.deleteById(table, id, returning)
+                    .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.NOT_FOUND,
+                            "No item with id = ${0} is present in ${1} table",
+                            id,
+                            table)));
+    }
+
+    Option<Tuple2<String, Inject>> getInject(Map<String, DataType> columns, String column, Object value) {
+        Option<DataType> dt = columns.get(column);
+        if (dt.isEmpty()) {
+            return Option.none();
+        }
+
+        Option<Function<Object, Inject>> injector = DB.DATA_TYPE_INJECT.get(dt.get());
+        if (dt.isEmpty()) {
+            return Option.none();
+        }
+
+        return Option.of(new Tuple2<>(column, injector.get().apply(value)));
+    }
+
+    void getListOfTables(HttpExchange exchange) {
+        Rest.json(exchange, schema.getTables());
+    }
+
+    void queryTable(HttpExchange exchange, String table) {
+        Map<String, List<String>> query = Rest.queryParams(exchange);
+
+        Map<String, DataType>               columns   = getColumns(table);
+        List<Tuple2<String, DB.Extract<?>>> select    = getSelect(query, columns);
+        Tuple2<String, DB.Inject>           condition = getConditions(query, columns);
+        List<Tuple2<String, Boolean>>       order     = getOrder(query, columns);
+        Tuple2<Long, Integer>               skipLimit = getSkipLimit(query);
+
+        Rest.json(exchange, data.queryByCondition(table, select, condition, order, skipLimit));
+    }
+
+    public Map<String, DataType> getColumns(String table) {
+        Map<String, DataType> columns = schema.getTableColumns(table);
         if (columns.isEmpty()) {
             throw new Rest.Error(Rest.ErrorCode.NOT_FOUND,
                     "Table ${0} was not found",
@@ -126,7 +198,20 @@ public class CrudHandler implements HttpHandler {
         return columns;
     }
 
-    List<Tuple2<String, DB.Extract<?>>> getSelect(Map<String, List<String>> query, Map<String, String> columns) {
+    void getRow(HttpExchange exchange, String table, Long id) {
+        Map<String, List<String>>           query   = Rest.queryParams(exchange);
+        Map<String, DataType>               columns = getColumns(table);
+        List<Tuple2<String, DB.Extract<?>>> select  = getSelect(query, columns);
+
+        Rest.json(exchange,
+                data.queryById(table, select, id)
+                    .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.NOT_FOUND,
+                            "No item with id = ${0} is present in ${1} table",
+                            id,
+                            table)));
+    }
+
+    List<Tuple2<String, DB.Extract<?>>> getSelect(Map<String, List<String>> query, Map<String, DataType> columns) {
         Option<List<String>> param = query.get(QueryParam.SELECT);
 
         return param.map(l -> l.flatMap(s -> List.of(s.split(","))))
@@ -138,8 +223,8 @@ public class CrudHandler implements HttpHandler {
             .toList();
     }
 
-    Tuple2<String, DB.Extract<?>> getSelectColumn(String column, Map<String, String> columns) {
-        String dataType = columns.get(column)
+    Tuple2<String, DB.Extract<?>> getSelectColumn(String column, Map<String, DataType> columns) {
+        DataType dataType = columns.get(column)
             .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.BAD_REQUEST,
                     "Column ${0} is not present on requested table",
                     column));
@@ -153,7 +238,7 @@ public class CrudHandler implements HttpHandler {
         return new Tuple2<>(column, extract);
     }
 
-    Tuple2<String, DB.Inject> getConditions(Map<String, List<String>> query, Map<String, String> columns) {
+    Tuple2<String, DB.Inject> getConditions(Map<String, List<String>> query, Map<String, DataType> columns) {
         return andSqlInjects(query
             .filterKeys(k -> !k.startsWith(QueryParam.AUX_PREFIX))
             .map(t -> conditionSqlInject(
@@ -175,8 +260,8 @@ public class CrudHandler implements HttpHandler {
         return new Tuple2<>("(" + conditions.map(t -> t._1).mkString(") AND (") + ")", DB.fold(conditions.map(t -> t._2)));
     }
 
-    Tuple2<String, DB.Inject> conditionSqlInject(String column, String dataType, List<String> values) {
-        if (DB.DataType.TSVECTOR.equals(dataType)) {
+    Tuple2<String, DB.Inject> conditionSqlInject(String column, DataType dataType, List<String> values) {
+        if (DB.DataType.TEXT_SEARCH_VECTOR.equals(dataType)) {
             return new Tuple2<>("websearch_to_tsquery('english', ?) @@ " + column,
                     DB.Injects.Str.STRING.apply(values.mkString(" ")));
         }
@@ -190,7 +275,7 @@ public class CrudHandler implements HttpHandler {
         return new Tuple2<>(column + " IN (" + Java.repeat("?", ", ", values.size()) + ")", DB.fold(values.map(inject)));
     }
 
-    List<Tuple2<String, Boolean>> getOrder(Map<String, List<String>> query, Map<String, String> columns) {
+    List<Tuple2<String, Boolean>> getOrder(Map<String, List<String>> query, Map<String, DataType> columns) {
         Option<List<String>> param = query.get(QueryParam.ORDER);
         if (param.isEmpty()) {
             return List.of(new Tuple2<>(columns.get()._1, true));
@@ -204,7 +289,7 @@ public class CrudHandler implements HttpHandler {
 
         Option<String> nonPresentColumn = orders.map(t -> t._1).find(c -> !columns.containsKey(c));
         if (nonPresentColumn.isDefined()) {
-            throw new Rest.Error(Rest.ErrorCode.BAD_REQUEST,
+            throw new Rest.Error(ErrorCode.BAD_REQUEST,
                     "Column ${0} is not present on requested table",
                     nonPresentColumn.get());
         }
@@ -219,5 +304,11 @@ public class CrudHandler implements HttpHandler {
                 query.get(QueryParam.LIMIT)
                     .map(l -> Integer.parseInt(l.get()))
                     .getOrElse(10));
+    }
+
+    long parseId(String id) {
+        return Java.soft(
+                () -> Long.parseLong(id),
+                ex -> new Rest.Error(ErrorCode.BAD_REQUEST, ex, "Can't parse id: ${0}", id));
     }
 }

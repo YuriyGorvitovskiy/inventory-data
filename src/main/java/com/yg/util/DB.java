@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.function.Function;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -28,13 +29,19 @@ public interface DB {
         static final String DB_PASSWORD = "DB_PASSWORD";
     }
 
-    static interface DataType {
-        static final String BIGINT   = "bigint";
-        static final String INTEGER  = "integer";
-        static final String VARCHAR  = "character varying";
-        static final String TSVECTOR = "tsvector";
+    public enum DataType {
+        BIGINT,
+        INTEGER,
+        VARCHAR,
+        TEXT_SEARCH_VECTOR;
 
-        static final Set<String> SUPPORTED = HashSet.of(BIGINT, INTEGER, VARCHAR);
+        public static final Map<String, DataType> DB_NAMES = HashMap.ofEntries(
+                new Tuple2<>("bigint", BIGINT),
+                new Tuple2<>("integer", INTEGER),
+                new Tuple2<>("character varying", VARCHAR),
+                new Tuple2<>("tsvector", TEXT_SEARCH_VECTOR));
+
+        public static final Set<DataType> SUPPORTED = HashSet.of(BIGINT, INTEGER, VARCHAR);
     }
 
     @FunctionalInterface
@@ -46,15 +53,27 @@ public interface DB {
     static interface Injects {
         static final Inject                    NOTHING = (ps, i) -> i;
         static final Function<Long, Inject>    LONG    = (v) -> (ps, i) -> {
-                                                           ps.setLong(i, v);
+                                                           if (null == v) {
+                                                               ps.setNull(i, Types.BIGINT);
+                                                           } else {
+                                                               ps.setLong(i, v);
+                                                           }
                                                            return i + 1;
                                                        };
         static final Function<Integer, Inject> INTEGER = (v) -> (ps, i) -> {
-                                                           ps.setInt(i, v);
+                                                           if (null == v) {
+                                                               ps.setNull(i, Types.INTEGER);
+                                                           } else {
+                                                               ps.setInt(i, v);
+                                                           }
                                                            return i + 1;
                                                        };
         static final Function<String, Inject>  STRING  = (v) -> (ps, i) -> {
-                                                           ps.setString(i, v);
+                                                           if (null == v) {
+                                                               ps.setNull(i, Types.VARCHAR);
+                                                           } else {
+                                                               ps.setString(i, v);
+                                                           }
                                                            return i + 1;
                                                        };
 
@@ -64,12 +83,25 @@ public interface DB {
             static final Function<String, Inject> STRING  = Injects.STRING;
         }
 
+        static interface Obj {
+            static final Function<Object, Inject> LONG    = (v) -> Injects.LONG
+                .apply(v instanceof Number ? ((Number) v).longValue() : null);
+            static final Function<Object, Inject> INTEGER = (v) -> Injects.INTEGER
+                .apply(v instanceof Number ? ((Number) v).intValue() : null);
+            static final Function<Object, Inject> STRING  = (v) -> Injects.STRING
+                .apply(null == v ? null : v.toString());
+        }
     }
 
-    static final Map<String, Function<String, Inject>> DATA_TYPE_STRING_INJECT = HashMap.ofEntries(
+    static final Map<DataType, Function<String, Inject>> DATA_TYPE_STRING_INJECT = HashMap.ofEntries(
             new Tuple2<>(DataType.BIGINT, Injects.Str.LONG),
             new Tuple2<>(DataType.INTEGER, Injects.Str.INTEGER),
             new Tuple2<>(DataType.VARCHAR, Injects.Str.STRING));
+
+    static final Map<DataType, Function<Object, Inject>> DATA_TYPE_INJECT = HashMap.ofEntries(
+            new Tuple2<>(DataType.BIGINT, Injects.Obj.LONG),
+            new Tuple2<>(DataType.INTEGER, Injects.Obj.INTEGER),
+            new Tuple2<>(DataType.VARCHAR, Injects.Obj.STRING));
 
     @FunctionalInterface
     static interface Extract<T> {
@@ -82,7 +114,7 @@ public interface DB {
         static final Extract<String>  STRING  = (rs, i) -> rs.getString(i);
     }
 
-    static final Map<String, Extract<?>> DATA_TYPE_EXTRACT = HashMap.ofEntries(
+    static final Map<DataType, Extract<?>> DATA_TYPE_EXTRACT = HashMap.ofEntries(
             new Tuple2<>(DataType.BIGINT, Extracts.LONG),
             new Tuple2<>(DataType.INTEGER, Extracts.INTEGER),
             new Tuple2<>(DataType.VARCHAR, Extracts.STRING));

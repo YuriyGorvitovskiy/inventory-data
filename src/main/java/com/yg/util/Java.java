@@ -8,23 +8,34 @@ import java.io.StringWriter;
 import java.lang.StackWalker.StackFrame;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.function.Function;
 
 import io.vavr.collection.Stream;
 
 public interface Java {
     static <E extends Exception> void soft(RunnableEx<E> runnable) {
+        soft(runnable, ex -> new RuntimeException(ex));
+    }
+
+    static <E extends Exception, R extends RuntimeException> void soft(RunnableEx<E> runnable,
+                                                                       Function<Throwable, R> toThrow) {
         try {
             runnable.run();
         } catch (Throwable ex) {
-            throw new RuntimeException(ex);
+            throw toThrow.apply(ex);
         }
     }
 
     static <T, E extends Exception> T soft(SupplierEx<T, E> supplier) {
+        return soft(supplier, ex -> new RuntimeException(ex));
+    }
+
+    static <T, E extends Exception, R extends RuntimeException> T soft(SupplierEx<T, E> supplier,
+                                                                       Function<Throwable, R> toThrow) {
         try {
             return supplier.get();
         } catch (Throwable ex) {
-            throw new RuntimeException(ex);
+            throw toThrow.apply(ex);
         }
     }
 

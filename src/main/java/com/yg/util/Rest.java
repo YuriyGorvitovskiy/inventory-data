@@ -1,5 +1,6 @@
 package com.yg.util;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 
@@ -48,8 +49,8 @@ public interface Rest {
             this.errorCode = errorCode;
         }
 
-        public Error(int errorCode, String message, Throwable ex) {
-            super(message, ex);
+        public Error(int errorCode, Throwable ex, String format, Object... parameters) {
+            super(Java.format(format, parameters), ex);
             this.errorCode = errorCode;
         }
     }
@@ -81,6 +82,14 @@ public interface Rest {
                 out.write(binary);
             }
             return exchange;
+        });
+    }
+
+    static <T> T extract(HttpExchange exchange, Class<T> type) {
+        return Java.soft(() -> {
+            try (InputStream input = exchange.getRequestBody()) {
+                return Json.MAPPER.readValue(input, type);
+            }
         });
     }
 
