@@ -109,9 +109,18 @@ public interface DB {
     }
 
     static interface Extracts {
-        static final Extract<Long>    LONG    = (rs, i) -> rs.getLong(i);
-        static final Extract<Integer> INTEGER = (rs, i) -> rs.getInt(i);
-        static final Extract<String>  STRING  = (rs, i) -> rs.getString(i);
+        static final Extract<Long>    LONG    = (rs, i) -> {
+                                                  long value = rs.getLong(i);
+                                                  return rs.wasNull() ? null : value;
+                                              };
+        static final Extract<Integer> INTEGER = (rs, i) -> {
+                                                  int value = rs.getInt(i);
+                                                  return rs.wasNull() ? null : value;
+                                              };
+        static final Extract<String>  STRING  = (rs, i) -> {
+                                                  String value = rs.getString(i);
+                                                  return rs.wasNull() ? null : value;
+                                              };
     }
 
     static final Map<DataType, Extract<?>> DATA_TYPE_EXTRACT = HashMap.ofEntries(

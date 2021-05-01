@@ -17,7 +17,7 @@ public class DataAccess {
 
     static final String ID = "id";
 
-    final String DELETE_BY_ID       = Java.resource("DeleteBuId.sql");
+    final String DELETE_BY_ID       = Java.resource("DeleteById.sql");
     final String INSERT             = Java.resource("Insert.sql");
     final String MERGE_BY_ID        = Java.resource("MergeById.sql");
     final String QEURY_ALL          = Java.resource("QueryAll.sql");
@@ -46,7 +46,7 @@ public class DataAccess {
                 order.map(t -> t._1 + (t._2 ? " ASC" : " DESC")).mkString(", "));
 
         return DB.query(sql,
-                ps -> inject(ps, 0, List.of(condition, limit, skip)),
+                ps -> inject(ps, 1, List.of(condition, limit, skip)),
                 rs -> extract(rs, select));
     }
 
@@ -60,7 +60,7 @@ public class DataAccess {
                 returning.map(t -> t._1).mkString(", "));
 
         return DB.query(sql,
-                ps -> inject(ps, 0, insert),
+                ps -> inject(ps, 1, insert),
                 rs -> extract(rs, returning));
     }
 
@@ -80,7 +80,7 @@ public class DataAccess {
                 returning.map(t -> t._1).mkString(", "));
 
         return DB.query(sql,
-                ps -> inject(ps, 0, insert.appendAll(values).append(idInject)),
+                ps -> inject(ps, 1, insert.appendAll(values)),
                 rs -> extract(rs, returning));
     }
 
@@ -95,7 +95,7 @@ public class DataAccess {
                 returning.map(t -> t._1).mkString(", "));
 
         return DB.query(sql,
-                ps -> inject(ps, 0, values.append(idInject)),
+                ps -> inject(ps, 1, values.append(idInject)),
                 rs -> extract(rs, returning));
     }
 

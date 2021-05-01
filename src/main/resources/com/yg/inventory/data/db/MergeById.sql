@@ -1,5 +1,4 @@
-INSERT INTO ${1} (${2})
-    VALUES (${3})
-    ON CONFLICT DO UPDATE SET (${4})
-        WHERE id = ?
-    RETURNING ${5}
+INSERT INTO ${0} (${1})
+    VALUES (${2})
+    ON CONFLICT (id) DO UPDATE SET ${3}
+    RETURNING ${4}

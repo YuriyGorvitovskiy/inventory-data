@@ -12,7 +12,7 @@ public class VersionHandler implements HttpHandler {
 
     public static class Version {
         public final String  name    = "Inventory Data";
-        public final String  version = "0.0.2";
+        public final String  version = "0.0.6";
         public final Instant time    = Instant.now();
     }
 

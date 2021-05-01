@@ -1,3 +1,3 @@
-INSERT INTO ${1} (${1})
+INSERT INTO ${0} (${1})
     VALUES (${2})
     RETURNING ${3}
