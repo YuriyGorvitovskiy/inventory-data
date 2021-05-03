@@ -10,8 +10,9 @@ import io.vavr.collection.Map;
 
 public class SchemaAccess {
 
-    static final String QEURY_FOR_TABLE   = Java.resource("QueryForTable.sql");
-    static final String QEURY_FOR_COLUMNS = Java.resource("QueryForColumns.sql");
+    static final String QEURY_FOR_COLUMNS      = Java.resource("QueryForColumns.sql");
+    static final String QUERY_FOR_FOREIGN_KEYS = Java.resource("QueryForForeignKeys.sql");
+    static final String QEURY_FOR_TABLE        = Java.resource("QueryForTables.sql");
 
     public Map<String, Map<String, DataType>> getTables() {
         return DB.query(QEURY_FOR_TABLE,

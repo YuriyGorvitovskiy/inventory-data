@@ -3,6 +3,8 @@ package com.yg.util;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -107,7 +109,11 @@ public interface Rest {
             .map(p -> p.split("=", 2))
             .filter(p -> !p[0].isEmpty())
             .groupBy(a -> a[0])
-            .mapValues(l -> l.map(a -> 2 == a.length ? a[1] : "").toList());
+            .mapValues(l -> l
+                .map(a -> 2 == a.length
+                        ? Java.soft(() -> URLDecoder.decode(a[1], StandardCharsets.UTF_8))
+                        : "")
+                .toList());
     }
 
     static HttpHandler errorHandler(HttpHandler handler) {

@@ -13,4 +13,10 @@ public interface Json {
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         .configure(SerializationFeature.INDENT_OUTPUT, true);
 
+    static <T> T parse(String input, Class<T> type) {
+        return Java.soft(() -> {
+            return Json.MAPPER.readValue(input, type);
+        });
+    }
+
 }

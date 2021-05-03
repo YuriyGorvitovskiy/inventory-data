@@ -5,8 +5,9 @@ import java.util.function.Supplier;
 
 import com.sun.net.httpserver.HttpServer;
 
+import com.yg.inventory.data.graphql.GraphQLHandler;
 import com.yg.inventory.data.rest.CrudHandler;
-import com.yg.inventory.data.rest.VersionHandler;
+import com.yg.inventory.data.version.VersionHandler;
 import com.yg.util.Java;
 import com.yg.util.Rest;
 
@@ -18,7 +19,8 @@ public class Main {
     HttpServer build() throws Exception {
         HttpServer server = HttpServer.create();
         server.createContext("/", Rest.errorHandler(new VersionHandler()));
-        server.createContext("/crud/", Rest.errorHandler(new CrudHandler()));
+        server.createContext("/crud", Rest.errorHandler(new CrudHandler()));
+        server.createContext("/graphql", Rest.errorHandler(new GraphQLHandler()));
         return server;
     }
 

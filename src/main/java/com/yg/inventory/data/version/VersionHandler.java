@@ -1,4 +1,4 @@
-package com.yg.inventory.data.rest;
+package com.yg.inventory.data.version;
 
 import java.io.IOException;
 import java.time.Instant;

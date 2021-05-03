@@ -31,17 +31,21 @@ public interface DB {
 
     public enum DataType {
         BIGINT,
+        BOOLEAN,
         INTEGER,
+        TEXT_SEARCH_VECTOR,
         VARCHAR,
-        TEXT_SEARCH_VECTOR;
+        UUID;
 
         public static final Map<String, DataType> DB_NAMES = HashMap.ofEntries(
                 new Tuple2<>("bigint", BIGINT),
-                new Tuple2<>("integer", INTEGER),
+                new Tuple2<>("boolean", BOOLEAN),
                 new Tuple2<>("character varying", VARCHAR),
-                new Tuple2<>("tsvector", TEXT_SEARCH_VECTOR));
+                new Tuple2<>("integer", INTEGER),
+                new Tuple2<>("tsvector", TEXT_SEARCH_VECTOR),
+                new Tuple2<>("uuid", UUID));
 
-        public static final Set<DataType> SUPPORTED = HashSet.of(BIGINT, INTEGER, VARCHAR);
+        public static final Set<DataType> SUPPORTED = HashSet.of(BIGINT, BOOLEAN, INTEGER, VARCHAR, UUID);
     }
 
     @FunctionalInterface
@@ -51,57 +55,88 @@ public interface DB {
     }
 
     static interface Injects {
-        static final Inject                    NOTHING = (ps, i) -> i;
-        static final Function<Long, Inject>    LONG    = (v) -> (ps, i) -> {
-                                                           if (null == v) {
-                                                               ps.setNull(i, Types.BIGINT);
-                                                           } else {
-                                                               ps.setLong(i, v);
-                                                           }
-                                                           return i + 1;
-                                                       };
-        static final Function<Integer, Inject> INTEGER = (v) -> (ps, i) -> {
-                                                           if (null == v) {
-                                                               ps.setNull(i, Types.INTEGER);
-                                                           } else {
-                                                               ps.setInt(i, v);
-                                                           }
-                                                           return i + 1;
-                                                       };
-        static final Function<String, Inject>  STRING  = (v) -> (ps, i) -> {
-                                                           if (null == v) {
-                                                               ps.setNull(i, Types.VARCHAR);
-                                                           } else {
-                                                               ps.setString(i, v);
-                                                           }
-                                                           return i + 1;
-                                                       };
+        static final Inject                           NOTHING = (ps, i) -> i;
+        static final Function<Boolean, Inject>        BOOLEAN = (v) -> (ps, i) -> {
+                                                                  if (null == v) {
+                                                                      ps.setNull(i, Types.BOOLEAN);
+                                                                  } else {
+                                                                      ps.setBoolean(i, v);
+                                                                  }
+                                                                  return i + 1;
+                                                              };
+        static final Function<Integer, Inject>        INTEGER = (v) -> (ps, i) -> {
+                                                                  if (null == v) {
+                                                                      ps.setNull(i, Types.INTEGER);
+                                                                  } else {
+                                                                      ps.setInt(i, v);
+                                                                  }
+                                                                  return i + 1;
+                                                              };
+        static final Function<Long, Inject>           LONG    = (v) -> (ps, i) -> {
+                                                                  if (null == v) {
+                                                                      ps.setNull(i, Types.BIGINT);
+                                                                  } else {
+                                                                      ps.setLong(i, v);
+                                                                  }
+                                                                  return i + 1;
+                                                              };
+        static final Function<String, Inject>         STRING  = (v) -> (ps, i) -> {
+                                                                  if (null == v) {
+                                                                      ps.setNull(i, Types.VARCHAR);
+                                                                  } else {
+                                                                      ps.setString(i, v);
+                                                                  }
+                                                                  return i + 1;
+                                                              };
+        static final Function<java.util.UUID, Inject> UUID    = (v) -> (ps, i) -> {
+                                                                  if (null == v) {
+                                                                      ps.setObject(i, new java.util.UUID(0L, 0L));
+                                                                  } else {
+                                                                      ps.setObject(i, v);
+                                                                  }
+                                                                  return i + 1;
+                                                              };
 
         static interface Str {
-            static final Function<String, Inject> LONG    = (v) -> Injects.LONG.apply(Long.parseLong(v));
             static final Function<String, Inject> INTEGER = (v) -> Injects.INTEGER.apply(Integer.parseInt(v));
+            static final Function<String, Inject> BOOLEAN = (v) -> Injects.BOOLEAN.apply(Boolean.parseBoolean(v));
+            static final Function<String, Inject> LONG    = (v) -> Injects.LONG.apply(Long.parseLong(v));
             static final Function<String, Inject> STRING  = Injects.STRING;
+            static final Function<String, Inject> UUID    = (v) -> Injects.UUID
+                .apply(Java.isEmpty(v) ? null : java.util.UUID.fromString(v));
         }
 
         static interface Obj {
-            static final Function<Object, Inject> LONG    = (v) -> Injects.LONG
-                .apply(v instanceof Number ? ((Number) v).longValue() : null);
+            static final Function<Object, Inject> BOOLEAN = (v) -> Injects.BOOLEAN
+                .apply(v instanceof Boolean ? ((Boolean) v).booleanValue() : null);
             static final Function<Object, Inject> INTEGER = (v) -> Injects.INTEGER
                 .apply(v instanceof Number ? ((Number) v).intValue() : null);
+            static final Function<Object, Inject> LONG    = (v) -> Injects.LONG
+                .apply(v instanceof Number ? ((Number) v).longValue() : null);
             static final Function<Object, Inject> STRING  = (v) -> Injects.STRING
                 .apply(null == v ? null : v.toString());
+            static final Function<Object, Inject> UUID    = (v) -> Injects.UUID
+                .apply(null == v
+                        ? null
+                        : v instanceof java.util.UUID
+                                ? (java.util.UUID) v
+                                : java.util.UUID.fromString(v.toString()));
         }
     }
 
     static final Map<DataType, Function<String, Inject>> DATA_TYPE_STRING_INJECT = HashMap.ofEntries(
             new Tuple2<>(DataType.BIGINT, Injects.Str.LONG),
+            new Tuple2<>(DataType.BOOLEAN, Injects.Str.BOOLEAN),
             new Tuple2<>(DataType.INTEGER, Injects.Str.INTEGER),
-            new Tuple2<>(DataType.VARCHAR, Injects.Str.STRING));
+            new Tuple2<>(DataType.VARCHAR, Injects.Str.STRING),
+            new Tuple2<>(DataType.UUID, Injects.Str.UUID));
 
     static final Map<DataType, Function<Object, Inject>> DATA_TYPE_INJECT = HashMap.ofEntries(
             new Tuple2<>(DataType.BIGINT, Injects.Obj.LONG),
+            new Tuple2<>(DataType.BOOLEAN, Injects.Obj.BOOLEAN),
             new Tuple2<>(DataType.INTEGER, Injects.Obj.INTEGER),
-            new Tuple2<>(DataType.VARCHAR, Injects.Obj.STRING));
+            new Tuple2<>(DataType.VARCHAR, Injects.Obj.STRING),
+            new Tuple2<>(DataType.UUID, Injects.Obj.UUID));
 
     @FunctionalInterface
     static interface Extract<T> {
@@ -109,24 +144,34 @@ public interface DB {
     }
 
     static interface Extracts {
-        static final Extract<Long>    LONG    = (rs, i) -> {
-                                                  long value = rs.getLong(i);
-                                                  return rs.wasNull() ? null : value;
-                                              };
-        static final Extract<Integer> INTEGER = (rs, i) -> {
-                                                  int value = rs.getInt(i);
-                                                  return rs.wasNull() ? null : value;
-                                              };
-        static final Extract<String>  STRING  = (rs, i) -> {
-                                                  String value = rs.getString(i);
-                                                  return rs.wasNull() ? null : value;
-                                              };
+        static final Extract<Boolean>        BOOLEAN = (rs, i) -> {
+                                                         boolean value = rs.getBoolean(i);
+                                                         return rs.wasNull() ? null : value;
+                                                     };
+        static final Extract<Integer>        INTEGER = (rs, i) -> {
+                                                         int value = rs.getInt(i);
+                                                         return rs.wasNull() ? null : value;
+                                                     };
+        static final Extract<Long>           LONG    = (rs, i) -> {
+                                                         long value = rs.getLong(i);
+                                                         return rs.wasNull() ? null : value;
+                                                     };
+        static final Extract<String>         STRING  = (rs, i) -> {
+                                                         String value = rs.getString(i);
+                                                         return rs.wasNull() ? null : value;
+                                                     };
+        static final Extract<java.util.UUID> UUID    = (rs, i) -> {
+                                                         java.util.UUID value = (java.util.UUID) rs.getObject(i);
+                                                         return rs.wasNull() ? null : value;
+                                                     };
     }
 
     static final Map<DataType, Extract<?>> DATA_TYPE_EXTRACT = HashMap.ofEntries(
             new Tuple2<>(DataType.BIGINT, Extracts.LONG),
+            new Tuple2<>(DataType.BOOLEAN, Extracts.BOOLEAN),
             new Tuple2<>(DataType.INTEGER, Extracts.INTEGER),
-            new Tuple2<>(DataType.VARCHAR, Extracts.STRING));
+            new Tuple2<>(DataType.VARCHAR, Extracts.STRING),
+            new Tuple2<>(DataType.UUID, Extracts.UUID));
 
     static BasicDataSource pool = create();
 
