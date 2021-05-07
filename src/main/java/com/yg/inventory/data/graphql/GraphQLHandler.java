@@ -17,12 +17,16 @@ import graphql.GraphQL;
 import graphql.Scalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.DataFetchingFieldSelectionSet;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLTypeReference;
+import graphql.schema.SelectedField;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
@@ -107,16 +111,27 @@ public class GraphQLHandler implements HttpHandler {
         GraphQLObjectType queryType = GraphQLObjectType.newObject()
             .name("QueryType")
             .field(GraphQLFieldDefinition.newFieldDefinition()
-                .name("hello")
-                .type(Scalars.GraphQLString))
+                .name("paint")
+                .type(new GraphQLList(new GraphQLTypeReference("paint"))))
             .build();
 
         GraphQLCodeRegistry code = GraphQLCodeRegistry.newCodeRegistry()
-            .dataFetcher(FieldCoordinates.coordinates("QueryType", "hello"), (DataFetcher<?>) (e -> fetch("paint", e)))
+            .dataFetcher(FieldCoordinates.coordinates("QueryType", "paint"), (DataFetcher<?>) (e -> fetch("paint", e)))
+            .build();
+
+        GraphQLObjectType paintType = GraphQLObjectType.newObject()
+            .name("paint")
+            .field(GraphQLFieldDefinition.newFieldDefinition().name("id").type(Scalars.GraphQLID))
+            .field(GraphQLFieldDefinition.newFieldDefinition().name("name").type(Scalars.GraphQLString))
+            .field(GraphQLFieldDefinition.newFieldDefinition().name("sku").type(Scalars.GraphQLString))
+            .field(GraphQLFieldDefinition.newFieldDefinition().name("palette_number").type(Scalars.GraphQLInt))
+            .field(GraphQLFieldDefinition.newFieldDefinition().name("color_hex").type(Scalars.GraphQLString))
+            .field(GraphQLFieldDefinition.newFieldDefinition().name("in_stock").type(Scalars.GraphQLBoolean))
             .build();
 
         return GraphQLSchema.newSchema()
             .query(queryType)
+            .additionalType(paintType)
             .codeRegistry(code)
             .build();
     }
@@ -191,8 +206,21 @@ public class GraphQLHandler implements HttpHandler {
             return wiring.build();
     }
     */
-    String fetch(String table, DataFetchingEnvironment environment) throws Exception {
-        return "world";
+    java.util.List<java.util.Map<String, Object>> fetch(String table, DataFetchingEnvironment environment) throws Exception {
+        Map<String, DB.DataType> columns = schema.getTableColumns(table);
+
+        DataFetchingFieldSelectionSet       selectionSet = environment.getSelectionSet();
+        List<Tuple2<String, DB.Extract<?>>> select       = List.ofAll(selectionSet.getImmediateFields())
+            .map(SelectedField::getName)
+            .map(c -> new Tuple2<>(c, DB.DATA_TYPE_EXTRACT.get(columns.get(c).get()).get()));
+
+        Tuple2<String, DB.Inject>     condition = new Tuple2<>("1 = 1", DB.Injects.NOTHING);
+        List<Tuple2<String, Boolean>> order     = List.of(new Tuple2<>(columns.get()._1, true));
+        Tuple2<Long, Integer>         skipLimit = new Tuple2<>(0L, 10);
+
+        return data.queryByCondition(table, select, condition, order, skipLimit)
+            .map(m -> m.toJavaMap())
+            .toJavaList();
     }
 
 }
