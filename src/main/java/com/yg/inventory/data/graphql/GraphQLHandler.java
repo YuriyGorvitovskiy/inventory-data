@@ -7,7 +7,10 @@ import com.sun.net.httpserver.HttpHandler;
 
 import com.yg.inventory.data.db.DataAccess;
 import com.yg.inventory.data.db.SchemaAccess;
+import com.yg.inventory.data.db.SchemaAccess.ForeignKey;
+import com.yg.inventory.data.db.SchemaAccess.PrimaryKey;
 import com.yg.util.DB;
+import com.yg.util.DB.DataType;
 import com.yg.util.Json;
 import com.yg.util.Rest;
 
@@ -18,19 +21,20 @@ import graphql.Scalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
-import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.SelectedField;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.control.Option;
 
 public class GraphQLHandler implements HttpHandler {
     static interface Param {
@@ -52,6 +56,7 @@ public class GraphQLHandler implements HttpHandler {
         }
     }
 
+    static final String                              QUERY_TYPE          = "QueryType";
     static final Map<DB.DataType, GraphQLScalarType> DATA_TYPE_TO_SCALAR = HashMap.ofEntries(
             new Tuple2<>(DB.DataType.BIGINT, Scalars.GraphQLString),
             new Tuple2<>(DB.DataType.BOOLEAN, Scalars.GraphQLBoolean),
@@ -108,104 +113,74 @@ public class GraphQLHandler implements HttpHandler {
     }
 
     GraphQLSchema generateSchema() {
-        GraphQLObjectType queryType = GraphQLObjectType.newObject()
-            .name("QueryType")
-            .field(GraphQLFieldDefinition.newFieldDefinition()
-                .name("paint")
-                .type(new GraphQLList(new GraphQLTypeReference("paint"))))
+        Map<String, Map<String, DataType>> tables = schema.getTables();
+
+        GraphQLObjectType queryType = GraphQLObjectType.newObject().name(QUERY_TYPE)
+            .fields(tables.keySet()
+                .map(t -> GraphQLFieldDefinition.newFieldDefinition()
+                    .name(t)
+                    .type(new GraphQLList(new GraphQLTypeReference(t)))
+                    .build())
+                .toJavaList())
             .build();
 
         GraphQLCodeRegistry code = GraphQLCodeRegistry.newCodeRegistry()
-            .dataFetcher(FieldCoordinates.coordinates("QueryType", "paint"), (DataFetcher<?>) (e -> fetch("paint", e)))
+            .dataFetchers(QUERY_TYPE,
+                    tables.keySet()
+                        .map(t -> new Tuple2<>(t, (DataFetcher<?>) (e -> fetch(t, e))))
+                        .toJavaMap(t -> t))
             .build();
 
-        GraphQLObjectType paintType = GraphQLObjectType.newObject()
-            .name("paint")
-            .field(GraphQLFieldDefinition.newFieldDefinition().name("id").type(Scalars.GraphQLID))
-            .field(GraphQLFieldDefinition.newFieldDefinition().name("name").type(Scalars.GraphQLString))
-            .field(GraphQLFieldDefinition.newFieldDefinition().name("sku").type(Scalars.GraphQLString))
-            .field(GraphQLFieldDefinition.newFieldDefinition().name("palette_number").type(Scalars.GraphQLInt))
-            .field(GraphQLFieldDefinition.newFieldDefinition().name("color_hex").type(Scalars.GraphQLString))
-            .field(GraphQLFieldDefinition.newFieldDefinition().name("in_stock").type(Scalars.GraphQLBoolean))
-            .build();
+        Map<String, PrimaryKey> primaryKeys = schema.getAllPrimaryKeys()
+            .toMap(p -> new Tuple2<>(p.table, p));
+
+        List<ForeignKey>                     foreignKeys = schema.getAllForeignKeys();
+        Map<String, Map<String, ForeignKey>> outcoming   = foreignKeys
+            .groupBy(f -> f.fromTable)
+            .mapValues(l -> l.toMap(f -> new Tuple2<>(f.fromColumn, f)));
+        Map<String, Map<String, ForeignKey>> incoming    = foreignKeys
+            .groupBy(f -> f.toTable)
+            .mapValues(l -> l.toMap(f -> new Tuple2<>(f.name, f)));
+
+        List<GraphQLType> additionalTypes = tables
+            .map(t -> generateType(t._1,
+                    t._2,
+                    primaryKeys.get(t._1),
+                    outcoming.getOrElse(t._1, HashMap.empty()),
+                    incoming.getOrElse(t._1, HashMap.empty())))
+            .toList();
 
         return GraphQLSchema.newSchema()
             .query(queryType)
-            .additionalType(paintType)
+            .additionalTypes(additionalTypes.toJavaSet())
             .codeRegistry(code)
             .build();
     }
 
-    /*
-    // Make the schema executable
-    GraphQL executor = GraphQL.newGraphQL(graphQLSchema).build();
-    ExecutionResult executionResult = executor.execute("{hello}");
-    
-    
-    
-    SchemaGenerator        schemaGenerator = new SchemaGenerator();
-    TypeDefinitionRegistry registry        = new TypeDefinitionRegistry();
-    RuntimeWiring          wiring          = buildRuntimeWiring();
-    
-    GraphQLObjectType type = null;
-    registry.add(type);
-    return schemaGenerator.makeExecutableSchema(registry, wiring);
+    GraphQLType generateType(String table,
+                             Map<String, DataType> columns,
+                             Option<PrimaryKey> pk,
+                             Map<String, ForeignKey> out,
+                             Map<String, ForeignKey> in) {
+        GraphQLObjectType.Builder builder = GraphQLObjectType.newObject().name(table);
+        builder.fields(columns
+            .filterValues(d -> DB.DataType.TEXT_SEARCH_VECTOR != d)
+            .map(t -> generateFiled(
+                    t._1,
+                    t._2,
+                    t._1.equals(pk.map(p -> p.column).getOrNull()) || out.containsKey(t._1)))
+            .toJavaList());
+
+        return builder.build();
     }
-    
-    private RuntimeWiring buildRuntimeWiring() {
-    Map<String, Map<String, DataType>> tables = schema.getTables();
-    RuntimeWiring.Builder              wiring = RuntimeWiring.newRuntimeWiring();
-    
-    wiring.type("QueryType", w -> {
-        tables.forEach(t -> w.dataFetcher(t._1, e -> fetch(t._1, e)));
-        return w;
-    });
-    
-    tables.map((t) -> {
-        t._2
-        .map(c -> new Tuple2<>(c._1, DATA_TYPE_TO_SCALAR.get(c._2).getOrNull()))
-        .filter(c -> null != c._2)
-        .forEach(c -> type.field(GraphQLFieldDefinition.newFieldDefinition()
-            .name(c._1)
-            .type(c._2)));
-    });
-    
-    GraphQLObjectType.Builder type = GraphQLObjectType.newObject().name(t._1);
-    t._2
-        .map(c -> new Tuple2<>(c._1, DATA_TYPE_TO_SCALAR.get(c._2).getOrNull()))
-        .filter(c -> null != c._2)
-        .forEach(c -> type.field(GraphQLFieldDefinition.newFieldDefinition()
-            .name(c._1)
-            .type(c._2)));
-    return type.build();
-    }).forEach(t -> schema.additionalType(t));
-    
-    
-    
-    .dataFetcher(fieldName, dataFetcher))
-    
-    
-    GraphQLSchema.Builder              schema = GraphQLSchema.newSchema();
-    schema.query(GraphQLObjectType.newObject().)
-    
-    tables.map((t) -> {
-        GraphQLObjectType.Builder type = GraphQLObjectType.newObject().name(t._1);
-        t._2
-            .map(c -> new Tuple2<>(c._1, DATA_TYPE_TO_SCALAR.get(c._2).getOrNull()))
-            .filter(c -> null != c._2)
-            .forEach(c -> type.field(GraphQLFieldDefinition.newFieldDefinition()
-                .name(c._1)
-                .type(c._2)));
-        return type.build();
-    }).forEach(t -> schema.additionalType(t));
-    
-    schema.query(GraphQLObjectType.)
-    return schema.build();
-    // TODO Auto-generated method stub
-    return null;
-            return wiring.build();
+
+    GraphQLFieldDefinition generateFiled(String name, DataType type, boolean isReference) {
+        return GraphQLFieldDefinition.newFieldDefinition()
+            .name(name)
+            .type(isReference ? Scalars.GraphQLID : DATA_TYPE_TO_SCALAR.get(type).get())
+            .build();
     }
-    */
+
     java.util.List<java.util.Map<String, Object>> fetch(String table, DataFetchingEnvironment environment) throws Exception {
         Map<String, DB.DataType> columns = schema.getTableColumns(table);
 

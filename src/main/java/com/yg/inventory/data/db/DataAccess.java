@@ -2,6 +2,7 @@ package com.yg.inventory.data.db;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.UUID;
 
 import com.yg.util.DB;
 import com.yg.util.DB.Extract;
@@ -25,9 +26,9 @@ public class DataAccess {
     final String QEURY_BY_ID        = Java.resource("QueryById.sql");
     final String UPDATE_BY_ID       = Java.resource("UpdateById.sql");
 
-    public List<Map<String, Object>> queryById(String table, List<Tuple2<String, Extract<?>>> select, Long id) {
+    public List<Map<String, Object>> queryById(String table, List<Tuple2<String, Extract<?>>> select, UUID id) {
         return DB.query(Java.format(QEURY_BY_ID, select.map(t -> t._1).mkString(", "), table),
-                ps -> ps.setLong(1, id),
+                ps -> ps.setObject(1, id),
                 rs -> extract(rs, select));
     }
 
@@ -65,11 +66,11 @@ public class DataAccess {
     }
 
     public List<Map<String, Object>> mergeById(String table,
-                                               Long id,
+                                               UUID id,
                                                List<Tuple2<String, Inject>> values,
                                                List<Tuple2<String, Extract<?>>> returning) {
 
-        var idInject = new Tuple2<>(ID, Injects.LONG.apply(id));
+        var idInject = new Tuple2<>(ID, Injects.UUID.apply(id));
         var insert   = List.of(idInject).appendAll(values);
 
         String sql = Java.format(MERGE_BY_ID,
@@ -85,10 +86,10 @@ public class DataAccess {
     }
 
     public List<Map<String, Object>> updateById(String table,
-                                                Long id,
+                                                UUID id,
                                                 List<Tuple2<String, Inject>> values,
                                                 List<Tuple2<String, Extract<?>>> returning) {
-        var    idInject = new Tuple2<>(ID, Injects.LONG.apply(id));
+        var    idInject = new Tuple2<>(ID, Injects.UUID.apply(id));
         String sql      = Java.format(UPDATE_BY_ID,
                 table,
                 values.map(t -> t._1 + " = ?").mkString(", "),
@@ -100,14 +101,14 @@ public class DataAccess {
     }
 
     public List<Map<String, Object>> deleteById(String table,
-                                                Long id,
+                                                UUID id,
                                                 List<Tuple2<String, Extract<?>>> returning) {
         String sql = Java.format(DELETE_BY_ID,
                 table,
                 returning.map(t -> t._1).mkString(", "));
 
         return DB.query(sql,
-                ps -> ps.setLong(1, id),
+                ps -> ps.setObject(1, id),
                 rs -> extract(rs, returning));
     }
 

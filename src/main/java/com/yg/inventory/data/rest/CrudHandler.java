@@ -1,5 +1,6 @@
 package com.yg.inventory.data.rest;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -95,7 +96,7 @@ public class CrudHandler implements HttpHandler {
         }
 
         String table = items[0];
-        Long   id    = parseId(items[1]);
+        UUID   id    = parseId(items[1]);
 
         Map<String, List<String>>           query     = Rest.queryParams(exchange);
         Map<String, DataType>               columns   = getColumns(table);
@@ -117,7 +118,7 @@ public class CrudHandler implements HttpHandler {
         }
 
         String table = items[0];
-        Long   id    = parseId(items[1]);
+        UUID   id    = parseId(items[1]);
 
         Map<String, List<String>>           query     = Rest.queryParams(exchange);
         Map<String, DataType>               columns   = getColumns(table);
@@ -144,7 +145,7 @@ public class CrudHandler implements HttpHandler {
         }
 
         String table = items[0];
-        Long   id    = parseId(items[1]);
+        UUID   id    = parseId(items[1]);
 
         Map<String, List<String>>           query     = Rest.queryParams(exchange);
         Map<String, DataType>               columns   = getColumns(table);
@@ -198,7 +199,7 @@ public class CrudHandler implements HttpHandler {
         return columns;
     }
 
-    void getRow(HttpExchange exchange, String table, Long id) {
+    void getRow(HttpExchange exchange, String table, UUID id) {
         Map<String, List<String>>           query   = Rest.queryParams(exchange);
         Map<String, DataType>               columns = getColumns(table);
         List<Tuple2<String, DB.Extract<?>>> select  = getSelect(query, columns);
@@ -306,9 +307,9 @@ public class CrudHandler implements HttpHandler {
                     .getOrElse(10));
     }
 
-    long parseId(String id) {
+    UUID parseId(String id) {
         return Java.soft(
-                () -> Long.parseLong(id),
+                () -> UUID.fromString(id),
                 ex -> new Rest.Error(ErrorCode.BAD_REQUEST, ex, "Can't parse id: ${0}", id));
     }
 }
