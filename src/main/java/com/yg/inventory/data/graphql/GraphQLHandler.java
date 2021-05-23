@@ -83,7 +83,6 @@ public class GraphQLHandler implements HttpHandler {
             default:
                 break;
         }
-
     }
 
     @SuppressWarnings("unchecked")
