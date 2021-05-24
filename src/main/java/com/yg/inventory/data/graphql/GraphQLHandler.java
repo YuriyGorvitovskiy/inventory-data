@@ -3,6 +3,7 @@ package com.yg.inventory.data.graphql;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.function.Function;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -13,6 +14,7 @@ import com.yg.inventory.data.db.SchemaAccess.ForeignKey;
 import com.yg.inventory.data.db.SchemaAccess.PrimaryKey;
 import com.yg.util.DB;
 import com.yg.util.DB.DataType;
+import com.yg.util.DB.Inject;
 import com.yg.util.Json;
 import com.yg.util.Rest;
 
@@ -23,8 +25,11 @@ import graphql.Scalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
+import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectField;
+import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
@@ -60,6 +65,8 @@ public class GraphQLHandler implements HttpHandler {
     }
 
     static final String                              QUERY_TYPE          = "QueryType";
+    static final String                              MUTATION_TYPE       = "MutationType";
+    static final String                              ID                  = "id";
     static final Map<DB.DataType, GraphQLScalarType> DATA_TYPE_TO_SCALAR = HashMap.ofEntries(
             new Tuple2<>(DB.DataType.BIGINT, Scalars.GraphQLString),
             new Tuple2<>(DB.DataType.BOOLEAN, Scalars.GraphQLBoolean),
@@ -126,6 +133,12 @@ public class GraphQLHandler implements HttpHandler {
                 .toJavaList())
             .build();
 
+        GraphQLObjectType mutationType = GraphQLObjectType.newObject().name(MUTATION_TYPE)
+            .fields(tables.keySet()
+                .flatMap(t -> generateMutations(t))
+                .toJavaList())
+            .build();
+
         Map<String, PrimaryKey> primaryKeys = schema.getAllPrimaryKeys()
             .toMap(p -> new Tuple2<>(p.table, p));
 
@@ -137,12 +150,16 @@ public class GraphQLHandler implements HttpHandler {
             .groupBy(f -> f.toTable)
             .mapValues(l -> l.toMap(f -> new Tuple2<>(f.name, f)));
 
-        List<Tuple3<GraphQLType, String, Map<String, DataFetcher<?>>>> additionalTypes = tables
-            .map(t -> generateType(t._1,
+        List<Tuple3<GraphQLType, String, Map<String, DataFetcher<?>>>> queryTypes = tables
+            .map(t -> generateQueryType(t._1,
                     t._2,
                     primaryKeys.get(t._1),
                     outcoming.getOrElse(t._1, HashMap.empty()),
                     incoming.getOrElse(t._1, HashMap.empty())))
+            .toList();
+
+        List<GraphQLType> mutationTypes = tables
+            .flatMap(t -> generateMutationTypes(t._1, t._2, primaryKeys.get(t._1), outcoming.getOrElse(t._1, HashMap.empty())))
             .toList();
 
         GraphQLCodeRegistry.Builder code = GraphQLCodeRegistry.newCodeRegistry();
@@ -150,28 +167,39 @@ public class GraphQLHandler implements HttpHandler {
                 tables.keySet()
                     .map(t -> new Tuple2<>(t, (DataFetcher<?>) (e -> fetchQuery(t, e))))
                     .toJavaMap(t -> t));
+        code.dataFetchers(MUTATION_TYPE,
+                tables.keySet()
+                    .flatMap(t -> List.of(
+                            new Tuple2<>("insert_" + t, (DataFetcher<?>) (e -> fetchInsert(t, tables.get(t).get(), e))),
+                            new Tuple2<>("upsert_" + t, (DataFetcher<?>) (e -> fetchUpsert(t, tables.get(t).get(), e))),
+                            new Tuple2<>("update_" + t, (DataFetcher<?>) (e -> fetchUpdate(t, tables.get(t).get(), e))),
+                            new Tuple2<>("delete_" + t, (DataFetcher<?>) (e -> fetchDelete(t, tables.get(t).get(), e)))))
+                    .toJavaMap(t -> t));
 
-        additionalTypes.forEach(t -> code.dataFetchers(t._2, t._3.toJavaMap()));
+        queryTypes.forEach(t -> code.dataFetchers(t._2, t._3.toJavaMap()));
 
         return GraphQLSchema.newSchema()
             .query(queryType)
-            .additionalTypes(additionalTypes.map(t -> t._1).toJavaSet())
+            .mutation(mutationType)
+            .additionalTypes(queryTypes.map(t -> t._1).toJavaSet())
+            .additionalTypes(mutationTypes.toJavaSet())
             .codeRegistry(code.build())
             .build();
     }
 
-    Tuple3<GraphQLType, String, Map<String, DataFetcher<?>>> generateType(String table,
-                                                                          Map<String, DataType> columns,
-                                                                          Option<PrimaryKey> pk,
-                                                                          Map<String, ForeignKey> out,
-                                                                          Map<String, ForeignKey> in) {
+    Tuple3<GraphQLType, String, Map<String, DataFetcher<?>>> generateQueryType(String table,
+                                                                               Map<String, DataType> columns,
+                                                                               Option<PrimaryKey> pk,
+                                                                               Map<String, ForeignKey> out,
+                                                                               Map<String, ForeignKey> in) {
         GraphQLObjectType.Builder builder = GraphQLObjectType.newObject().name(table);
         builder.fields(columns
+            .filterKeys(c -> !out.containsKey(c))
             .filterValues(d -> DB.DataType.TEXT_SEARCH_VECTOR != d)
-            .map(t -> generateFiled(
+            .map(t -> generateField(
                     t._1,
                     t._2,
-                    t._1.equals(pk.map(p -> p.column).getOrNull()) || out.containsKey(t._1)))
+                    t._1.equals(pk.map(p -> p.column).getOrNull())))
             .toJavaList());
 
         builder.fields(out.values()
@@ -199,11 +227,98 @@ public class GraphQLHandler implements HttpHandler {
         return new Tuple3<>(builder.build(), table, outDataFetchers.merge(inDataFetchers));
     }
 
-    GraphQLFieldDefinition generateFiled(String name, DataType type, boolean isReference) {
+    GraphQLFieldDefinition generateField(String name, DataType type, boolean isReference) {
         return GraphQLFieldDefinition.newFieldDefinition()
             .name(name)
             .type(isReference ? Scalars.GraphQLID : DATA_TYPE_TO_SCALAR.get(type).get())
             .build();
+    }
+
+    GraphQLInputObjectField generateInputField(String name, DataType type, boolean isReference) {
+        return GraphQLInputObjectField.newInputObjectField()
+            .name(name)
+            .type(isReference ? Scalars.GraphQLID : DATA_TYPE_TO_SCALAR.get(type).get())
+            .build();
+    }
+
+    List<GraphQLFieldDefinition> generateMutations(String table) {
+        return List.of(
+                generateInsertMutations(table),
+                generateUpsertMutations(table),
+                generateUpdateMutations(table),
+                generateDeleteMutations(table));
+    }
+
+    GraphQLFieldDefinition generateInsertMutations(String table) {
+        return GraphQLFieldDefinition.newFieldDefinition()
+            .name("insert_" + table)
+            .type(new GraphQLTypeReference(table))
+            .argument(GraphQLArgument.newArgument()
+                .name(table)
+                .type(new GraphQLTypeReference(table + "_insert")))
+            .build();
+    }
+
+    GraphQLFieldDefinition generateUpsertMutations(String table) {
+        return GraphQLFieldDefinition.newFieldDefinition()
+            .name("upsert_" + table)
+            .type(new GraphQLTypeReference(table))
+            .argument(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(Scalars.GraphQLID))
+            .argument(GraphQLArgument.newArgument()
+                .name(table)
+                .type(new GraphQLTypeReference(table + "_update")))
+            .build();
+    }
+
+    GraphQLFieldDefinition generateUpdateMutations(String table) {
+        return GraphQLFieldDefinition.newFieldDefinition()
+            .name("update_" + table)
+            .type(new GraphQLTypeReference(table))
+            .argument(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(Scalars.GraphQLID))
+            .argument(GraphQLArgument.newArgument()
+                .name(table)
+                .type(new GraphQLTypeReference(table + "_update")))
+            .build();
+    }
+
+    GraphQLFieldDefinition generateDeleteMutations(String table) {
+        return GraphQLFieldDefinition.newFieldDefinition()
+            .name("delete_" + table)
+            .type(new GraphQLTypeReference(table))
+            .argument(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(Scalars.GraphQLID))
+            .build();
+    }
+
+    List<GraphQLType> generateMutationTypes(String table,
+                                            Map<String, DataType> columns,
+                                            Option<PrimaryKey> pk,
+                                            Map<String, ForeignKey> out) {
+        GraphQLInputObjectType insert = GraphQLInputObjectType.newInputObject()
+            .name(table + "_insert")
+            .fields(columns
+                .filterValues(d -> DB.DataType.TEXT_SEARCH_VECTOR != d)
+                .map(t -> generateInputField(t._1,
+                        t._2,
+                        t._1.equals(pk.map(p -> p.column).getOrNull()) || out.containsKey(t._1)))
+                .toJavaList())
+            .build();
+
+        GraphQLInputObjectType update = GraphQLInputObjectType.newInputObject()
+            .name(table + "_update")
+            .fields(columns
+                .filterKeys(c -> !c.equals(pk.map(p -> p.column).getOrNull()))
+                .filterValues(d -> DB.DataType.TEXT_SEARCH_VECTOR != d)
+                .map(t -> generateInputField(t._1, t._2, out.containsKey(t._1)))
+                .toJavaList())
+            .build();
+
+        return List.of(insert, update);
     }
 
     java.util.List<java.util.Map<String, Object>> fetchQuery(String table,
@@ -214,7 +329,7 @@ public class GraphQLHandler implements HttpHandler {
         List<Tuple2<String, DB.Extract<?>>> select       = List.ofAll(selectionSet.getImmediateFields())
             .filter(f -> columns.containsKey(f.getName()))
             .map(SelectedField::getName)
-            .append("id")
+            .append(ID)
             .distinct()
             .map(c -> new Tuple2<>(c, DB.DATA_TYPE_EXTRACT.get(columns.get(c).get()).get()));
 
@@ -234,7 +349,7 @@ public class GraphQLHandler implements HttpHandler {
         List<Tuple2<String, DB.Extract<?>>> select       = List.ofAll(selectionSet.getImmediateFields())
             .filter(f -> columns.containsKey(f.getName()))
             .map(SelectedField::getName)
-            .append("id")
+            .append(ID)
             .distinct()
             .map(c -> new Tuple2<>(c, DB.DATA_TYPE_EXTRACT.get(columns.get(c).get()).get()));
 
@@ -257,7 +372,7 @@ public class GraphQLHandler implements HttpHandler {
         List<Tuple2<String, DB.Extract<?>>> select       = List.ofAll(selectionSet.getImmediateFields())
             .filter(f -> columns.containsKey(f.getName()))
             .map(SelectedField::getName)
-            .append("id")
+            .append(ID)
             .distinct()
             .map(c -> new Tuple2<>(c, DB.DATA_TYPE_EXTRACT.get(columns.get(c).get()).get()));
 
@@ -272,4 +387,89 @@ public class GraphQLHandler implements HttpHandler {
             .map(m -> m.toJavaMap())
             .toJavaList();
     }
+
+    java.util.Map<String, Object> fetchInsert(String table,
+                                              Map<String, DataType> columns,
+                                              DataFetchingEnvironment environment) throws Exception {
+        java.util.Map<String, Object> entity = environment.getArgument(table);
+        List<Tuple2<String, Inject>>  insert = HashMap.ofAll(entity).flatMap(t -> getInject(columns, t._1, t._2)).toList();
+
+        UUID id = (UUID) data.insert(table, insert, returnId(columns)).flatMap(r -> r.get(ID)).get();
+        return fetchById(table, id, environment);
+    }
+
+    java.util.Map<String, Object> fetchUpsert(String table,
+                                              Map<String, DataType> columns,
+                                              DataFetchingEnvironment environment) throws Exception {
+        UUID                          id     = UUID.fromString(environment.getArgument(ID));
+        java.util.Map<String, Object> entity = environment.getArgument(table);
+        List<Tuple2<String, Inject>>  upsert = HashMap.ofAll(entity).flatMap(t -> getInject(columns, t._1, t._2)).toList();
+
+        id = (UUID) data.mergeById(table, id, upsert, returnId(columns)).flatMap(r -> r.get(ID)).get();
+        return fetchById(table, id, environment);
+    }
+
+    java.util.Map<String, Object> fetchUpdate(String table,
+                                              Map<String, DataType> columns,
+                                              DataFetchingEnvironment environment) throws Exception {
+        UUID                          id     = UUID.fromString(environment.getArgument(ID));
+        java.util.Map<String, Object> entity = environment.getArgument(table);
+        List<Tuple2<String, Inject>>  upsert = HashMap.ofAll(entity).flatMap(t -> getInject(columns, t._1, t._2)).toList();
+
+        id = (UUID) data.updateById(table, id, upsert, returnId(columns)).flatMap(r -> r.get(ID)).get();
+        return fetchById(table, id, environment);
+    }
+
+    java.util.Map<String, Object> fetchDelete(String table,
+                                              Map<String, DataType> columns,
+                                              DataFetchingEnvironment environment) throws Exception {
+        UUID                          id     = UUID.fromString(environment.getArgument(ID));
+        java.util.Map<String, Object> result = fetchById(table, id, environment);
+
+        data.deleteById(table, id, returnId(columns)).flatMap(r -> r.get(ID)).get();
+        return result;
+    }
+
+    java.util.Map<String, Object> fetchById(String table,
+                                            UUID id,
+                                            DataFetchingEnvironment environment) throws Exception {
+        Map<String, DB.DataType> columns = schema.getTableColumns(table);
+
+        DataFetchingFieldSelectionSet       selectionSet = environment.getSelectionSet();
+        List<Tuple2<String, DB.Extract<?>>> select       = List.ofAll(selectionSet.getImmediateFields())
+            .filter(f -> columns.containsKey(f.getName()))
+            .map(SelectedField::getName)
+            .append(ID)
+            .distinct()
+            .map(c -> new Tuple2<>(c, DB.DATA_TYPE_EXTRACT.get(columns.get(c).get()).get()));
+
+        Tuple2<String, DB.Inject>     condition = new Tuple2<>(ID + " = ?", DB.Injects.UUID.apply(id));
+        List<Tuple2<String, Boolean>> order     = List.of(new Tuple2<>(columns.get()._1, true));
+        Tuple2<Long, Integer>         skipLimit = new Tuple2<>(0L, 10);
+
+        return data.queryByCondition(table, select, condition, order, skipLimit)
+            .map(m -> m.toJavaMap())
+            .getOrNull();
+    }
+
+    Option<Tuple2<String, Inject>> getInject(Map<String, DataType> columns, String column, Object value) {
+        Option<DataType> dt = columns.get(column);
+        if (dt.isEmpty()) {
+            return Option.none();
+        }
+
+        Option<Function<Object, Inject>> injector = DB.DATA_TYPE_INJECT.get(dt.get());
+        if (dt.isEmpty()) {
+            return Option.none();
+        }
+
+        return Option.of(new Tuple2<>(column, injector.get().apply(value)));
+    }
+
+    List<Tuple2<String, DB.Extract<?>>> returnId(Map<String, DataType> columns) {
+        return List.of(new Tuple2<>(
+                ID,
+                DB.DATA_TYPE_EXTRACT.get(columns.get(ID).get()).get()));
+    }
+
 }
