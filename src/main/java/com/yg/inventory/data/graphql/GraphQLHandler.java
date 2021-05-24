@@ -394,8 +394,7 @@ public class GraphQLHandler implements HttpHandler {
         java.util.Map<String, Object> entity = environment.getArgument(table);
         List<Tuple2<String, Inject>>  insert = HashMap.ofAll(entity).flatMap(t -> getInject(columns, t._1, t._2)).toList();
 
-        UUID id = (UUID) data.insert(table, insert, returnId(columns)).flatMap(r -> r.get(ID)).get();
-        return fetchById(table, id, environment);
+        return data.insert(table, insert, returnFields(columns, environment)).get().toJavaMap();
     }
 
     java.util.Map<String, Object> fetchUpsert(String table,
@@ -405,8 +404,7 @@ public class GraphQLHandler implements HttpHandler {
         java.util.Map<String, Object> entity = environment.getArgument(table);
         List<Tuple2<String, Inject>>  upsert = HashMap.ofAll(entity).flatMap(t -> getInject(columns, t._1, t._2)).toList();
 
-        id = (UUID) data.mergeById(table, id, upsert, returnId(columns)).flatMap(r -> r.get(ID)).get();
-        return fetchById(table, id, environment);
+        return data.mergeById(table, id, upsert, returnFields(columns, environment)).get().toJavaMap();
     }
 
     java.util.Map<String, Object> fetchUpdate(String table,
@@ -416,40 +414,14 @@ public class GraphQLHandler implements HttpHandler {
         java.util.Map<String, Object> entity = environment.getArgument(table);
         List<Tuple2<String, Inject>>  upsert = HashMap.ofAll(entity).flatMap(t -> getInject(columns, t._1, t._2)).toList();
 
-        id = (UUID) data.updateById(table, id, upsert, returnId(columns)).flatMap(r -> r.get(ID)).get();
-        return fetchById(table, id, environment);
+        return data.updateById(table, id, upsert, returnFields(columns, environment)).get().toJavaMap();
     }
 
     java.util.Map<String, Object> fetchDelete(String table,
                                               Map<String, DataType> columns,
                                               DataFetchingEnvironment environment) throws Exception {
-        UUID                          id     = UUID.fromString(environment.getArgument(ID));
-        java.util.Map<String, Object> result = fetchById(table, id, environment);
-
-        data.deleteById(table, id, returnId(columns)).flatMap(r -> r.get(ID)).get();
-        return result;
-    }
-
-    java.util.Map<String, Object> fetchById(String table,
-                                            UUID id,
-                                            DataFetchingEnvironment environment) throws Exception {
-        Map<String, DB.DataType> columns = schema.getTableColumns(table);
-
-        DataFetchingFieldSelectionSet       selectionSet = environment.getSelectionSet();
-        List<Tuple2<String, DB.Extract<?>>> select       = List.ofAll(selectionSet.getImmediateFields())
-            .filter(f -> columns.containsKey(f.getName()))
-            .map(SelectedField::getName)
-            .append(ID)
-            .distinct()
-            .map(c -> new Tuple2<>(c, DB.DATA_TYPE_EXTRACT.get(columns.get(c).get()).get()));
-
-        Tuple2<String, DB.Inject>     condition = new Tuple2<>(ID + " = ?", DB.Injects.UUID.apply(id));
-        List<Tuple2<String, Boolean>> order     = List.of(new Tuple2<>(columns.get()._1, true));
-        Tuple2<Long, Integer>         skipLimit = new Tuple2<>(0L, 10);
-
-        return data.queryByCondition(table, select, condition, order, skipLimit)
-            .map(m -> m.toJavaMap())
-            .getOrNull();
+        UUID id = UUID.fromString(environment.getArgument(ID));
+        return data.deleteById(table, id, returnFields(columns, environment)).get().toJavaMap();
     }
 
     Option<Tuple2<String, Inject>> getInject(Map<String, DataType> columns, String column, Object value) {
@@ -466,10 +438,14 @@ public class GraphQLHandler implements HttpHandler {
         return Option.of(new Tuple2<>(column, injector.get().apply(value)));
     }
 
-    List<Tuple2<String, DB.Extract<?>>> returnId(Map<String, DataType> columns) {
-        return List.of(new Tuple2<>(
-                ID,
-                DB.DATA_TYPE_EXTRACT.get(columns.get(ID).get()).get()));
+    List<Tuple2<String, DB.Extract<?>>> returnFields(Map<String, DataType> columns, DataFetchingEnvironment environment) {
+        DataFetchingFieldSelectionSet selectionSet = environment.getSelectionSet();
+        return List.ofAll(selectionSet.getImmediateFields())
+            .filter(f -> columns.containsKey(f.getName()))
+            .map(SelectedField::getName)
+            .append(ID)
+            .distinct()
+            .map(c -> new Tuple2<>(c, DB.DATA_TYPE_EXTRACT.get(columns.get(c).get()).get()));
     }
 
 }
