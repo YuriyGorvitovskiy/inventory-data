@@ -27,6 +27,7 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLCodeRegistry;
+import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
@@ -72,7 +73,8 @@ public class GraphQLHandler implements HttpHandler {
             new Tuple2<>(DB.DataType.BOOLEAN, Scalars.GraphQLBoolean),
             new Tuple2<>(DB.DataType.INTEGER, Scalars.GraphQLInt),
             new Tuple2<>(DB.DataType.UUID, Scalars.GraphQLID),
-            new Tuple2<>(DB.DataType.VARCHAR, Scalars.GraphQLString));
+            new Tuple2<>(DB.DataType.VARCHAR, Scalars.GraphQLString),
+            new Tuple2<>(DB.DataType.TEXT_SEARCH_VECTOR, Scalars.GraphQLString));
 
     final SchemaAccess schema  = new SchemaAccess();
     final DataAccess   data    = new DataAccess();
@@ -128,7 +130,19 @@ public class GraphQLHandler implements HttpHandler {
             .fields(tables.keySet()
                 .map(t -> GraphQLFieldDefinition.newFieldDefinition()
                     .name(t)
-                    .type(new GraphQLList(new GraphQLTypeReference(t)))
+                    .type(GraphQLList.list(new GraphQLTypeReference(t)))
+                    .argument(GraphQLArgument.newArgument()
+                        .name("filter")
+                        .type(new GraphQLTypeReference(t + "_filter")))
+                    .argument(GraphQLArgument.newArgument()
+                        .name("order")
+                        .type(GraphQLList.list(new GraphQLTypeReference(t + "_order"))))
+                    .argument(GraphQLArgument.newArgument()
+                        .name("skip")
+                        .type(Scalars.GraphQLInt))
+                    .argument(GraphQLArgument.newArgument()
+                        .name("limit")
+                        .type(Scalars.GraphQLInt))
                     .build())
                 .toJavaList())
             .build();
@@ -158,6 +172,11 @@ public class GraphQLHandler implements HttpHandler {
                     incoming.getOrElse(t._1, HashMap.empty())))
             .toList();
 
+        List<GraphQLType> queryInputTypes = tables
+            .flatMap(
+                    t -> generateQueryInputTypes(t._1, t._2, primaryKeys.get(t._1), outcoming.getOrElse(t._1, HashMap.empty())))
+            .toList();
+
         List<GraphQLType> mutationTypes = tables
             .flatMap(t -> generateMutationTypes(t._1, t._2, primaryKeys.get(t._1), outcoming.getOrElse(t._1, HashMap.empty())))
             .toList();
@@ -177,12 +196,18 @@ public class GraphQLHandler implements HttpHandler {
                     .toJavaMap(t -> t));
 
         queryTypes.forEach(t -> code.dataFetchers(t._2, t._3.toJavaMap()));
-
+        GraphQLEnumType sortingOrder = GraphQLEnumType.newEnum()
+            .name("SortingOrder")
+            .value("ASC")
+            .value("DESC")
+            .build();
         return GraphQLSchema.newSchema()
             .query(queryType)
             .mutation(mutationType)
             .additionalTypes(queryTypes.map(t -> t._1).toJavaSet())
+            .additionalTypes(queryInputTypes.toJavaSet())
             .additionalTypes(mutationTypes.toJavaSet())
+            .additionalType(sortingOrder)
             .codeRegistry(code.build())
             .build();
     }
@@ -199,7 +224,7 @@ public class GraphQLHandler implements HttpHandler {
             .map(t -> generateField(
                     t._1,
                     t._2,
-                    t._1.equals(pk.map(p -> p.column).getOrNull())))
+                    isReference(t._1, pk, out)))
             .toJavaList());
 
         builder.fields(out.values()
@@ -212,7 +237,7 @@ public class GraphQLHandler implements HttpHandler {
         builder.fields(in.values()
             .map(fk -> GraphQLFieldDefinition.newFieldDefinition()
                 .name(fk.name)
-                .type(new GraphQLList(new GraphQLTypeReference(fk.fromTable)))
+                .type(GraphQLList.list(new GraphQLTypeReference(fk.fromTable)))
                 .build())
             .toJavaList());
 
@@ -292,6 +317,44 @@ public class GraphQLHandler implements HttpHandler {
             .argument(GraphQLArgument.newArgument()
                 .name(ID)
                 .type(Scalars.GraphQLID))
+            .build();
+    }
+
+    List<GraphQLType> generateQueryInputTypes(String table,
+                                              Map<String, DataType> columns,
+                                              Option<PrimaryKey> pk,
+                                              Map<String, ForeignKey> out) {
+        GraphQLInputObjectType filter = GraphQLInputObjectType.newInputObject()
+            .name(table + "_filter")
+            .fields(columns
+                .map(t -> generateFilterField(t._1, t._2, isReference(t._1, pk, out)))
+                .toJavaList())
+            .build();
+
+        GraphQLInputObjectType order = GraphQLInputObjectType.newInputObject()
+            .name(table + "_order")
+            .fields(columns
+                .filterValues(d -> DB.DataType.TEXT_SEARCH_VECTOR != d)
+                .map(t -> GraphQLInputObjectField.newInputObjectField()
+                    .name(t._1)
+                    .type(GraphQLTypeReference.typeRef("SortingOrder"))
+                    .build())
+                .toJavaList())
+            .build();
+
+        return List.of(filter, order);
+    }
+
+    boolean isReference(String column, Option<PrimaryKey> pk, Map<String, ForeignKey> out) {
+        return column.equals(pk.map(p -> p.column).getOrNull()) || out.containsKey(column);
+    }
+
+    GraphQLInputObjectField generateFilterField(String name, DataType type, boolean isReference) {
+        GraphQLType primitive = isReference ? Scalars.GraphQLID : DATA_TYPE_TO_SCALAR.get(type).get();
+
+        return GraphQLInputObjectField.newInputObjectField()
+            .name(name)
+            .type(GraphQLList.list(primitive))
             .build();
     }
 
