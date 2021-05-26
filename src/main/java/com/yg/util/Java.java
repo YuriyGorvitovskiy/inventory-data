@@ -85,4 +85,8 @@ public interface Java {
     static String repeat(String repeat, String separator, int count) {
         return Stream.range(0, count).map(i -> repeat).mkString(separator);
     }
+
+    static <T> T ifNull(T value, T inCaseValueIsNull) {
+        return null != value ? value : inCaseValueIsNull;
+    }
 }

@@ -242,4 +242,32 @@ public interface DB {
         return injects.foldLeft(Injects.NOTHING, (f, j) -> (ps, i) -> j.set(ps, f.set(ps, i)));
     }
 
+    static Tuple2<String, DB.Inject> andSqlInjects(Seq<Tuple2<String, DB.Inject>> conditions) {
+        if (conditions.isEmpty()) {
+            return new Tuple2<>("1 = 1", DB.Injects.NOTHING);
+        }
+        if (1 == conditions.size()) {
+            return conditions.get();
+        }
+        return new Tuple2<>("(" + conditions.map(t -> t._1).mkString(") AND (") + ")", DB.fold(conditions.map(t -> t._2)));
+    }
+
+    static <T> Tuple2<String, DB.Inject> conditionSqlInject(String column, DataType dataType,
+                                                            Map<DataType, Function<T, Inject>> injectors,
+                                                            List<T> values) {
+        if (DB.DataType.TEXT_SEARCH_VECTOR.equals(dataType)) {
+            return new Tuple2<>("websearch_to_tsquery('english', ?) @@ " + column,
+                    DB.Injects.Str.STRING.apply(values.mkString(" ")));
+        }
+        if (values.isEmpty()) {
+            return new Tuple2<>(column + " IS NULL", DB.Injects.NOTHING);
+        }
+
+        Function<T, Inject> injector = injectors.get(dataType).get();
+        if (1 == values.size()) {
+            return new Tuple2<>(column + " = ?", injector.apply(values.get()));
+        }
+        return new Tuple2<>(column + " IN (" + Java.repeat("?", ", ", values.size()) + ")", DB.fold(values.map(injector)));
+    }
+
 }

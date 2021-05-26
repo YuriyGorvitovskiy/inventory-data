@@ -18,7 +18,6 @@ import com.yg.util.Rest.ErrorCode;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 
 public class CrudHandler implements HttpHandler {
@@ -240,40 +239,16 @@ public class CrudHandler implements HttpHandler {
     }
 
     Tuple2<String, DB.Inject> getConditions(Map<String, List<String>> query, Map<String, DataType> columns) {
-        return andSqlInjects(query
+        return DB.andSqlInjects(query
             .filterKeys(k -> !k.startsWith(QueryParam.AUX_PREFIX))
-            .map(t -> conditionSqlInject(
+            .map(t -> DB.conditionSqlInject(
                     t._1,
                     columns.get(t._1)
                         .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.BAD_REQUEST,
                                 "Column ${0} is not present on requested table",
                                 t._1)),
+                    DB.DATA_TYPE_STRING_INJECT,
                     t._2)));
-    }
-
-    Tuple2<String, DB.Inject> andSqlInjects(Seq<Tuple2<String, DB.Inject>> conditions) {
-        if (conditions.isEmpty()) {
-            return new Tuple2<>("1 = 1", DB.Injects.NOTHING);
-        }
-        if (1 == conditions.size()) {
-            return conditions.get();
-        }
-        return new Tuple2<>("(" + conditions.map(t -> t._1).mkString(") AND (") + ")", DB.fold(conditions.map(t -> t._2)));
-    }
-
-    Tuple2<String, DB.Inject> conditionSqlInject(String column, DataType dataType, List<String> values) {
-        if (DB.DataType.TEXT_SEARCH_VECTOR.equals(dataType)) {
-            return new Tuple2<>("websearch_to_tsquery('english', ?) @@ " + column,
-                    DB.Injects.Str.STRING.apply(values.mkString(" ")));
-        }
-        if (values.isEmpty()) {
-            return new Tuple2<>(column + " IS NULL", DB.Injects.NOTHING);
-        }
-        Function<String, DB.Inject> inject = DB.DATA_TYPE_STRING_INJECT.get(dataType).get();
-        if (1 == values.size()) {
-            return new Tuple2<>(column + " = ?", inject.apply(values.get()));
-        }
-        return new Tuple2<>(column + " IN (" + Java.repeat("?", ", ", values.size()) + ")", DB.fold(values.map(inject)));
     }
 
     List<Tuple2<String, Boolean>> getOrder(Map<String, List<String>> query, Map<String, DataType> columns) {

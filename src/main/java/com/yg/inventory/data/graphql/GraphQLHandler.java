@@ -15,6 +15,7 @@ import com.yg.inventory.data.db.SchemaAccess.PrimaryKey;
 import com.yg.util.DB;
 import com.yg.util.DB.DataType;
 import com.yg.util.DB.Inject;
+import com.yg.util.Java;
 import com.yg.util.Json;
 import com.yg.util.Rest;
 
@@ -46,10 +47,23 @@ import io.vavr.collection.Map;
 import io.vavr.control.Option;
 
 public class GraphQLHandler implements HttpHandler {
+    static interface Argument {
+        static final String FILTER = "filter";
+        static final String ID     = "ID";
+        static final String LIMIT  = "limit";
+        static final String ORDER  = "order";
+        static final String SKIP   = "skip";
+    }
+
     static interface Param {
         static final String OPERATION_NAME = "operationName";
         static final String QUERY          = "query";
         static final String VARIABLES      = "variables";
+    }
+
+    static interface Sort {
+        static final String ASC  = "ASC";
+        static final String DESC = "DESC";
     }
 
     public static class Input {
@@ -132,16 +146,16 @@ public class GraphQLHandler implements HttpHandler {
                     .name(t)
                     .type(GraphQLList.list(new GraphQLTypeReference(t)))
                     .argument(GraphQLArgument.newArgument()
-                        .name("filter")
+                        .name(Argument.FILTER)
                         .type(new GraphQLTypeReference(t + "_filter")))
                     .argument(GraphQLArgument.newArgument()
-                        .name("order")
+                        .name(Argument.ORDER)
                         .type(GraphQLList.list(new GraphQLTypeReference(t + "_order"))))
                     .argument(GraphQLArgument.newArgument()
-                        .name("skip")
+                        .name(Argument.SKIP)
                         .type(Scalars.GraphQLInt))
                     .argument(GraphQLArgument.newArgument()
-                        .name("limit")
+                        .name(Argument.LIMIT)
                         .type(Scalars.GraphQLInt))
                     .build())
                 .toJavaList())
@@ -183,8 +197,8 @@ public class GraphQLHandler implements HttpHandler {
 
         GraphQLCodeRegistry.Builder code = GraphQLCodeRegistry.newCodeRegistry();
         code.dataFetchers(QUERY_TYPE,
-                tables.keySet()
-                    .map(t -> new Tuple2<>(t, (DataFetcher<?>) (e -> fetchQuery(t, e))))
+                tables
+                    .map(t -> new Tuple2<>(t._1, (DataFetcher<?>) (e -> fetchQuery(t._1, t._2, e))))
                     .toJavaMap(t -> t));
         code.dataFetchers(MUTATION_TYPE,
                 tables.keySet()
@@ -198,8 +212,8 @@ public class GraphQLHandler implements HttpHandler {
         queryTypes.forEach(t -> code.dataFetchers(t._2, t._3.toJavaMap()));
         GraphQLEnumType sortingOrder = GraphQLEnumType.newEnum()
             .name("SortingOrder")
-            .value("ASC")
-            .value("DESC")
+            .value(Sort.ASC)
+            .value(Sort.DESC)
             .build();
         return GraphQLSchema.newSchema()
             .query(queryType)
@@ -289,7 +303,7 @@ public class GraphQLHandler implements HttpHandler {
             .name("upsert_" + table)
             .type(new GraphQLTypeReference(table))
             .argument(GraphQLArgument.newArgument()
-                .name(ID)
+                .name(Argument.ID)
                 .type(Scalars.GraphQLID))
             .argument(GraphQLArgument.newArgument()
                 .name(table)
@@ -302,7 +316,7 @@ public class GraphQLHandler implements HttpHandler {
             .name("update_" + table)
             .type(new GraphQLTypeReference(table))
             .argument(GraphQLArgument.newArgument()
-                .name(ID)
+                .name(Argument.ID)
                 .type(Scalars.GraphQLID))
             .argument(GraphQLArgument.newArgument()
                 .name(table)
@@ -315,7 +329,7 @@ public class GraphQLHandler implements HttpHandler {
             .name("delete_" + table)
             .type(new GraphQLTypeReference(table))
             .argument(GraphQLArgument.newArgument()
-                .name(ID)
+                .name(Argument.ID)
                 .type(Scalars.GraphQLID))
             .build();
     }
@@ -385,8 +399,8 @@ public class GraphQLHandler implements HttpHandler {
     }
 
     java.util.List<java.util.Map<String, Object>> fetchQuery(String table,
+                                                             Map<String, DB.DataType> columns,
                                                              DataFetchingEnvironment environment) throws Exception {
-        Map<String, DB.DataType> columns = schema.getTableColumns(table);
 
         DataFetchingFieldSelectionSet       selectionSet = environment.getSelectionSet();
         List<Tuple2<String, DB.Extract<?>>> select       = List.ofAll(selectionSet.getImmediateFields())
@@ -396,13 +410,42 @@ public class GraphQLHandler implements HttpHandler {
             .distinct()
             .map(c -> new Tuple2<>(c, DB.DATA_TYPE_EXTRACT.get(columns.get(c).get()).get()));
 
-        Tuple2<String, DB.Inject>     condition = new Tuple2<>("1 = 1", DB.Injects.NOTHING);
-        List<Tuple2<String, Boolean>> order     = List.of(new Tuple2<>(columns.get()._1, true));
-        Tuple2<Long, Integer>         skipLimit = new Tuple2<>(0L, 10);
+        java.util.Map<String, java.util.List<Object>> filter    = environment.getArgument(Argument.FILTER);
+        Tuple2<String, DB.Inject>                     condition = buildCondition(
+                HashMap.ofAll(Java.ifNull(filter, Collections.emptyMap())).mapValues(List::ofAll),
+                columns);
+
+        java.util.List<java.util.Map<String, String>> sorting = environment.getArgument(Argument.ORDER);
+        List<Tuple2<String, Boolean>>                 order   = buildOrder(
+                List.ofAll(Java.ifNull(sorting, Collections.emptyList())).map(HashMap::ofAll),
+                columns);
+
+        Integer               skip      = Java.ifNull(environment.getArgument(Argument.SKIP), 0);
+        Integer               limit     = Java.ifNull(environment.getArgument(Argument.LIMIT), 10);
+        Tuple2<Long, Integer> skipLimit = new Tuple2<>(skip.longValue(), limit);
 
         return data.queryByCondition(table, select, condition, order, skipLimit)
             .map(m -> m.toJavaMap())
             .toJavaList();
+    }
+
+    Tuple2<String, DB.Inject> buildCondition(Map<String, List<Object>> filter, Map<String, DB.DataType> columns) {
+        return DB.andSqlInjects(filter
+            .filterKeys(k -> columns.containsKey(k))
+            .map(t -> DB.conditionSqlInject(
+                    t._1,
+                    columns.get(t._1).get(),
+                    DB.DATA_TYPE_INJECT,
+                    t._2)));
+    }
+
+    List<Tuple2<String, Boolean>> buildOrder(List<Map<String, String>> argument, Map<String, DB.DataType> columns) {
+        List<Tuple2<String, Boolean>> order = argument
+            .flatMap(m -> m
+                .filter(t -> columns.containsKey(t._1))
+                .mapValues(s -> Sort.ASC.equals(s)));
+
+        return order.isEmpty() ? List.of(new Tuple2<>(ID, true)) : order;
     }
 
     Object fetchOut(ForeignKey fk, DataFetchingEnvironment environment) throws Exception {
