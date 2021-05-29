@@ -252,7 +252,8 @@ public interface DB {
         return new Tuple2<>("(" + conditions.map(t -> t._1).mkString(") AND (") + ")", DB.fold(conditions.map(t -> t._2)));
     }
 
-    static <T> Tuple2<String, DB.Inject> conditionSqlInject(String column, DataType dataType,
+    static <T> Tuple2<String, DB.Inject> conditionSqlInject(String column,
+                                                            DataType dataType,
                                                             Map<DataType, Function<T, Inject>> injectors,
                                                             List<T> values) {
         if (DB.DataType.TEXT_SEARCH_VECTOR.equals(dataType)) {

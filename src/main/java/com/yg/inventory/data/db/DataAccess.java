@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.util.UUID;
 
 import com.yg.util.DB;
+import com.yg.util.DB.DataType;
 import com.yg.util.DB.Extract;
 import com.yg.util.DB.Inject;
 import com.yg.util.DB.Injects;
@@ -49,6 +50,26 @@ public class DataAccess {
         return DB.query(sql,
                 ps -> inject(ps, 1, List.of(condition, limit, skip)),
                 rs -> extract(rs, select));
+    }
+
+    public List<Map<String, Object>> queryByView(View<Extract<?>> select,
+                                                 View<Tuple2<DataType, List<?>>> filters,
+                                                 View<Boolean> order,
+                                                 Tuple2<Long, Integer> skipLimit) {
+        var skip  = new Tuple2<>("", Injects.LONG.apply(skipLimit._1));
+        var limit = new Tuple2<>("", Injects.INTEGER.apply(skipLimit._2));
+        /*
+        String sql = Java.format(QEURY_BY_VIEWS,
+                select.map(t -> t._1).mkString(", "),
+                table,
+                condition._1,
+                order.map(t -> t._1 + (t._2 ? " ASC" : " DESC")).mkString(", "));
+        
+        return DB.query(sql,
+                ps -> inject(ps, 1, List.of(condition, limit, skip)),
+                rs -> extract(rs, select));
+        */
+        return List.empty();
     }
 
     public List<Map<String, Object>> insert(String table,

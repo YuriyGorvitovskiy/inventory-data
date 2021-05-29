@@ -82,6 +82,10 @@ public interface Java {
             .foldLeft(format, (f, i) -> f.replace("${" + i + "}", toString(params[i])));
     }
 
+    static String repeat(String repeat, int count) {
+        return Stream.range(0, count).map(i -> repeat).mkString();
+    }
+
     static String repeat(String repeat, String separator, int count) {
         return Stream.range(0, count).map(i -> repeat).mkString(separator);
     }
