@@ -1,7 +1,8 @@
 package com.yg.inventory.data.db;
 
 public class Join {
-    static enum Kind {
+
+    public static enum Kind {
         CROSS,
         INNER,
         LEFT,
@@ -9,14 +10,14 @@ public class Join {
         FULL,
     }
 
-    final Kind   kind;
-    final String leftColumn;
-    final String rightColumn;
+    public final Kind      kind;
+    public final Condition condition;
+    public final boolean   oneToOne;
 
-    public Join(Kind kind, String leftColumn, String rightColumn) {
+    public Join(Kind kind, Condition condition, boolean oneToOne) {
         this.kind = kind;
-        this.leftColumn = leftColumn;
-        this.rightColumn = rightColumn;
+        this.condition = condition;
+        this.oneToOne = oneToOne;
     }
 
 }
