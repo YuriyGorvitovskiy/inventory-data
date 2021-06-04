@@ -1,5 +1,7 @@
 package com.yg.inventory.data.db;
 
+import com.yg.inventory.model.db.ForeignKey;
+import com.yg.inventory.model.db.PrimaryKey;
 import com.yg.util.DB;
 import com.yg.util.DB.DataType;
 import com.yg.util.Java;
@@ -10,34 +12,6 @@ import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
 public class SchemaAccess {
-
-    public static class ForeignKey {
-        public final String name;
-        public final String fromTable;
-        public final String fromColumn;
-        public final String toTable;
-        public final String toColumn;
-
-        ForeignKey(String name, String fromTable, String fromColumn, String toTable, String toColumn) {
-            this.name = name;
-            this.fromTable = fromTable;
-            this.fromColumn = fromColumn;
-            this.toTable = toTable;
-            this.toColumn = toColumn;
-        }
-    }
-
-    public static class PrimaryKey {
-        public final String name;
-        public final String table;
-        public final String column;
-
-        PrimaryKey(String name, String table, String column) {
-            this.name = name;
-            this.table = table;
-            this.column = column;
-        }
-    }
 
     static final String QUERY_FOR_ALL_FOREIGN_KEYS   = Java.resource("QueryForAllForeignKeys.sql");
     static final String QUERY_FOR_ALL_PRIMARY_KEYS   = Java.resource("QueryForAllPrimaryKeys.sql");

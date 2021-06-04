@@ -12,7 +12,7 @@ public class Condition {
 
     public final DB.Inject inject;
 
-    Condition(String sql, DB.Inject inject) {
+    public Condition(String sql, DB.Inject inject) {
         this.sql = sql;
         this.inject = inject;
     }
@@ -62,4 +62,5 @@ public class Condition {
         return new Condition(SQL.WEB_SEARCH + column,
                 DB.Injects.Str.STRING.apply(values.mkString(" ")));
     }
+
 }

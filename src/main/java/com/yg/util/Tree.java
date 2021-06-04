@@ -218,6 +218,13 @@ public class Tree<K, N, L> {
                 links.mapValues(v -> new Tuple2<>(mapping.apply(v._1), v._2.mapLinks(mapping))));
     }
 
+    public <R> Tree<K, N, R> mapLinksWithNodes(Function<Tuple3<N, L, N>, R> mapping) {
+        return new Tree<>(
+                node,
+                links.mapValues(v -> new Tuple2<>(mapping.apply(new Tuple3<>(node, v._1, v._2.node)),
+                        v._2.mapLinksWithNodes(mapping))));
+    }
+
     public <R> Tree<K, N, R> mapLinksWithIndex(int from, BiFunction<L, Integer, R> mapping) {
         return mapLinksWith(Stream.from(from), mapping);
     }

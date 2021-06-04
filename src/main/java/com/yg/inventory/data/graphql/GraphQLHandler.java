@@ -10,8 +10,8 @@ import com.sun.net.httpserver.HttpHandler;
 
 import com.yg.inventory.data.db.DataAccess;
 import com.yg.inventory.data.db.SchemaAccess;
-import com.yg.inventory.data.db.SchemaAccess.ForeignKey;
-import com.yg.inventory.data.db.SchemaAccess.PrimaryKey;
+import com.yg.inventory.model.db.ForeignKey;
+import com.yg.inventory.model.db.PrimaryKey;
 import com.yg.util.DB;
 import com.yg.util.DB.DataType;
 import com.yg.util.DB.Inject;

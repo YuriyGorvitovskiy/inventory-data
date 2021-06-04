@@ -9,8 +9,8 @@ import io.vavr.collection.List;
 public class View<T> {
 
     public static class Node {
-        final String table;
-        final String alias;
+        public final String table;
+        public final String alias;
 
         public Node(String table, String alias) {
             this.table = table;
@@ -27,14 +27,14 @@ public class View<T> {
     public final Long                     skip;
     public final Integer                  limit;
 
-    View(String name,
-         Tree<String, Node, Join> joins,
-         Condition where,
-         List<Column<Boolean>> order,
-         List<Column<T>> select,
-         boolean distinct,
-         Long skip,
-         Integer limit) {
+    public View(String name,
+                Tree<String, Node, Join> joins,
+                Condition where,
+                List<Column<Boolean>> order,
+                List<Column<T>> select,
+                boolean distinct,
+                Long skip,
+                Integer limit) {
         this.name = name;
         this.joins = joins;
         this.where = where;
