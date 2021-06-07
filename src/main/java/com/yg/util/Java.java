@@ -7,9 +7,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.StackWalker.StackFrame;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Function;
 
+import graphql.com.google.common.base.Objects;
 import io.vavr.collection.Stream;
 
 public interface Java {
@@ -92,5 +94,19 @@ public interface Java {
 
     static <T> T ifNull(T value, T inCaseValueIsNull) {
         return null != value ? value : inCaseValueIsNull;
+    }
+
+    @SafeVarargs
+    static <T> boolean in(T value, T... checks) {
+        for (T check : checks) {
+            if (Objects.equal(value, check)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static <T> boolean in(T value, List<T> checks) {
+        return checks.contains(value);
     }
 }

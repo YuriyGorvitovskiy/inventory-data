@@ -20,7 +20,7 @@ public class Main {
         HttpServer server = HttpServer.create();
         server.createContext("/", Rest.errorHandler(new VersionHandler()));
         server.createContext("/crud", Rest.errorHandler(new CrudHandler()));
-        server.createContext("/graphql", Rest.errorHandler(new GraphQLHandler()));
+        server.createContext("/graphql", Rest.errorHandler(GraphQLHandler.build()));
         return server;
     }
 
