@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -37,7 +38,7 @@ public interface DB {
         VARCHAR,
         UUID;
 
-        public static final Map<String, DataType> DB_NAMES = HashMap.ofEntries(
+        public static final Map<String, DataType> FROM_DB_NAME = HashMap.ofEntries(
                 new Tuple2<>("bigint", BIGINT),
                 new Tuple2<>("boolean", BOOLEAN),
                 new Tuple2<>("character varying", VARCHAR),
@@ -45,7 +46,10 @@ public interface DB {
                 new Tuple2<>("tsvector", TEXT_SEARCH_VECTOR),
                 new Tuple2<>("uuid", UUID));
 
+        public static final Map<DataType, String> TO_DB_NAME = FROM_DB_NAME.toMap(t -> new Tuple2<>(t._2, t._1));
+
         public static final Set<DataType> SUPPORTED = HashSet.of(BIGINT, BOOLEAN, INTEGER, VARCHAR, UUID);
+
     }
 
     @FunctionalInterface
@@ -55,47 +59,54 @@ public interface DB {
     }
 
     static interface Injects {
-        static final Inject                           NOTHING = (ps, i) -> i;
-        static final Function<Boolean, Inject>        BOOLEAN = (v) -> (ps, i) -> {
-                                                                  if (null == v) {
-                                                                      ps.setNull(i, Types.BOOLEAN);
-                                                                  } else {
-                                                                      ps.setBoolean(i, v);
-                                                                  }
-                                                                  return i + 1;
-                                                              };
-        static final Function<Integer, Inject>        INTEGER = (v) -> (ps, i) -> {
-                                                                  if (null == v) {
-                                                                      ps.setNull(i, Types.INTEGER);
-                                                                  } else {
-                                                                      ps.setInt(i, v);
-                                                                  }
-                                                                  return i + 1;
-                                                              };
-        static final Function<Long, Inject>           LONG    = (v) -> (ps, i) -> {
-                                                                  if (null == v) {
-                                                                      ps.setNull(i, Types.BIGINT);
-                                                                  } else {
-                                                                      ps.setLong(i, v);
-                                                                  }
-                                                                  return i + 1;
-                                                              };
-        static final Function<String, Inject>         STRING  = (v) -> (ps, i) -> {
-                                                                  if (null == v) {
-                                                                      ps.setNull(i, Types.VARCHAR);
-                                                                  } else {
-                                                                      ps.setString(i, v);
-                                                                  }
-                                                                  return i + 1;
-                                                              };
-        static final Function<java.util.UUID, Inject> UUID    = (v) -> (ps, i) -> {
-                                                                  if (null == v) {
-                                                                      ps.setObject(i, new java.util.UUID(0L, 0L));
-                                                                  } else {
-                                                                      ps.setObject(i, v);
-                                                                  }
-                                                                  return i + 1;
-                                                              };
+        static final Inject                               NOTHING = (ps, i) -> i;
+        static final Function<Boolean, Inject>            BOOLEAN = (v) -> (ps, i) -> {
+                                                                      if (null == v) {
+                                                                          ps.setNull(i, Types.BOOLEAN);
+                                                                      } else {
+                                                                          ps.setBoolean(i, v);
+                                                                      }
+                                                                      return i + 1;
+                                                                  };
+        static final Function<Integer, Inject>            INTEGER = (v) -> (ps, i) -> {
+                                                                      if (null == v) {
+                                                                          ps.setNull(i, Types.INTEGER);
+                                                                      } else {
+                                                                          ps.setInt(i, v);
+                                                                      }
+                                                                      return i + 1;
+                                                                  };
+        static final Function<Long, Inject>               LONG    = (v) -> (ps, i) -> {
+                                                                      if (null == v) {
+                                                                          ps.setNull(i, Types.BIGINT);
+                                                                      } else {
+                                                                          ps.setLong(i, v);
+                                                                      }
+                                                                      return i + 1;
+                                                                  };
+        static final Function<String, Inject>             STRING  = (v) -> (ps, i) -> {
+                                                                      if (null == v) {
+                                                                          ps.setNull(i, Types.VARCHAR);
+                                                                      } else {
+                                                                          ps.setString(i, v);
+                                                                      }
+                                                                      return i + 1;
+                                                                  };
+        static final Function<java.util.UUID, Inject>     UUID    = (v) -> (ps, i) -> {
+                                                                      if (null == v) {
+                                                                          ps.setObject(i, new java.util.UUID(0L, 0L));
+                                                                      } else {
+                                                                          ps.setObject(i, v);
+                                                                      }
+                                                                      return i + 1;
+                                                                  };
+        static final BiFunction<DataType, Seq<?>, Inject> ARRAY   = (t, v) -> (ps, i) -> {
+                                                                      ps.setArray(i,
+                                                                              ps.getConnection().createArrayOf(
+                                                                                      DataType.TO_DB_NAME.get(t).get(),
+                                                                                      v.toJavaArray()));
+                                                                      return i + 1;
+                                                                  };
 
         static interface Str {
             static final Function<String, Inject> INTEGER = (v) -> Injects.INTEGER.apply(Integer.parseInt(v));

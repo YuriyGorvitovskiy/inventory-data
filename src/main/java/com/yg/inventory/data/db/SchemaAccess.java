@@ -26,7 +26,7 @@ public class SchemaAccess {
                 rs -> new Tuple3<>(
                         rs.getString(1), // Table name
                         rs.getString(2), // Column name
-                        DataType.DB_NAMES.get(rs.getString(3)).get()))
+                        DataType.FROM_DB_NAME.get(rs.getString(3)).get()))
             .groupBy(t -> t._1)
             .mapValues(tl -> tl
                 .groupBy(t -> t._2)
@@ -38,7 +38,7 @@ public class SchemaAccess {
                 ps -> ps.setString(1, table),
                 rs -> new Tuple2<>(
                         rs.getString(1),
-                        DataType.DB_NAMES.get(rs.getString(2)).get()))
+                        DataType.FROM_DB_NAME.get(rs.getString(2)).get()))
             .toLinkedMap(t -> t);
     }
 

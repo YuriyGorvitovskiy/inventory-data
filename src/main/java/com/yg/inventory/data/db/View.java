@@ -84,7 +84,6 @@ public class View<T> {
             sb.append(indent)
                 .append(SQL.ORDER_BY)
                 .append(order.map(c -> c.alias + SQL.DOT + c.column + (c._1 ? SQL.ASC : SQL.DESC)).mkString(SQL.COMMA))
-                .append(where.sql)
                 .append(SQL.NEXT_LINE);
         }
         if (null != limit) {

@@ -109,4 +109,5 @@ public interface Java {
     static <T> boolean in(T value, List<T> checks) {
         return checks.contains(value);
     }
+
 }

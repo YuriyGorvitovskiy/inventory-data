@@ -12,12 +12,10 @@ public class Join {
 
     public final Kind      kind;
     public final Condition condition;
-    public final boolean   oneToOne;
 
-    public Join(Kind kind, Condition condition, boolean oneToOne) {
+    public Join(Kind kind, Condition condition) {
         this.kind = kind;
         this.condition = condition;
-        this.oneToOne = oneToOne;
     }
 
 }
