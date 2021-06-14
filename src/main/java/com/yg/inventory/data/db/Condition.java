@@ -25,7 +25,9 @@ public class Condition {
         if (1 == child.size()) {
             return child.get();
         }
-        return new Condition(child.mkString(SQL.AND), DB.fold(child.map(c -> c.inject)));
+        return new Condition(
+                child.map(c -> SQL.OPEN + c.sql + SQL.CLOSE).mkString(SQL.AND),
+                DB.fold(child.map(c -> c.inject)));
     }
 
     public static Condition or(Condition... child) {
@@ -39,7 +41,7 @@ public class Condition {
         if (1 == child.size()) {
             return child.get();
         }
-        return new Condition(child.mkString(SQL.OR), DB.fold(child.map(c -> c.inject)));
+        return new Condition(child.map(c -> SQL.OPEN + c.sql + SQL.CLOSE).mkString(SQL.OR), DB.fold(child.map(c -> c.inject)));
     }
 
     public static Condition not(Condition child) {
@@ -64,7 +66,7 @@ public class Condition {
 
     public static Condition in(String column, Seq<DB.Inject> values) {
         return new Condition(column + SQL.IN_OPEN + Java.repeat(SQL.PARAM, SQL.COMMA, values.size()) + SQL.CLOSE,
-                DB.Injects.NOTHING);
+                DB.fold(values));
     }
 
     public static Condition inArray(String column, DB.DataType elementType, DB.Inject array) {

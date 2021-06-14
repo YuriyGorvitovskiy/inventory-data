@@ -106,7 +106,7 @@ public class View<T> {
     }
 
     List<DB.Inject> injectJoins(Tree<String, Node, Join> tree) {
-        return joins.links
+        return tree.links
             .values()
             .flatMap(t -> List.of(t._1.condition.inject).appendAll(injectJoins(t._2)))
             .toList();
