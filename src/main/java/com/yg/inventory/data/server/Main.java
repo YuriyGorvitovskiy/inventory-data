@@ -3,12 +3,13 @@ package com.yg.inventory.data.server;
 import java.net.InetSocketAddress;
 import java.util.function.Supplier;
 
+import org.statemach.util.Java;
+
 import com.sun.net.httpserver.HttpServer;
 
 import com.yg.inventory.data.graphql.GraphQLHandler;
 import com.yg.inventory.data.rest.CrudHandler;
 import com.yg.inventory.data.version.VersionHandler;
-import com.yg.util.Java;
 import com.yg.util.Rest;
 
 public class Main {

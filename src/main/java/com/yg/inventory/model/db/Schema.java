@@ -7,11 +7,9 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 
 public class Schema {
-    public final Map<String, ForeignKey> foreignKeys;
-    public final Map<String, Table>      tables;
+    public final Map<String, Table> tables;
 
-    Schema(Map<String, ForeignKey> foreignKeys, Map<String, Table> tables) {
-        this.foreignKeys = foreignKeys;
+    Schema(Map<String, Table> tables) {
         this.tables = tables;
     }
 
@@ -41,6 +39,6 @@ public class Schema {
                             incomingByNameByTable.get(t._1).getOrElse(HashMap.empty()),
                             outgoingByColumnByTable.get(t._1).getOrElse(HashMap.empty()))));
 
-        return new Schema(foreignByName, tablesByName);
+        return new Schema(tablesByName);
     }
 }

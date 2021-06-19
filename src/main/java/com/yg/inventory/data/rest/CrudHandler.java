@@ -3,6 +3,8 @@ package com.yg.inventory.data.rest;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.statemach.util.Java;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -11,7 +13,6 @@ import com.yg.inventory.data.db.SchemaAccess;
 import com.yg.util.DB;
 import com.yg.util.DB.DataType;
 import com.yg.util.DB.Inject;
-import com.yg.util.Java;
 import com.yg.util.Rest;
 import com.yg.util.Rest.ErrorCode;
 

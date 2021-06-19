@@ -15,9 +15,11 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import com.sun.net.httpserver.HttpServer;
 
+@EnabledIfEnvironmentVariable(named = "SM_DATABASE", matches = "POSTGRES")
 public class Main_UnitTest {
     Supplier<Main> factoryBackup;
 

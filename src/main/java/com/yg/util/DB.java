@@ -9,6 +9,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.statemach.util.ConsumerEx;
+import org.statemach.util.FunctionEx;
+import org.statemach.util.Java;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;

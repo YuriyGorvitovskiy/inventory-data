@@ -1,7 +1,8 @@
 package com.yg.inventory.data.db;
 
+import org.statemach.util.Java;
+
 import com.yg.util.DB;
-import com.yg.util.Java;
 
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;

@@ -3,6 +3,8 @@ package com.yg.inventory.data.graphql;
 import java.util.Collections;
 import java.util.UUID;
 
+import org.statemach.util.Java;
+
 import com.yg.inventory.data.db.Condition;
 import com.yg.inventory.data.db.DataAccess;
 import com.yg.inventory.data.db.Join;
@@ -11,7 +13,6 @@ import com.yg.inventory.data.db.View;
 import com.yg.inventory.model.db.Schema;
 import com.yg.inventory.model.db.Table;
 import com.yg.util.DB;
-import com.yg.util.Java;
 import com.yg.util.Tree;
 
 import graphql.schema.DataFetcher;

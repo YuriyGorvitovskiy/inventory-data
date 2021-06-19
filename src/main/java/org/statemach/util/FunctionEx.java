@@ -1,4 +1,4 @@
-package com.yg.util;
+package org.statemach.util;
 
 @FunctionalInterface
 public interface FunctionEx<P, R, E extends Exception> {

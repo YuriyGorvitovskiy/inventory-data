@@ -1,10 +1,11 @@
 package com.yg.inventory.data.db;
 
+import org.statemach.util.Java;
+
 import com.yg.inventory.model.db.ForeignKey;
 import com.yg.inventory.model.db.PrimaryKey;
 import com.yg.util.DB;
 import com.yg.util.DB.DataType;
-import com.yg.util.Java;
 
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
