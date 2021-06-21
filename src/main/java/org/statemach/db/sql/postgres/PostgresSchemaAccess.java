@@ -1,13 +1,15 @@
 package org.statemach.db.sql.postgres;
 
 import org.statemach.db.jdbc.JDBC;
+import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.PrimaryKey;
 import org.statemach.db.sql.SchemaAccess;
 import org.statemach.util.Java;
 
-import com.yg.util.DB.DataType;
+import com.yg.util.DB;
 
+import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.Tuple4;
 import io.vavr.collection.List;
@@ -32,9 +34,16 @@ public class PostgresSchemaAccess implements SchemaAccess {
     }
 
     @Override
-    public Map<String, Map<String, DataType>> getTables() {
-        // TODO Auto-generated method stub
-        return null;
+    public Map<String, List<ColumnInfo>> getAllTables() {
+        return DB.query(QEURY_FOR_ALL_TABLES,
+                ps -> ps.setString(1, schemaName),
+                rs -> new Tuple2<>(
+                        rs.getString(1), // Table name
+                        new ColumnInfo(
+                                rs.getString(2),
+                                PostgresDataType.getByName(rs.getString(3)))))
+            .groupBy(t -> t._1)
+            .mapValues(l -> l.map(c -> c._2));
     }
 
     @Override

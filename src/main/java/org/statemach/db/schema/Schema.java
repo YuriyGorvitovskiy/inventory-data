@@ -1,6 +1,9 @@
 package org.statemach.db.schema;
 
+import java.util.Objects;
+
 import org.statemach.db.sql.SchemaAccess;
+import org.statemach.util.Java;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -11,14 +14,18 @@ public class Schema {
     public final String                 name;
     public final Map<String, TableInfo> tables;
 
+    private final int hash;
+
     public Schema(String name, Map<String, TableInfo> tables) {
         this.name = name;
         this.tables = tables;
+
+        this.hash = Objects.hash(name, tables);
     }
 
     public static Schema from(SchemaAccess access) {
-        Map<String, Map<String, ColumnInfo>> columnsByNameByTable = access.getTables()
-            .mapValues(t -> t.toMap(c -> new Tuple2<>(c._1, new ColumnInfo(c._1, c._2))));
+        Map<String, Map<String, ColumnInfo>> columnsByNameByTable = access.getAllTables()
+            .mapValues(l -> l.toMap(c -> c.name, c -> c));
 
         Map<String, PrimaryKey> primaryByTable = access.getAllPrimaryKeys()
             .toMap(p -> new Tuple2<>(p.table, p));
@@ -42,5 +49,15 @@ public class Schema {
                             outgoingByNameByTable.get(t._1).getOrElse(HashMap.empty()))));
 
         return new Schema(access.getSchemaName(), tablesByName);
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return Java.equalsByFields(this, other, t -> t.name, t -> t.tables);
     }
 }

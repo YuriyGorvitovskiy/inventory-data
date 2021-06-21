@@ -84,7 +84,7 @@ public class JDBC {
     }
 
     public <R, E extends Exception> List<R> query(String statement, Inject inject, Extract<R> extract) {
-        return call(c -> query(c, statement, ps -> inject.set(ps, 1), rs -> extract.get(rs, 1)._1));
+        return call(c -> query(c, statement, ps -> inject.set(ps, 1), rs -> extract.get(rs, 1)));
     }
 
 }

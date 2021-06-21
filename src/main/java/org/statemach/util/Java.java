@@ -13,8 +13,12 @@ import java.util.function.Function;
 
 import graphql.com.google.common.base.Objects;
 import io.vavr.collection.Stream;
+import io.vavr.control.Option;
 
 public interface Java {
+    public static final Option<Boolean> OPTION_TRUE  = Option.of(Boolean.TRUE);
+    public static final Option<Boolean> OPTION_FALSE = Option.of(Boolean.FALSE);
+
     static <E extends Exception> void soft(RunnableEx<E> runnable) {
         soft(runnable, ex -> new RuntimeException(ex));
     }
@@ -108,6 +112,63 @@ public interface Java {
 
     static <T> boolean in(T value, List<T> checks) {
         return checks.contains(value);
+    }
+
+    public static Option<Boolean> equalsPreCheck(Object a, Object b) {
+        if (a == b) {
+            return OPTION_TRUE;
+        }
+        if (null == a || null == b) {
+            return OPTION_FALSE;
+        }
+        if (a.getClass() != b.getClass()) {
+            return OPTION_FALSE;
+        }
+        return Option.none();
+    }
+
+    @SafeVarargs
+    @SuppressWarnings("unchecked")
+    public static <T> Option<Boolean> equalsCheck(T self, Object b, Function<T, ?>... fields) {
+        return equalsPreCheck(self, b).orElse(() -> {
+            T other = (T) b;
+            for (Function<T, ?> field : fields) {
+                if (!Objects.equal(field.apply(self), field.apply(other))) {
+                    return OPTION_FALSE;
+                }
+            }
+            return Option.none();
+        });
+    }
+
+    @SafeVarargs
+    public static <T> boolean equalsByFields(T self, Object b, Function<T, ?>... fields) {
+        return equalsCheck(self, b, fields).getOrElse(true);
+    }
+
+    public static <T extends Comparable<T>> int compareTo(T left, T right) {
+        if (null == left && null == right) {
+            return 0;
+        }
+        if (null == left) {
+            return -1;
+        }
+        if (null == right) {
+            return 1;
+        }
+        return left.compareTo(right);
+    }
+
+    @SafeVarargs
+    public static <T> int compareByFields(T left, T right, Function<T, ? extends Comparable<?>>... fields) {
+        for (Function<T, ? extends Comparable<?>> field : fields) {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            int cmp = compareTo((Comparable) field.apply(left), (Comparable) field.apply(right));
+            if (0 != cmp) {
+                return cmp;
+            }
+        }
+        return 0;
     }
 
 }

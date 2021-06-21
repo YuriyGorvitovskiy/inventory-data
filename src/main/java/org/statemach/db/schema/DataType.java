@@ -1,25 +1,36 @@
 package org.statemach.db.schema;
 
-import java.util.function.Function;
+import java.util.Objects;
 
-import org.statemach.db.jdbc.Extract;
-import org.statemach.db.jdbc.Inject;
+import org.statemach.util.Java;
 
-public class DataType<T> {
+public class DataType {
+    public final String name;
 
-    public final String              name;
-    public final Class<T>            java;
-    public final Extract<T>          extract;
-    public final Function<T, Inject> injector;
+    private final int hash;
 
-    public DataType(String name, Class<T> java, Extract<T> extract, Function<T, Inject> injector) {
+    public DataType(String name) {
         this.name = name;
-        this.java = java;
-        this.extract = extract;
-        this.injector = injector;
+
+        this.hash = Objects.hash(this.name);
     }
 
-    public Inject inject(T value) {
-        return injector.apply(value);
+    public static DataType unsupported(String name) {
+        return new DataType(name);
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return Java.equalsByFields(this, other, t -> t.name);
+    }
+
+    @Override
+    public String toString() {
+        return "DataType@{name: '" + name + "'}";
     }
 }

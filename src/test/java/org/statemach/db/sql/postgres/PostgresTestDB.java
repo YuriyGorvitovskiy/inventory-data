@@ -9,7 +9,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
-public class TestDB {
+public class PostgresTestDB {
 
     static interface Config {
         static final String DB_ADDRESS  = "TEST_DB_ADDRESS";
@@ -41,7 +41,7 @@ public class TestDB {
     public final static JDBC                jdbc    = new JDBC(pool);
     public final static String              schema  = config.getOrElse(Config.DB_SCHEMA, "test").toLowerCase();
     public final static String              product = "inventory-data";
-    public final static String              version = "0.0.3";
+    public final static String              version = "0.0.5";
 
     static boolean prepared = false;
 
