@@ -9,11 +9,14 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.statemach.util.Java;
 import org.statemach.util.Json;
 
 import com.yg.util.DB.DataType;
 
+import io.vavr.Tuple2;
 import io.vavr.collection.Seq;
+import io.vavr.collection.Traversable;
 
 @FunctionalInterface
 public interface Inject {
@@ -72,7 +75,7 @@ public interface Inject {
                                                                             };
     static final Function<UUID, Inject>               UUID_AS_OBJECT        = (v) -> (ps, i) -> {
                                                                                 if (null == v) {
-                                                                                    ps.setObject(i, new UUID(0L, 0L));
+                                                                                    ps.setNull(i, Types.OTHER);
                                                                                 } else {
                                                                                     ps.setObject(i, v);
                                                                                 }
@@ -95,5 +98,13 @@ public interface Inject {
 
     /// return next position
     int set(PreparedStatement ps, int pos) throws SQLException;
+
+    @SafeVarargs
+    static int inject(PreparedStatement ps, int pos, Traversable<Tuple2<String, Inject>>... portions) {
+        for (Traversable<Tuple2<String, Inject>> portion : portions) {
+            pos = portion.foldLeft(pos, (i, t) -> Java.soft(() -> t._2.set(ps, i)));
+        }
+        return pos;
+    }
 
 }

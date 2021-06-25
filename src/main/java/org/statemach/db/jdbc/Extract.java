@@ -4,8 +4,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Iterator;
 
+import org.statemach.util.Java;
 import org.statemach.util.Json;
+
+import io.vavr.Tuple2;
+import io.vavr.collection.Map;
 
 @FunctionalInterface
 public interface Extract<T> {
@@ -52,4 +57,42 @@ public interface Extract<T> {
     default int next(int pos) {
         return pos + 1;
     }
+
+    static Map<String, Object> extract(ResultSet rs,
+                                       int pos,
+                                       Map<String, Extract<?>> extracts) {
+        // We should force toMap() call at the end, collect all records
+        // Otherwise this stream will be lazy, and
+        // ResultSet.next() will be called before all fields get read
+        return extracts.zipWith(positions(pos, extracts.map(e -> e._2)),
+                (t, p) -> Java.soft(() -> new Tuple2<String, Object>(t._1, t._2.get(rs, p))))
+            .toMap(t -> t);
+    }
+
+    static Iterable<Integer> positions(int start, Iterable<Extract<?>> extracts) {
+        return () -> new PositionIterator(start, extracts.iterator());
+    }
+
+    static class PositionIterator implements Iterator<Integer> {
+        int                  pos;
+        Iterator<Extract<?>> it;
+
+        PositionIterator(int pos, Iterator<Extract<?>> it) {
+            this.pos = pos;
+            this.it = it;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public Integer next() {
+            int i = pos;
+            pos = it.next().next(pos);
+            return i;
+        }
+    }
+
 }
