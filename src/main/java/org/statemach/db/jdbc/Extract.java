@@ -61,9 +61,9 @@ public interface Extract<T> {
     static Map<String, Object> extract(ResultSet rs,
                                        int pos,
                                        Map<String, Extract<?>> extracts) {
-        // We should force toMap() call at the end, collect all records
+        // We should force toMap() call at the end, to collect all records
         // Otherwise this stream will be lazy, and
-        // ResultSet.next() will be called before all fields get read
+        // ResultSet.next() will be called before all fields read
         return extracts.zipWith(positions(pos, extracts.map(e -> e._2)),
                 (t, p) -> Java.soft(() -> new Tuple2<String, Object>(t._1, t._2.get(rs, p))))
             .toMap(t -> t);

@@ -107,4 +107,9 @@ public interface Inject {
         return pos;
     }
 
+    @SuppressWarnings("unchecked")
+    static <T> Inject of(Function<T, Inject> injector, Object value) {
+        return injector.apply((T) value);
+    }
+
 }

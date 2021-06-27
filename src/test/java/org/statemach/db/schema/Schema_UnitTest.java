@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.statemach.db.sql.SchemaAccess;
-import org.statemach.db.sql.postgres.PostgresTestData;
+import org.statemach.db.sql.postgres.TestSchema;
 
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
@@ -44,15 +44,15 @@ public class Schema_UnitTest {
         // Setup
         SchemaAccess access = mock(SchemaAccess.class);
         doReturn(SCHEMA_NAME_1).when(access).getSchemaName();
-        doReturn(PostgresTestData.ALL_TABLES).when(access).getAllTables();
-        doReturn(PostgresTestData.ALL_PRIMARY_KEYS).when(access).getAllPrimaryKeys();
-        doReturn(PostgresTestData.ALL_FOREIGN_KEYS).when(access).getAllForeignKeys();
+        doReturn(TestSchema.ALL_TABLES).when(access).getAllTables();
+        doReturn(TestSchema.ALL_PRIMARY_KEYS).when(access).getAllPrimaryKeys();
+        doReturn(TestSchema.ALL_FOREIGN_KEYS).when(access).getAllForeignKeys();
 
         // Execute
         Schema result = Schema.from(access);
 
         // Verify
-        assertEquals(new Schema(SCHEMA_NAME_1, PostgresTestData.ALL_TABLE_INFO_MAP), result);
+        assertEquals(new Schema(SCHEMA_NAME_1, TestSchema.ALL_TABLE_INFO_MAP), result);
     }
 
     @Test

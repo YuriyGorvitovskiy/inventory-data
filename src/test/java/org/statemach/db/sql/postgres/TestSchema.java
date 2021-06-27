@@ -13,7 +13,7 @@ import io.vavr.collection.LinkedHashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
-public interface PostgresTestData {
+public interface TestSchema {
 
     static final String TABLE_NAME_FIRST   = "first";
     static final String TABLE_NAME_SECOND  = "second";

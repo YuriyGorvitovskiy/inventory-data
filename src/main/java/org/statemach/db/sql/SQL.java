@@ -1,8 +1,4 @@
-package com.yg.inventory.data.db;
-
-import io.vavr.Tuple2;
-import io.vavr.collection.HashMap;
-import io.vavr.collection.Map;
+package org.statemach.db.sql;
 
 public interface SQL {
     public static final String AND               = " AND ";
@@ -50,12 +46,5 @@ public interface SQL {
     public static final String WEB_SEARCH        = "websearch_to_tsquery('english', ?) @@ ";
     public static final String WHERE             = "WHERE ";
     public static final String WITH              = "WITH ";
-
-    public static final Map<Join.Kind, String> JOIN_KIND = HashMap.ofEntries(
-            new Tuple2<>(Join.Kind.CROSS, CROSS_JOIN),
-            new Tuple2<>(Join.Kind.FULL, FULL_JOIN),
-            new Tuple2<>(Join.Kind.INNER, INNER_JOIN),
-            new Tuple2<>(Join.Kind.LEFT, LEFT_JOIN),
-            new Tuple2<>(Join.Kind.RIGHT, RIGHT_JOIN));
 
 }

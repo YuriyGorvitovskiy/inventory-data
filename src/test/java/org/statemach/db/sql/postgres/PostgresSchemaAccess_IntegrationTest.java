@@ -16,11 +16,11 @@ import io.vavr.collection.Map;
 @EnabledIfEnvironmentVariable(named = "TEST_DATABASE", matches = "POSTGRES")
 public class PostgresSchemaAccess_IntegrationTest {
 
-    final PostgresSchemaAccess subject = new PostgresSchemaAccess(PostgresTestDB.jdbc, PostgresTestDB.schema);
+    final PostgresSchemaAccess subject = new PostgresSchemaAccess(TestDB.jdbc, TestDB.schema);
 
     @BeforeAll
     static void setup() {
-        PostgresTestDB.setup();
+        TestDB.setup();
     }
 
     @Test
@@ -29,7 +29,7 @@ public class PostgresSchemaAccess_IntegrationTest {
         String result = subject.getSchemaName();
 
         // Verify
-        assertEquals(PostgresTestDB.schema, result);
+        assertEquals(TestDB.schema, result);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class PostgresSchemaAccess_IntegrationTest {
         Map<String, List<ColumnInfo>> result = subject.getAllTables();
 
         // Verify
-        assertEquals(PostgresTestData.ALL_TABLES, result);
+        assertEquals(TestSchema.ALL_TABLES, result);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class PostgresSchemaAccess_IntegrationTest {
         List<PrimaryKey> result = subject.getAllPrimaryKeys();
 
         // Verify
-        assertEquals(PostgresTestData.ALL_PRIMARY_KEYS, result.sortBy(p -> p.name));
+        assertEquals(TestSchema.ALL_PRIMARY_KEYS, result.sortBy(p -> p.name));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class PostgresSchemaAccess_IntegrationTest {
         List<ForeignKey> result = subject.getAllForeignKeys();
 
         // Verify
-        assertEquals(PostgresTestData.ALL_FOREIGN_KEYS, result.sortBy(f -> f.name));
+        assertEquals(TestSchema.ALL_FOREIGN_KEYS, result.sortBy(f -> f.name));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class PostgresSchemaAccess_IntegrationTest {
         Schema result = Schema.from(subject);
 
         // Verify
-        assertEquals(new Schema(PostgresTestDB.schema, PostgresTestData.ALL_TABLE_INFO_MAP), result);
+        assertEquals(new Schema(TestDB.schema, TestSchema.ALL_TABLE_INFO_MAP), result);
     }
 
 }

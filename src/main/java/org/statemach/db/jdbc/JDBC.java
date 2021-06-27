@@ -62,6 +62,19 @@ public class JDBC {
         execute(statement, ps -> inject.set(ps, 1));
     }
 
+    public <E extends Exception> int update(String statement, ConsumerEx<PreparedStatement, E> stuffing) {
+        return call(c -> {
+            try (PreparedStatement ps = c.prepareStatement(statement)) {
+                stuffing.accept(ps);
+                return ps.executeUpdate();
+            }
+        });
+    }
+
+    public <E extends Exception> int update(String statement, Inject inject) {
+        return update(statement, ps -> inject.set(ps, 1));
+    }
+
     public <R, E extends Exception> List<R> query(Connection connection,
                                                   String statement,
                                                   ConsumerEx<PreparedStatement, E> stuffing,

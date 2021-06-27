@@ -4,24 +4,37 @@ import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
 
 import io.vavr.collection.Map;
+import io.vavr.control.Option;
 
 public interface DataAccess {
 
-    public Map<String, Object> insert(String table,
-                                      Map<String, Inject> values,
-                                      Map<String, Extract<?>> returning);
+    void insert(String table, Map<String, Inject> values);
 
-    public Map<String, Object> merge(String table,
-                                     Map<String, Inject> primaryKey,
-                                     Map<String, Inject> values,
-                                     Map<String, Extract<?>> returning);
+    void merge(String table, Map<String, Inject> primaryKey, Map<String, Inject> values);
 
-    public Map<String, Object> update(String table,
-                                      Map<String, Inject> primaryKey,
-                                      Map<String, Inject> values,
-                                      Map<String, Extract<?>> returning);
+    boolean update(String table, Map<String, Inject> primaryKey, Map<String, Inject> values);
 
-    public Map<String, Object> delete(String table,
-                                      Map<String, Inject> primaryKey,
-                                      Map<String, Extract<?>> returning);
+    boolean delete(String table, Map<String, Inject> primaryKey);
+
+    Map<String, Object> insert(String table,
+                               Map<String, Inject> values,
+                               Map<String, Extract<?>> returning);
+
+    Map<String, Object> merge(String table,
+                              Map<String, Inject> primaryKey,
+                              Map<String, Inject> values,
+                              Map<String, Extract<?>> returning);
+
+    Option<Map<String, Object>> update(String table,
+                                       Map<String, Inject> primaryKey,
+                                       Map<String, Inject> values,
+                                       Map<String, Extract<?>> returning);
+
+    Option<Map<String, Object>> delete(String table,
+                                       Map<String, Inject> primaryKey,
+                                       Map<String, Extract<?>> returning);
+
+    Option<Map<String, Object>> select(String table,
+                                       Map<String, Inject> primaryKey,
+                                       Map<String, Extract<?>> returning);
 }

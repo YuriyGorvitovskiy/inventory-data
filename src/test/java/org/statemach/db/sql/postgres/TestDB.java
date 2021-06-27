@@ -2,6 +2,8 @@ package org.statemach.db.sql.postgres;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.statemach.db.jdbc.JDBC;
+import org.statemach.db.schema.TableInfo;
+import org.statemach.db.sql.DataAccess;
 import org.statemach.util.Java;
 
 import io.vavr.Tuple2;
@@ -9,7 +11,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
-public class PostgresTestDB {
+public class TestDB {
 
     static interface Config {
         static final String DB_ADDRESS  = "TEST_DB_ADDRESS";
@@ -33,13 +35,14 @@ public class PostgresTestDB {
         static final String DROP_SCHEMA                = Java.resource("DropSchema.sql");
         static final String INSERT_PRODUCT_VERSION     = Java.resource("InsertProductVersion.sql");
         static final String SELECT_PRODUCT_VERSION     = Java.resource("SelectProductVersion.sql");
-
+        static final String TRUNCATE                   = Java.resource("TruncateTable.sql");
     }
 
     public final static Map<String, String> config  = HashMap.ofAll(System.getenv());
     public final static BasicDataSource     pool    = createDBConnectionPool();
     public final static JDBC                jdbc    = new JDBC(pool);
     public final static String              schema  = config.getOrElse(Config.DB_SCHEMA, "test").toLowerCase();
+    public final static DataAccess          da      = new PostgresDataAccess(jdbc, schema);
     public final static String              product = "inventory-data";
     public final static String              version = "0.0.5";
 
@@ -103,5 +106,77 @@ public class PostgresTestDB {
             ps.setString(1, product);
             ps.setString(2, version);
         });
+    }
+
+    static void truncateAll() {
+        jdbc.execute(Java.format(SQL.TRUNCATE, schema, TestSchema.TABLE_NAME_FIRST), ps -> {});
+        jdbc.execute(Java.format(SQL.TRUNCATE, schema, TestSchema.TABLE_NAME_SECOND), ps -> {});
+        jdbc.execute(Java.format(SQL.TRUNCATE, schema, TestSchema.TABLE_NAME_THIRD), ps -> {});
+    }
+
+    static void insert(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
+        da.insert(table.name, TestData.toInject(table, pk.merge(values)));
+    }
+
+    static void update(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
+        da.update(table.name,
+                TestData.toInject(table, pk),
+                TestData.toInject(table, values));
+    }
+
+    static void merge(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
+        da.merge(table.name,
+                TestData.toInject(table, pk),
+                TestData.toInject(table, values));
+    }
+
+    static void insertAll() {
+        insert(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_1_PK, TestData.FIRST_ROW_1_VAL);
+        insert(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_2_PK, TestData.FIRST_ROW_2_VAL);
+        insert(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_3_PK, TestData.FIRST_ROW_3_VAL);
+
+        insert(TestSchema.TABLE_INFO_SECOND, TestData.SECOND_ROW_1_PK, TestData.SECOND_ROW_1_VAL);
+        insert(TestSchema.TABLE_INFO_SECOND, TestData.SECOND_ROW_2_PK, TestData.SECOND_ROW_2_VAL);
+        insert(TestSchema.TABLE_INFO_SECOND, TestData.SECOND_ROW_3_PK, TestData.SECOND_ROW_3_VAL);
+
+        insert(TestSchema.TABLE_INFO_THIRD, TestData.THIRD_ROW_1_PK, TestData.THIRD_ROW_1_VAL);
+        insert(TestSchema.TABLE_INFO_THIRD, TestData.THIRD_ROW_2_PK, TestData.THIRD_ROW_2_VAL);
+        insert(TestSchema.TABLE_INFO_THIRD, TestData.THIRD_ROW_3_PK, TestData.THIRD_ROW_3_VAL);
+
+        update(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_1_PK, TestData.FIRST_ROW_1_REF);
+        update(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_2_PK, TestData.FIRST_ROW_2_REF);
+        update(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_3_PK, TestData.FIRST_ROW_3_REF);
+
+        update(TestSchema.TABLE_INFO_SECOND, TestData.SECOND_ROW_1_PK, TestData.SECOND_ROW_1_REF);
+        update(TestSchema.TABLE_INFO_SECOND, TestData.SECOND_ROW_2_PK, TestData.SECOND_ROW_2_REF);
+        update(TestSchema.TABLE_INFO_SECOND, TestData.SECOND_ROW_3_PK, TestData.SECOND_ROW_3_REF);
+
+        update(TestSchema.TABLE_INFO_THIRD, TestData.THIRD_ROW_1_PK, TestData.THIRD_ROW_1_REF);
+        update(TestSchema.TABLE_INFO_THIRD, TestData.THIRD_ROW_2_PK, TestData.THIRD_ROW_2_REF);
+        update(TestSchema.TABLE_INFO_THIRD, TestData.THIRD_ROW_3_PK, TestData.THIRD_ROW_3_REF);
+    }
+
+    static void updateAllTablesRow1() {
+        update(TestSchema.TABLE_INFO_FIRST,
+                TestData.FIRST_ROW_1_PK,
+                TestData.FIRST_ROW_1_VAL.merge(TestData.FIRST_ROW_1_REF));
+        update(TestSchema.TABLE_INFO_SECOND,
+                TestData.SECOND_ROW_1_PK,
+                TestData.SECOND_ROW_1_VAL.merge(TestData.SECOND_ROW_1_REF));
+        update(TestSchema.TABLE_INFO_THIRD,
+                TestData.THIRD_ROW_1_PK,
+                TestData.THIRD_ROW_1_VAL.merge(TestData.THIRD_ROW_1_REF));
+    }
+
+    static void restoreAllTablesRow2() {
+        merge(TestSchema.TABLE_INFO_FIRST,
+                TestData.FIRST_ROW_2_PK,
+                TestData.FIRST_ROW_2_VAL.merge(TestData.FIRST_ROW_2_REF));
+        merge(TestSchema.TABLE_INFO_SECOND,
+                TestData.SECOND_ROW_2_PK,
+                TestData.SECOND_ROW_2_VAL.merge(TestData.SECOND_ROW_2_REF));
+        merge(TestSchema.TABLE_INFO_THIRD,
+                TestData.THIRD_ROW_2_PK,
+                TestData.THIRD_ROW_2_VAL.merge(TestData.THIRD_ROW_2_REF));
     }
 }

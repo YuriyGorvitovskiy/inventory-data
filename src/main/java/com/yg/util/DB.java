@@ -231,6 +231,15 @@ public interface DB {
         });
     }
 
+    static <E extends Exception> int update(String statement, ConsumerEx<PreparedStatement, E> p) {
+        return call(c -> {
+            try (PreparedStatement ps = c.prepareStatement(statement)) {
+                p.accept(ps);
+                return ps.executeUpdate();
+            }
+        });
+    }
+
     static <R, E extends SQLException> List<R> query(String statement,
                                                      ConsumerEx<PreparedStatement, E> prep,
                                                      FunctionEx<ResultSet, R, E> row) {
