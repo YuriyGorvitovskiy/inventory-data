@@ -184,7 +184,7 @@ public interface TestData {
     static final Map<String, Object> SECOND_ROW_3_REF = HashMap.ofEntries(
             new Tuple2<>(TestSchema.COLUMN_SECOND_FIRST.name, null),
             new Tuple2<>(TestSchema.COLUMN_SECOND_ONE.name, SECOND_ROW_3_ID),
-            new Tuple2<>(TestSchema.COLUMN_SECOND_TWO.name, SECOND_ROW_1_ID),
+            new Tuple2<>(TestSchema.COLUMN_SECOND_TWO.name, null),
             new Tuple2<>(TestSchema.COLUMN_SECOND_THIRD_NAME.name, null),
             new Tuple2<>(TestSchema.COLUMN_SECOND_THIRD_INDX.name, null));
 

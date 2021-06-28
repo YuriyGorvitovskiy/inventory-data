@@ -93,11 +93,21 @@ public interface Inject {
         .apply(null == v ? null : Integer.parseInt(v));
     static final Function<String, Inject>             STRING_AS_LONG        = (v) -> LONG
         .apply(null == v ? null : Long.parseLong(v));
-    static final Function<String, Inject>             STRING_AS_UUID_OBJECT = (v) -> UUID_AS_OBJECT.apply(UUID.fromString(v));
-    static final Function<String, Inject>             VOID                  = (v) -> (ps, i) -> i;
+    static final Function<String, Inject>             STRING_AS_UUID_OBJECT = (v) -> (ps, i) -> {
+                                                                                if (null == v) {
+                                                                                    ps.setNull(i, Types.OTHER);
+                                                                                } else {
+                                                                                    ps.setObject(i, UUID.fromString(v));
+                                                                                }
+                                                                                return i + 1;
+                                                                            };
+
+    static final Function<String, Inject> VOID = (v) -> (ps, i) -> i;
 
     /// return next position
-    int set(PreparedStatement ps, int pos) throws SQLException;
+    int set(
+            PreparedStatement ps,
+            int pos) throws SQLException;
 
     @SafeVarargs
     static int inject(PreparedStatement ps, int pos, Traversable<Tuple2<String, Inject>>... portions) {
