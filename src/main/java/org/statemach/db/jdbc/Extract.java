@@ -11,6 +11,7 @@ import org.statemach.util.Json;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.Map;
+import io.vavr.collection.Traversable;
 
 @FunctionalInterface
 public interface Extract<T> {
@@ -60,7 +61,7 @@ public interface Extract<T> {
 
     static Map<String, Object> extract(ResultSet rs,
                                        int pos,
-                                       Map<String, Extract<?>> extracts) {
+                                       Traversable<Tuple2<String, Extract<?>>> extracts) {
         // We should force toMap() call at the end, to collect all records
         // Otherwise this stream will be lazy, and
         // ResultSet.next() will be called before all fields read

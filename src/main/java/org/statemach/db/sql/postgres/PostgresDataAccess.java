@@ -5,8 +5,12 @@ import org.statemach.db.jdbc.Inject;
 import org.statemach.db.jdbc.JDBC;
 import org.statemach.db.sql.DataAccess;
 import org.statemach.db.sql.SQL;
+import org.statemach.db.sql.SQLBuilder;
+import org.statemach.db.sql.View;
 import org.statemach.util.Java;
 
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
 
@@ -18,12 +22,19 @@ public class PostgresDataAccess implements DataAccess {
     static final String DELETE = Java.resource("Delete.sql");
     static final String SELECT = Java.resource("Select.sql");
 
-    public final JDBC   jdbc;
-    public final String schema;
+    public final JDBC               jdbc;
+    public final String             schema;
+    public final PostgresSQLBuilder builder;
 
-    public PostgresDataAccess(JDBC jdbc, String schema) {
+    public PostgresDataAccess(JDBC jdbc, String schema, PostgresSQLBuilder builder) {
         this.jdbc = jdbc;
         this.schema = schema;
+        this.builder = builder;
+    }
+
+    @Override
+    public SQLBuilder builder() {
+        return builder;
     }
 
     @Override
@@ -35,7 +46,7 @@ public class PostgresDataAccess implements DataAccess {
                 Java.repeat(SQL.PARAM, SQL.COMMA, values.size()),
                 "");
 
-        jdbc.execute(sql, ps -> Inject.inject(ps, 1, values));
+        jdbc.execute(sql, ps -> Inject.inject(ps, 1, values.values()));
     }
 
     @Override
@@ -50,7 +61,7 @@ public class PostgresDataAccess implements DataAccess {
                 SQL.RETURNING + returning.map(t -> t._1).mkString(SQL.COMMA));
 
         return jdbc.query(sql,
-                ps -> Inject.inject(ps, 1, values),
+                ps -> Inject.inject(ps, 1, values.values()),
                 rs -> Extract.extract(rs, 1, returning))
             .get();
     }
@@ -67,7 +78,7 @@ public class PostgresDataAccess implements DataAccess {
                 values.map(t -> t._1 + SQL.EQUAL + SQL.PARAM).mkString(SQL.COMMA),
                 "");
 
-        jdbc.execute(sql, ps -> Inject.inject(ps, 1, insert.appendAll(values)));
+        jdbc.execute(sql, ps -> Inject.inject(ps, 1, insert.appendAll(values).map(t -> t._2)));
     }
 
     @Override
@@ -86,7 +97,7 @@ public class PostgresDataAccess implements DataAccess {
                 SQL.RETURNING + returning.map(t -> t._1).mkString(SQL.COMMA));
 
         return jdbc.query(sql,
-                ps -> Inject.inject(ps, 1, insert.appendAll(values)),
+                ps -> Inject.inject(ps, 1, insert.appendAll(values).map(t -> t._2)),
                 rs -> Extract.extract(rs, 1, returning))
             .get();
     }
@@ -102,7 +113,7 @@ public class PostgresDataAccess implements DataAccess {
                 primaryKey.map(t -> t._1 + SQL.EQUAL + SQL.PARAM).mkString(SQL.AND),
                 "");
 
-        return 0 != jdbc.update(sql, ps -> Inject.inject(ps, 1, values.toList().appendAll(primaryKey)));
+        return 0 != jdbc.update(sql, ps -> Inject.inject(ps, 1, values.values().appendAll(primaryKey.values())));
     }
 
     @Override
@@ -118,7 +129,7 @@ public class PostgresDataAccess implements DataAccess {
                 SQL.RETURNING + returning.map(t -> t._1).mkString(SQL.COMMA));
 
         return jdbc.query(sql,
-                ps -> Inject.inject(ps, 1, values.toList().appendAll(primaryKey)),
+                ps -> Inject.inject(ps, 1, values.values().appendAll(primaryKey.values())),
                 rs -> Extract.extract(rs, 1, returning))
             .peekOption();
     }
@@ -131,7 +142,7 @@ public class PostgresDataAccess implements DataAccess {
                 primaryKey.map(t -> t._1 + SQL.EQUAL + SQL.PARAM).mkString(SQL.AND),
                 "");
 
-        return 0 != jdbc.update(sql, ps -> Inject.inject(ps, 1, primaryKey));
+        return 0 != jdbc.update(sql, ps -> Inject.inject(ps, 1, primaryKey.values()));
     }
 
     @Override
@@ -145,7 +156,7 @@ public class PostgresDataAccess implements DataAccess {
                 SQL.RETURNING + returning.map(t -> t._1).mkString(SQL.COMMA));
 
         return jdbc.query(sql,
-                ps -> Inject.inject(ps, 1, primaryKey),
+                ps -> Inject.inject(ps, 1, primaryKey.values()),
                 rs -> Extract.extract(rs, 1, returning))
             .peekOption();
     }
@@ -161,8 +172,19 @@ public class PostgresDataAccess implements DataAccess {
                 returning.map(t -> t._1).mkString(SQL.COMMA));
 
         return jdbc.query(sql,
-                ps -> Inject.inject(ps, 1, primaryKey),
+                ps -> Inject.inject(ps, 1, primaryKey.values()),
                 rs -> Extract.extract(rs, 1, returning))
             .peekOption();
+    }
+
+    @Override
+    public List<Map<String, Object>> query(List<View<String>> commonTableExpressions,
+                                           View<Tuple2<String, Extract<?>>> query) {
+        String                           sql     = builder.querySql(commonTableExpressions, query);
+        List<Inject>                     injects = commonTableExpressions.flatMap(View::injects).appendAll(query.injects());
+        List<Tuple2<String, Extract<?>>> extract = query.select.map(c -> c._1);
+        return jdbc.query(sql,
+                ps -> Inject.inject(ps, 1, injects),
+                rs -> Extract.extract(rs, 1, extract));
     }
 }

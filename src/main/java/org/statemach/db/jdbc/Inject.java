@@ -9,12 +9,10 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.statemach.db.schema.DataType;
 import org.statemach.util.Java;
 import org.statemach.util.Json;
 
-import com.yg.util.DB.DataType;
-
-import io.vavr.Tuple2;
 import io.vavr.collection.Seq;
 import io.vavr.collection.Traversable;
 
@@ -26,8 +24,7 @@ public interface Inject {
                                                                                 else
                                                                                     ps.setArray(i,
                                                                                             ps.getConnection().createArrayOf(
-                                                                                                    DataType.TO_DB_NAME.get(t)
-                                                                                                        .get(),
+                                                                                                    t.name,
                                                                                                     v.toJavaArray()));
                                                                                 return i + 1;
                                                                             };
@@ -102,19 +99,21 @@ public interface Inject {
                                                                                 return i + 1;
                                                                             };
 
-    static final Function<String, Inject> VOID = (v) -> (ps, i) -> i;
+    static final Inject NOTHING = (ps, i) -> i;
 
-    /// return next position
-    int set(
-            PreparedStatement ps,
-            int pos) throws SQLException;
+    /// Return next position
+    int set(PreparedStatement ps, int pos) throws SQLException;
 
     @SafeVarargs
-    static int inject(PreparedStatement ps, int pos, Traversable<Tuple2<String, Inject>>... portions) {
-        for (Traversable<Tuple2<String, Inject>> portion : portions) {
-            pos = portion.foldLeft(pos, (i, t) -> Java.soft(() -> t._2.set(ps, i)));
+    static int inject(PreparedStatement ps, int pos, Traversable<Inject>... portions) {
+        for (Traversable<Inject> portion : portions) {
+            pos = portion.foldLeft(pos, (i, j) -> Java.soft(() -> j.set(ps, i)));
         }
         return pos;
+    }
+
+    static Inject fold(Seq<Inject> injects) {
+        return injects.foldLeft(Inject.NOTHING, (f, j) -> (ps, i) -> j.set(ps, f.set(ps, i)));
     }
 
     @SuppressWarnings("unchecked")

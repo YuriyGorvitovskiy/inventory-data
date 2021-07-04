@@ -3,10 +3,14 @@ package org.statemach.db.sql;
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
 
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
 
 public interface DataAccess {
+
+    SQLBuilder builder();
 
     void insert(String table, Map<String, Inject> values);
 
@@ -37,4 +41,7 @@ public interface DataAccess {
     Option<Map<String, Object>> select(String table,
                                        Map<String, Inject> primaryKey,
                                        Map<String, Extract<?>> returning);
+
+    List<Map<String, Object>> query(List<View<String>> commonTableExpressions,
+                                    View<Tuple2<String, Extract<?>>> query);
 }
