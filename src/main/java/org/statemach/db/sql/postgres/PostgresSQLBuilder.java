@@ -16,6 +16,7 @@ import org.statemach.util.NodeLinkTree;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
+import io.vavr.collection.Set;
 
 public class PostgresSQLBuilder implements SQLBuilder {
 
@@ -97,29 +98,30 @@ public class PostgresSQLBuilder implements SQLBuilder {
     }
 
     String querySql(List<View<String>> commonTableExpressions, View<Tuple2<String, Extract<?>>> query) {
-        StringBuilder sb     = new StringBuilder();
-        int           indent = 0;
+        StringBuilder sb       = new StringBuilder();
+        int           indent   = 0;
+        Set<String>   cteNames = commonTableExpressions.map(c -> c.name).toSet();
         if (!commonTableExpressions.isEmpty()) {
             sb.append(SQL.WITH);
-            sb.append(commonTableExpressions.map(v -> commonTableExrpressionSql(v, 1)).mkString(SQL.COMMA));
+            sb.append(commonTableExpressions.map(v -> commonTableExrpressionSql(v, cteNames, 1)).mkString(SQL.COMMA));
             sb.append(SQL.NEXT_LINE);
             indent = 1;
         }
-        sb.append(viewSql(query, indent));
+        sb.append(viewSql(query, cteNames, indent));
         return sb.toString();
     }
 
-    String commonTableExrpressionSql(View<String> v, int indentLength) {
+    String commonTableExrpressionSql(View<String> v, Set<String> cteNames, int indentLength) {
         return v.name +
                 SQL.SPACE +
                 v.select.map(c -> c._1).mkString(SQL.OPEN, SQL.COMMA, SQL.CLOSE) +
                 SQL.NEXT_LINE +
-                viewSql(v, indentLength + 1) +
+                viewSql(v, cteNames, indentLength + 1) +
                 Java.repeat(SQL.INDENT, indentLength) +
                 SQL.CLOSE;
     }
 
-    String viewSql(View<?> v, int indentLength) {
+    String viewSql(View<?> v, Set<String> cteNames, int indentLength) {
         String indent = Java.repeat(SQL.INDENT, indentLength);
 
         StringBuilder sb = new StringBuilder()
@@ -134,7 +136,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
             .append(SQL.NEXT_LINE);
 
         indent = indent + SQL.INDENT;
-        joinSql(v.joins, indent);
+        joinSql(v.joins, cteNames, sb, indent);
         if (Condition.NONE != v.where) {
             sb.append(indent)
                 .append(SQL.WHERE)
@@ -162,10 +164,10 @@ public class PostgresSQLBuilder implements SQLBuilder {
         return sb.toString();
     }
 
-    String joinSql(NodeLinkTree<String, From, Join> joins, String indent) {
-        StringBuilder sb = new StringBuilder()
-            .append(indent)
+    StringBuilder joinSql(NodeLinkTree<String, From, Join> joins, Set<String> cteNames, StringBuilder sb, String indent) {
+        sb.append(indent)
             .append(SQL.FROM)
+            .append(cteNames.contains(joins.getNode().table) ? "" : schema + SQL.DOT)
             .append(joins.getNode().table)
             .append(SQL.SPACE)
             .append(joins.getNode().alias)
@@ -173,13 +175,17 @@ public class PostgresSQLBuilder implements SQLBuilder {
 
         return joins.links
             .values()
-            .foldLeft(sb, (s, c) -> joinSql(c._1, c._2, s, indent))
-            .toString();
+            .foldLeft(sb, (s, c) -> joinSql(c._1, c._2, cteNames, s, indent));
     }
 
-    StringBuilder joinSql(Join join, NodeLinkTree<String, From, Join> right, StringBuilder sb, String indent) {
+    StringBuilder joinSql(Join join,
+                          NodeLinkTree<String, From, Join> right,
+                          Set<String> cteNames,
+                          StringBuilder sb,
+                          String indent) {
         sb.append(indent)
             .append(join.kind.sql)
+            .append(cteNames.contains(right.getNode().table) ? "" : schema + SQL.DOT)
             .append(right.getNode().table)
             .append(SQL.SPACE)
             .append(right.getNode().alias)
@@ -189,7 +195,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
 
         return right.links
             .values()
-            .foldLeft(sb, (s, c) -> joinSql(c._1, c._2, sb, indent));
+            .foldLeft(sb, (s, c) -> joinSql(c._1, c._2, cteNames, sb, indent));
     }
 
 }

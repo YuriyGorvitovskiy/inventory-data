@@ -42,7 +42,7 @@ public class TestDB {
     public final static BasicDataSource     pool    = createDBConnectionPool();
     public final static JDBC                jdbc    = new JDBC(pool);
     public final static String              schema  = config.getOrElse(Config.DB_SCHEMA, "test").toLowerCase();
-    public final static DataAccess          da      = new PostgresDataAccess(jdbc, schema);
+    public final static DataAccess          da      = new PostgresDataAccess(jdbc, schema, new PostgresSQLBuilder(schema));
     public final static String              product = "inventory-data";
     public final static String              version = "0.0.5";
 

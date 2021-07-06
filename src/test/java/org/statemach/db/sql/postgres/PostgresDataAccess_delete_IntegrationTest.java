@@ -17,7 +17,10 @@ import io.vavr.control.Option;
 @EnabledIfEnvironmentVariable(named = "TEST_DATABASE", matches = "POSTGRES")
 public class PostgresDataAccess_delete_IntegrationTest {
 
-    final PostgresDataAccess subject = new PostgresDataAccess(TestDB.jdbc, TestDB.schema);
+    final PostgresDataAccess subject = new PostgresDataAccess(
+            TestDB.jdbc,
+            TestDB.schema,
+            new PostgresSQLBuilder(TestDB.schema));
 
     @BeforeAll
     static void setup() {
