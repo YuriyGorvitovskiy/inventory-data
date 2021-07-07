@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
-import io.vavr.collection.HashMap;
+import io.vavr.collection.LinkedHashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
@@ -14,11 +14,11 @@ import io.vavr.control.Option;
 
 public class NodeLinkTree<K, N, L> {
 
-    public final N                                node;
+    public final N                                        node;
     public final Map<K, Tuple2<L, NodeLinkTree<K, N, L>>> links;
 
     public static <K, N, L> NodeLinkTree<K, N, L> of(N node) {
-        return new NodeLinkTree<>(node, HashMap.empty());
+        return new NodeLinkTree<>(node, LinkedHashMap.empty());
     }
 
     public static <K, N, L> NodeLinkTree<K, N, L> of(N node, Map<K, Tuple2<L, NodeLinkTree<K, N, L>>> links) {
@@ -33,10 +33,10 @@ public class NodeLinkTree<K, N, L> {
         if (path.isEmpty()) {
             return of(node);
         }
-        K             key     = path.get();
-        Tuple2<L, N>  created = createLinkWithNode.apply(node, key);
+        K                     key     = path.get();
+        Tuple2<L, N>          created = createLinkWithNode.apply(node, key);
         NodeLinkTree<K, N, L> child   = of(created._2, path.drop(1), createLinkWithNode);
-        return of(node, HashMap.of(key, new Tuple2<>(created._1, child)));
+        return of(node, LinkedHashMap.of(key, new Tuple2<>(created._1, child)));
     }
 
     NodeLinkTree(N node, Map<K, Tuple2<L, NodeLinkTree<K, N, L>>> links) {
@@ -153,7 +153,7 @@ public class NodeLinkTree<K, N, L> {
 
         Option<Tuple2<L, NodeLinkTree<K, N, L>>> childLink = links.get(key);
         if (childLink.isEmpty()) {
-            Tuple2<L, N>  created   = createMissingLinkWithNode.apply(node, key);
+            Tuple2<L, N>          created   = createMissingLinkWithNode.apply(node, key);
             NodeLinkTree<K, N, L> childTree = of(created._2, path, createMissingLinkWithNode);
             return this.put(key, created._1, childTree);
         }
@@ -164,7 +164,8 @@ public class NodeLinkTree<K, N, L> {
                 : this.put(key, childLink.get()._1, childTree);
     }
 
-    public NodeLinkTree<K, N, L> merge(NodeLinkTree<K, N, L> that, BiFunction<N, N, N> nodeCollision, BiFunction<L, L, L> linkCollision) {
+    public NodeLinkTree<K, N, L> merge(NodeLinkTree<K, N, L> that, BiFunction<N, N, N> nodeCollision,
+                                       BiFunction<L, L, L> linkCollision) {
         N   newNode  = nodeCollision.apply(this.node, that.node);
         var newLinks = this.links.merge(that.links,
                 (l, r) -> null == l ? r
