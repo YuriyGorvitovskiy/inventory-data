@@ -115,7 +115,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
         return v.name +
                 SQL.SPACE +
                 v.select.map(c -> c._1).mkString(SQL.OPEN, SQL.COMMA, SQL.CLOSE) +
-                SQL.NEXT_LINE +
+                SQL.AS_OPEN + SQL.NEXT_LINE +
                 viewSql(v, cteNames, indentLength + 1) +
                 Java.repeat(SQL.INDENT, indentLength) +
                 SQL.CLOSE;
@@ -140,7 +140,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
         if (Condition.NONE != v.where) {
             sb.append(indent)
                 .append(SQL.WHERE)
-                .append(v.where)
+                .append(v.where.sql)
                 .append(SQL.NEXT_LINE);
         }
         if (!v.order.isEmpty()) {

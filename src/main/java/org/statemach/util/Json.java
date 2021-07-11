@@ -1,10 +1,7 @@
 package org.statemach.util;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.TimeZone;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -25,12 +22,6 @@ public interface Json {
         return Java.soft(() -> {
             return Json.MAPPER.readValue(input, type);
         });
-    }
-
-    static DateFormat newISO8601Format() {
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return format;
     }
 
     static String toISO8601(Instant v) {

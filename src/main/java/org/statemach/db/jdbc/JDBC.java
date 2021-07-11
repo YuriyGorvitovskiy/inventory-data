@@ -38,17 +38,6 @@ public class JDBC {
         });
     }
 
-    public <E extends Exception> void execute(Connection connection,
-                                              String statement,
-                                              ConsumerEx<PreparedStatement, E> stuffing) {
-        run(c -> {
-            try (PreparedStatement ps = connection.prepareStatement(statement)) {
-                stuffing.accept(ps);
-                ps.execute();
-            }
-        });
-    }
-
     public <E extends Exception> void execute(String statement, ConsumerEx<PreparedStatement, E> stuffing) {
         run(c -> {
             try (PreparedStatement ps = c.prepareStatement(statement)) {
@@ -58,10 +47,6 @@ public class JDBC {
         });
     }
 
-    public <E extends Exception> void execute(String statement, Inject inject) {
-        execute(statement, ps -> inject.set(ps, 1));
-    }
-
     public <E extends Exception> int update(String statement, ConsumerEx<PreparedStatement, E> stuffing) {
         return call(c -> {
             try (PreparedStatement ps = c.prepareStatement(statement)) {
@@ -69,10 +54,6 @@ public class JDBC {
                 return ps.executeUpdate();
             }
         });
-    }
-
-    public <E extends Exception> int update(String statement, Inject inject) {
-        return update(statement, ps -> inject.set(ps, 1));
     }
 
     public <R, E extends Exception> List<R> query(Connection connection,
@@ -94,10 +75,6 @@ public class JDBC {
                                                   ConsumerEx<PreparedStatement, E> stuffing,
                                                   FunctionEx<ResultSet, R, E> extractor) {
         return call(c -> query(c, statement, stuffing, extractor));
-    }
-
-    public <R, E extends Exception> List<R> query(String statement, Inject inject, Extract<R> extract) {
-        return call(c -> query(c, statement, ps -> inject.set(ps, 1), rs -> extract.get(rs, 1)));
     }
 
 }

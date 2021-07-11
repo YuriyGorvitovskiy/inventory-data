@@ -108,7 +108,7 @@ public interface Rest {
 
     static Map<String, List<String>> queryParams(HttpExchange exchange) {
         URI uri = exchange.getRequestURI();
-        return Stream.of(Java.toString(uri.getQuery()).split("&"))
+        return Stream.of(Java.toStringOrEmpty(uri.getQuery()).split("&"))
             .map(p -> p.split("=", 2))
             .filter(p -> !p[0].isEmpty())
             .groupBy(a -> a[0])

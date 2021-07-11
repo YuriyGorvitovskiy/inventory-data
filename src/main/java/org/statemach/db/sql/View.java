@@ -34,10 +34,6 @@ public class View<T> {
         this.limit = limit;
     }
 
-    public static NodeLinkTree<String, From, Join> alias(String aliasPrefix, NodeLinkTree<String, String, Join> joins) {
-        return joins.mapNodesWithIndex(1, (n, i) -> new From(n, aliasPrefix + i));
-    }
-
     public List<Inject> injects() {
         return injectJoins(joins).append(where.inject);
     }

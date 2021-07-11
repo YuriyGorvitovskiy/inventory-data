@@ -2,12 +2,10 @@ package org.statemach.util;
 
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.StackWalker.StackFrame;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Scanner;
 import java.util.function.Function;
 
@@ -67,7 +65,7 @@ public interface Java {
         return (null == val || 0 == val.length());
     }
 
-    static String toString(Object val) {
+    static String toStringOrEmpty(Object val) {
         return null == val ? "" : val.toString();
     }
 
@@ -78,14 +76,14 @@ public interface Java {
                 pw.flush();
                 return sw.toString();
             }
-        } catch (IOException io) {
+        } catch (Exception io) {
             throw new RuntimeException(io);
         }
     }
 
     static String format(String format, Object... params) {
         return Stream.range(0, params.length)
-            .foldLeft(format, (f, i) -> f.replace("${" + i + "}", toString(params[i])));
+            .foldLeft(format, (f, i) -> f.replace("${" + i + "}", toStringOrEmpty(params[i])));
     }
 
     static String repeat(String repeat, int count) {
@@ -108,10 +106,6 @@ public interface Java {
             }
         }
         return false;
-    }
-
-    static <T> boolean in(T value, List<T> checks) {
-        return checks.contains(value);
     }
 
     public static Option<Boolean> equalsPreCheck(Object a, Object b) {

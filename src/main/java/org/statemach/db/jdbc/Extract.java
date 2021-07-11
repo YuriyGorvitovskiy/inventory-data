@@ -51,7 +51,6 @@ public interface Extract<T> {
                                                                    return null == v ? null : Instant.ofEpochMilli(v.getTime());
                                                                };
     static final Extract<String>         TIMESTAMP_AS_ISO8601  = (rs, i) -> Json.toISO8601(TIMESTAMP_AS_INSTANT.get(rs, i));
-    static final Extract<Void>           VOID                  = (rs, pos) -> null;
 
     T get(ResultSet rs, int pos) throws SQLException;
 
