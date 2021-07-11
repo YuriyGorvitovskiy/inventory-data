@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import graphql.com.google.common.base.Objects;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.collection.HashMap;
@@ -98,8 +99,8 @@ public class NodeLinkTree<K, N, L> {
     }
 
     public NodeLinkTree<K, N, L> setLink(List<K> path, L link) {
-        K key = path.last();
-        path = path.dropRight(1);
+        K key = path.get();
+        path = path.drop(1);
 
         return path.isEmpty()
                 ? setLink(key, link)
@@ -112,8 +113,8 @@ public class NodeLinkTree<K, N, L> {
     }
 
     public NodeLinkTree<K, N, L> setChild(List<K> path, NodeLinkTree<K, N, L> child) {
-        K key = path.last();
-        path = path.dropRight(1);
+        K key = path.get();
+        path = path.drop(1);
 
         return path.isEmpty()
                 ? setChild(key, child)
@@ -238,5 +239,18 @@ public class NodeLinkTree<K, N, L> {
         return new NodeLinkTree<>(
                 node,
                 links.mapValues(v -> new Tuple2<>(mapping.apply(v._1, it.next()), v._2.mapLinksWith(it, mapping))));
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return Java.equalsByFields(this,
+                other,
+                o -> o.node,
+                o -> o.links);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(node, links);
     }
 }
