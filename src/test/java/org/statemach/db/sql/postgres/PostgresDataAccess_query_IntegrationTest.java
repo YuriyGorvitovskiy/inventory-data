@@ -169,13 +169,13 @@ public class PostgresDataAccess_query_IntegrationTest {
                             subject.builder.equal(
                                     new Select<Void>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
                                     new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_FIRST.name, null))),
-                    NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2)))
-            .put(TestSchema.FK_THIRD_SECOND.name,
-                    new Join(Kind.FULL,
-                            subject.builder.equal(
-                                    new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null),
-                                    new Select<Void>(ALIAS_3, TestSchema.COLUMN_THIRD_SECOND.name, null))),
-                    NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_THIRD, ALIAS_3)));
+                    NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2))
+                        .put(TestSchema.FK_THIRD_SECOND.name,
+                                new Join(Kind.FULL,
+                                        subject.builder.equal(
+                                                new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null),
+                                                new Select<Void>(ALIAS_3, TestSchema.COLUMN_THIRD_SECOND.name, null))),
+                                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_THIRD, ALIAS_3))));
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 joins,

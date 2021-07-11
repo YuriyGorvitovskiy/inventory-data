@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
-import io.vavr.collection.LinkedHashMap;
+import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
@@ -18,7 +18,7 @@ public class NodeLinkTree<K, N, L> {
     public final Map<K, Tuple2<L, NodeLinkTree<K, N, L>>> links;
 
     public static <K, N, L> NodeLinkTree<K, N, L> of(N node) {
-        return new NodeLinkTree<>(node, LinkedHashMap.empty());
+        return new NodeLinkTree<>(node, HashMap.empty());
     }
 
     public static <K, N, L> NodeLinkTree<K, N, L> of(N node, Map<K, Tuple2<L, NodeLinkTree<K, N, L>>> links) {
@@ -26,7 +26,7 @@ public class NodeLinkTree<K, N, L> {
     }
 
     public static <K, N, L> NodeLinkTree<K, N, L> of(N node, List<Tuple3<K, L, NodeLinkTree<K, N, L>>> links) {
-        return new NodeLinkTree<>(node, links.toLinkedMap(t -> new Tuple2<>(t._1, new Tuple2<>(t._2, t._3))));
+        return new NodeLinkTree<>(node, links.toMap(t -> new Tuple2<>(t._1, new Tuple2<>(t._2, t._3))));
     }
 
     public static <K, N, L> NodeLinkTree<K, N, L> of(N node, List<K> path, BiFunction<N, K, Tuple2<L, N>> createLinkWithNode) {
@@ -36,7 +36,7 @@ public class NodeLinkTree<K, N, L> {
         K                     key     = path.get();
         Tuple2<L, N>          created = createLinkWithNode.apply(node, key);
         NodeLinkTree<K, N, L> child   = of(created._2, path.drop(1), createLinkWithNode);
-        return of(node, LinkedHashMap.of(key, new Tuple2<>(created._1, child)));
+        return of(node, HashMap.of(key, new Tuple2<>(created._1, child)));
     }
 
     NodeLinkTree(N node, Map<K, Tuple2<L, NodeLinkTree<K, N, L>>> links) {

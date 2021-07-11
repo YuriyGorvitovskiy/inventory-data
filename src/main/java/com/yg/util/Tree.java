@@ -26,7 +26,7 @@ public class Tree<K, N, L> {
     }
 
     public static <K, N, L> Tree<K, N, L> of(N node, List<Tuple3<K, L, Tree<K, N, L>>> links) {
-        return new Tree<>(node, links.toLinkedMap(t -> new Tuple2<>(t._1, new Tuple2<>(t._2, t._3))));
+        return new Tree<>(node, links.toMap(t -> new Tuple2<>(t._1, new Tuple2<>(t._2, t._3))));
     }
 
     public static <K, N, L> Tree<K, N, L> of(N node, List<K> path, BiFunction<N, K, Tuple2<L, N>> createLinkWithNode) {
