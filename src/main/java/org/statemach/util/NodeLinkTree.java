@@ -169,11 +169,9 @@ public class NodeLinkTree<K, N, L> {
                                        BiFunction<L, L, L> linkCollision) {
         N   newNode  = nodeCollision.apply(this.node, that.node);
         var newLinks = this.links.merge(that.links,
-                (l, r) -> null == l ? r
-                        : null == r ? l
-                                : new Tuple2<>(
-                                        linkCollision.apply(l._1, r._1),
-                                        l._2.merge(r._2, nodeCollision, linkCollision)));
+                (l, r) -> new Tuple2<>(
+                        linkCollision.apply(l._1, r._1),
+                        l._2.merge(r._2, nodeCollision, linkCollision)));
 
         return of(newNode, newLinks);
     }
@@ -252,5 +250,12 @@ public class NodeLinkTree<K, N, L> {
     @Override
     public int hashCode() {
         return Objects.hashCode(node, links);
+    }
+
+    @Override
+    public String toString() {
+        return "{N: " + node +
+                (links.isEmpty() ? "" : "L: " + links) +
+                "}";
     }
 }
