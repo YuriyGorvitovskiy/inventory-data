@@ -77,15 +77,6 @@ public class NodeLinkTree_UnitTest {
         var node2 = NodeLinkTree.of(2, List.of(new Tuple3<>("b", false, node3)));
         var node1 = NodeLinkTree.of(1, List.of(new Tuple3<>("a", true, node2)));
 
-        var list = List.of(
-                new Tuple3<>("a", true, node2),
-                new Tuple3<>("b", false, node3));
-        var map  = HashMap.of(
-                "a",
-                new Tuple2<>(true, node2),
-                "b",
-                new Tuple2<>(false, node3));
-
         // Execute
         var result = NodeLinkTree.of(1, path, links);
 
@@ -580,7 +571,6 @@ public class NodeLinkTree_UnitTest {
     @Test
     void putIfMissed_key_existing() {
         // Setup
-        var node3   = NodeLinkTree.<String, Integer, Boolean>of(3);
         var node2   = NodeLinkTree.<String, Integer, Boolean>of(2);
         var node1   = NodeLinkTree.<String, Integer, Boolean>of(1);
         var subject = NodeLinkTree.of(0,
