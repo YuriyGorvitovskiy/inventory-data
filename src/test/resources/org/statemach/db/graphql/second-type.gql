@@ -1,0 +1,17 @@
+query {
+    __type(name: "second") {
+        kind
+        name
+        fields {
+            name
+            type {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                }
+            }
+        }
+    }
+}

@@ -26,10 +26,14 @@ public class PostgresDataAccess implements DataAccess {
     public final String             schema;
     public final PostgresSQLBuilder builder;
 
-    public PostgresDataAccess(JDBC jdbc, String schema, PostgresSQLBuilder builder) {
+    PostgresDataAccess(JDBC jdbc, String schema, PostgresSQLBuilder builder) {
         this.jdbc = jdbc;
         this.schema = schema;
         this.builder = builder;
+    }
+
+    public static PostgresDataAccess of(JDBC jdbc, String schema) {
+        return new PostgresDataAccess(jdbc, schema, new PostgresSQLBuilder(schema));
     }
 
     @Override

@@ -5,18 +5,19 @@ import java.util.Objects;
 import org.statemach.util.Java;
 
 import io.vavr.collection.Map;
+import io.vavr.control.Option;
 
 public class TableInfo {
 
     public final String                  name;
     public final Map<String, ColumnInfo> columns;
-    public final PrimaryKey              primary;
+    public final Option<PrimaryKey>      primary;
     public final Map<String, ForeignKey> incoming;
     public final Map<String, ForeignKey> outgoing;
 
     public TableInfo(String name,
                      Map<String, ColumnInfo> columns,
-                     PrimaryKey primary,
+                     Option<PrimaryKey> primary,
                      Map<String, ForeignKey> incoming,
                      Map<String, ForeignKey> outgoing) {
         this.name = name;

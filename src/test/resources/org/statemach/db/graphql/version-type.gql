@@ -1,0 +1,17 @@
+query {
+    __type(name: "version") {
+        kind
+        name
+        fields {
+            name
+            type {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                }
+            }
+        }
+    }
+}

@@ -13,7 +13,7 @@ import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 
-public interface Rest {
+public interface Http {
 
     static interface Header {
         final static String CONTENT_TYPE = "Content-Type";

@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.statemach.db.schema.Schema;
 import org.statemach.db.sql.DataAccess;
 import org.statemach.util.Json;
-import org.statemach.util.Rest;
+import org.statemach.util.Http;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -85,11 +85,11 @@ public class GraphQLHandler implements HttpHandler {
 
     @SuppressWarnings("unchecked")
     void get(HttpExchange exchange) {
-        Map<String, List<String>> params = Rest.queryParams(exchange);
+        Map<String, List<String>> params = Http.queryParams(exchange);
         Input                     input  = new Input();
 
         input.query = params.get(Param.QUERY)
-            .getOrElseThrow(() -> new Rest.Error(Rest.ErrorCode.BAD_REQUEST,
+            .getOrElseThrow(() -> new Http.Error(Http.ErrorCode.BAD_REQUEST,
                     "HTTP GET request should have request parameter '${0}' specified",
                     Param.QUERY))
             .get();
@@ -102,14 +102,14 @@ public class GraphQLHandler implements HttpHandler {
     }
 
     void post(HttpExchange exchange) {
-        Input input = Rest.extract(exchange, Input.class);
+        Input input = Http.extract(exchange, Input.class);
 
         execute(exchange, input);
     }
 
     void execute(HttpExchange exchange, Input input) {
         ExecutionResult result = graphQL.execute(input.buildExecutionInput());
-        Rest.json(exchange, result.toSpecification());
+        Http.json(exchange, result.toSpecification());
     }
 
 }

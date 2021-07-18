@@ -5,10 +5,10 @@ import java.util.function.Function;
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
 import org.statemach.db.schema.ColumnInfo;
+import org.statemach.db.schema.PrimaryKey;
 import org.statemach.db.schema.Schema;
 import org.statemach.db.schema.TableInfo;
 import org.statemach.db.sql.DataAccess;
-import org.statemach.db.sql.postgres.PostgresDataType;
 
 import graphql.Scalars;
 import graphql.schema.DataFetcher;
@@ -57,6 +57,7 @@ public class GraphQLMutation {
         return GraphQLObjectType.newObject()
             .name(MUTATION_TYPE)
             .fields(schema.tables.values()
+                .filter(t -> t.primary.isDefined())
                 .flatMap(this::buildMutationFields)
                 .toJavaList())
             .build();
@@ -64,12 +65,14 @@ public class GraphQLMutation {
 
     public List<GraphQLType> buildAddtionalTypes() {
         return schema.tables.values()
+            .filter(t -> t.primary.isDefined())
             .flatMap(this::buildTypes)
             .toList();
     }
 
     public List<Tuple2<FieldCoordinates, DataFetcher<?>>> buildAllFetchers() {
         return schema.tables.values()
+            .filter(t -> t.primary.isDefined())
             .flatMap(this::buildFetchers)
             .toList();
     }
@@ -160,7 +163,7 @@ public class GraphQLMutation {
         return GraphQLInputObjectType.newInputObject()
             .name(naming.getUpdateTypeName(table.name))
             .fields(table.columns.values()
-                .filter(this::isUpdatableColumn)
+                .filter(c -> isUpdatableColumn(table.primary, c))
                 .map(this::buildMutableField)
                 .toJavaList())
             .build();
@@ -174,11 +177,11 @@ public class GraphQLMutation {
     }
 
     boolean isInsertableColumn(ColumnInfo column) {
-        return PostgresDataType.TSVECTOR != column.type;
+        return mapping.isMutable(column.type);
     }
 
-    boolean isUpdatableColumn(ColumnInfo column) {
-        return isInsertableColumn(column) && ID_COLUMN.equalsIgnoreCase(column.name);
+    boolean isUpdatableColumn(Option<PrimaryKey> pk, ColumnInfo column) {
+        return isInsertableColumn(column) && (pk.isEmpty() || !pk.get().columns.contains(column.name));
     }
 
     java.util.Map<String, Object> fetchInsert(TableInfo table, DataFetchingEnvironment environment) throws Exception {
@@ -207,7 +210,9 @@ public class GraphQLMutation {
     }
 
     Map<String, Inject> primaryKey(TableInfo table, DataFetchingEnvironment environment) {
-        return table.primary.columns.map(c -> columnInject(table, c, environment)).toMap(t -> t);
+        return table.primary.isEmpty()
+                ? HashMap.empty()
+                : table.primary.get().columns.map(c -> columnInject(table, c, environment)).toMap(t -> t);
     }
 
     Tuple2<String, Inject> columnInject(TableInfo table, String columnName, DataFetchingEnvironment environment) {

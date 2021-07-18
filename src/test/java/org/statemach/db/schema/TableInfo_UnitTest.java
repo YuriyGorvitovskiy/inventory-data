@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.control.Option;
 
 public class TableInfo_UnitTest {
 
@@ -31,8 +32,8 @@ public class TableInfo_UnitTest {
     final Map<String, ColumnInfo> COLUMNS_3 = List.of(COLUMN_1, COLUMN_3).toLinkedMap(c -> c.name, c -> c);
     final Map<String, ColumnInfo> COLUMNS_4 = List.of(COLUMN_1).toLinkedMap(c -> c.name, c -> c);
 
-    final PrimaryKey PRIMARY_KEY_1 = new PrimaryKey("PrimaryKey1", TABLE_NAME_1, List.empty());
-    final PrimaryKey PRIMARY_KEY_2 = new PrimaryKey("PrimaryKey2", TABLE_NAME_2, List.empty());
+    final Option<PrimaryKey> PRIMARY_KEY_1 = Option.of(new PrimaryKey("PrimaryKey1", TABLE_NAME_1, List.empty()));
+    final Option<PrimaryKey> PRIMARY_KEY_2 = Option.of(new PrimaryKey("PrimaryKey2", TABLE_NAME_2, List.empty()));
 
     final ForeignKey FOREIGN_KEY_1 = new ForeignKey("ForeignKey1", TABLE_NAME_1, TABLE_NAME_2, List.empty());
     final ForeignKey FOREIGN_KEY_2 = new ForeignKey("ForeignKey2", TABLE_NAME_1, TABLE_NAME_2, List.empty());

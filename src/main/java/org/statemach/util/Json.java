@@ -7,6 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 import io.vavr.jackson.datatype.VavrModule;
 
 public interface Json {
@@ -30,5 +34,36 @@ public interface Json {
 
     static Instant fromISO8601(String v) {
         return null == v ? null : ISO8601_FORMAT.parse(v, Instant::from);
+    }
+
+    @SuppressWarnings("unchecked")
+    static Object alphabetize(Object input) {
+        if (input instanceof Map) {
+            return ((Map<String, Object>) input).toList()
+                .sortBy(t -> t._1)
+                .toLinkedMap(t -> t)
+                .mapValues(Json::alphabetize);
+        }
+        if (input instanceof java.util.Map) {
+            return HashMap.ofAll((java.util.Map<String, Object>) input)
+                .toList()
+                .sortBy(t -> t._1).toLinkedMap(t -> t)
+                .toLinkedMap(t -> t)
+                .mapValues(Json::alphabetize);
+        }
+        if (input instanceof Seq) {
+            return ((Seq<Object>) input)
+                .map(Json::alphabetize)
+                .toList();
+        }
+        if (input instanceof java.util.Collection) {
+            return List.ofAll((java.util.Collection<Object>) input)
+                .map(Json::alphabetize);
+        }
+        return input;
+    }
+
+    static Object readAlphabetize(String json) {
+        return Java.soft(() -> alphabetize(MAPPER.readValue(json, Object.class)));
     }
 }

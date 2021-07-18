@@ -12,6 +12,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.LinkedHashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.control.Option;
 
 public interface TestSchema {
 
@@ -20,9 +21,9 @@ public interface TestSchema {
     static final String TABLE_NAME_THIRD   = "third";
     static final String TABLE_NAME_VERSION = "version";
 
-    static final PrimaryKey PK_FIRST  = new PrimaryKey("pk_first", "first", List.of("id"));
-    static final PrimaryKey PK_SECOND = new PrimaryKey("pk_second", "second", List.of("id"));
-    static final PrimaryKey PK_THIRD  = new PrimaryKey("pk_third", "third", List.of("name", "indx"));
+    static final Option<PrimaryKey> PK_FIRST  = Option.of(new PrimaryKey("pk_first", "first", List.of("id")));
+    static final Option<PrimaryKey> PK_SECOND = Option.of(new PrimaryKey("pk_second", "second", List.of("id")));
+    static final Option<PrimaryKey> PK_THIRD  = Option.of(new PrimaryKey("pk_third", "third", List.of("name", "indx")));
 
     static final ForeignKey FK_FIRST_SECOND      = new ForeignKey("fk_first_second",
             TABLE_NAME_FIRST,
@@ -129,7 +130,7 @@ public interface TestSchema {
             new Tuple2<>(TABLE_NAME_THIRD, THIRD_COLUMNS),
             new Tuple2<>(TABLE_NAME_VERSION, VERSION_COLUMNS));
 
-    static final List<PrimaryKey> ALL_PRIMARY_KEYS = List.of(PK_FIRST, PK_SECOND, PK_THIRD);
+    static final List<PrimaryKey> ALL_PRIMARY_KEYS = List.of(PK_FIRST.get(), PK_SECOND.get(), PK_THIRD.get());
 
     static final List<ForeignKey> ALL_FOREIGN_KEYS = List.of(
             FK_FIRST_SECOND,
@@ -165,7 +166,7 @@ public interface TestSchema {
     static final TableInfo TABLE_INFO_VERSION = new TableInfo(
             TABLE_NAME_VERSION,
             VERSION_COLUMNS.toMap(c -> c.name, c -> c),
-            null,
+            Option.none(),
             HashMap.empty(),
             HashMap.empty());
 

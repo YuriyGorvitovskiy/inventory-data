@@ -7,7 +7,6 @@ import org.statemach.db.schema.TableInfo;
 import org.statemach.db.sql.From;
 import org.statemach.db.sql.Join;
 import org.statemach.db.sql.Select;
-import org.statemach.db.sql.postgres.PostgresDataType;
 import org.statemach.util.NodeLinkTree;
 
 import graphql.Scalars;
@@ -53,8 +52,7 @@ public class GraphQLQueryExtract {
     java.util.List<GraphQLFieldDefinition> buildScalarFields(TableInfo table) {
         return table.columns.values()
             .filter(this::isExtractableColumn)
-            .filter(c -> !table.outgoing.containsKey(c.name))
-            .map(this::buildScalarField)
+            .map(c -> buildScalarField(table, c))
             .toJavaList();
     }
 
@@ -70,10 +68,10 @@ public class GraphQLQueryExtract {
             .toJavaList();
     }
 
-    GraphQLFieldDefinition buildScalarField(ColumnInfo column) {
+    GraphQLFieldDefinition buildScalarField(TableInfo table, ColumnInfo column) {
         return GraphQLFieldDefinition.newFieldDefinition()
             .name(column.name)
-            .type(mapping.scalar(column.type))
+            .type(mapping.scalar(table, column))
             .build();
     }
 
@@ -108,7 +106,7 @@ public class GraphQLQueryExtract {
     }
 
     boolean isExtractableColumn(ColumnInfo column) {
-        return PostgresDataType.TSVECTOR != column.type;
+        return mapping.isExtractable(column.type);
     }
 
     public Tuple2<List<Extract>, List<SubQuery>> parse(TableInfo table,

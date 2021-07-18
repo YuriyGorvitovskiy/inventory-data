@@ -195,7 +195,7 @@ public class GraphQLQuery {
                                                                             List<Filter> filters,
                                                                             List<OrderBy> orders,
                                                                             Tuple2<Long, Integer> skipLimit) {
-        PrimaryKey                       pk    = preparedJoins.node.primary;
+        PrimaryKey                       pk    = preparedJoins.node.primary.get();
         NodeLinkTree<String, From, Join> joins = preparedJoins
             .mapNodesWithIndex(1, (t, i) -> new From(t.name, "q" + i))
             .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));
@@ -221,7 +221,7 @@ public class GraphQLQuery {
     }
 
     View<String> buildFilterView(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins, List<Filter> filters) {
-        PrimaryKey                       pk    = preparedJoins.node.primary;
+        PrimaryKey                       pk    = preparedJoins.node.primary.get();
         NodeLinkTree<String, From, Join> joins = preparedJoins
             .mapNodesWithIndex(1, (t, i) -> new From(t.name, "f" + i))
             .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));

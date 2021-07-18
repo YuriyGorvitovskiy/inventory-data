@@ -1,0 +1,75 @@
+{
+  "data" : {
+    "__schema" : {
+      "types" : [ {
+        "name" : "Boolean"
+      }, {
+        "name" : "Float"
+      }, {
+        "name" : "ID"
+      }, {
+        "name" : "Int"
+      }, {
+        "name" : "MutationType"
+      }, {
+        "name" : "QueryType"
+      }, {
+        "name" : "SortingOrder"
+      }, {
+        "name" : "String"
+      }, {
+        "name" : "__Directive"
+      }, {
+        "name" : "__DirectiveLocation"
+      }, {
+        "name" : "__EnumValue"
+      }, {
+        "name" : "__Field"
+      }, {
+        "name" : "__InputValue"
+      }, {
+        "name" : "__Schema"
+      }, {
+        "name" : "__Type"
+      }, {
+        "name" : "__TypeKind"
+      }, {
+        "name" : "first"
+      }, {
+        "name" : "first_filter"
+      }, {
+        "name" : "first_insert"
+      }, {
+        "name" : "first_order"
+      }, {
+        "name" : "first_update"
+      }, {
+        "name" : "second"
+      }, {
+        "name" : "second_filter"
+      }, {
+        "name" : "second_insert"
+      }, {
+        "name" : "second_order"
+      }, {
+        "name" : "second_update"
+      }, {
+        "name" : "third"
+      }, {
+        "name" : "third_filter"
+      }, {
+        "name" : "third_insert"
+      }, {
+        "name" : "third_order"
+      }, {
+        "name" : "third_update"
+      }, {
+        "name" : "version"
+      }, {
+        "name" : "version_filter"
+      }, {
+        "name" : "version_order"
+      } ]
+    }
+  }
+}

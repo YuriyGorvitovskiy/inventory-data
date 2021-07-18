@@ -277,7 +277,7 @@ public interface TestData {
     }
 
     static Map<String, Inject> pkToInject(TableInfo table, Map<String, Object> values) {
-        return toInject(table, table.primary.columns.map(c -> new Tuple2<>(c, values.get(c).get())).toMap(t -> t));
+        return toInject(table, table.primary.get().columns.map(c -> new Tuple2<>(c, values.get(c).get())).toMap(t -> t));
     }
 
 }

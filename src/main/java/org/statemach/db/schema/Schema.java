@@ -58,7 +58,7 @@ public class Schema {
             .toMap(t -> new Tuple2<>(t._1,
                     new TableInfo(t._1,
                             t._2,
-                            primaryByTable.get(t._1).getOrNull(),
+                            primaryByTable.get(t._1),
                             incomingByNameByTable.get(t._1).getOrElse(HashMap.empty()),
                             outgoingByNameByTable.get(t._1).getOrElse(HashMap.empty()))));
 

@@ -5,7 +5,9 @@ import java.util.function.Function;
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
 import org.statemach.db.jdbc.Vendor;
+import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.DataType;
+import org.statemach.db.schema.TableInfo;
 import org.statemach.db.sql.postgres.PostgresDataType;
 import org.statemach.util.Java;
 
@@ -28,7 +30,6 @@ public class GraphQLMapping {
             new Tuple2<>(PostgresDataType.SMALLINT, Extract.INTEGER),
             new Tuple2<>(PostgresDataType.TEXT, Extract.STRING),
             new Tuple2<>(PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE, Extract.TIMESTAMP_AS_ISO8601),
-            new Tuple2<>(PostgresDataType.TSVECTOR, Extract.STRING),
             new Tuple2<>(PostgresDataType.UUID, Extract.OBJECT_AS_UUID_STRING));
 
     static final Map<DataType, Function<Object, Inject>> POSTGRES_INJECTORS = HashMap.ofEntries(
@@ -57,7 +58,7 @@ public class GraphQLMapping {
             new Tuple2<>(PostgresDataType.TEXT, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.TSVECTOR, Scalars.GraphQLString),
-            new Tuple2<>(PostgresDataType.UUID, Scalars.GraphQLID));
+            new Tuple2<>(PostgresDataType.UUID, Scalars.GraphQLString));
 
     final Map<DataType, Extract<?>>               extracts;
     final Map<DataType, Function<Object, Inject>> injectors;
@@ -87,7 +88,44 @@ public class GraphQLMapping {
         return scalars.get(type).get();
     }
 
+    public GraphQLScalarType scalar(TableInfo table, ColumnInfo column) {
+        GraphQLScalarType type = scalar(column.type);
+        if (Scalars.GraphQLString != type) {
+            return type;
+        }
+        if (table.primary.isDefined()
+                && 1 == table.primary.get().columns.size()
+                && table.primary.get().columns.contains(column.name)) {
+            return Scalars.GraphQLID;
+        }
+        if (table.outgoing.values()
+            .exists(o -> 1 == o.matchingColumns.size()
+                    && column.name.equals(o.matchingColumns.get().from))) {
+            return Scalars.GraphQLID;
+        }
+        if (table.incoming.values()
+            .exists(o -> 1 == o.matchingColumns.size()
+                    && column.name.equals(o.matchingColumns.get().to))) {
+            return Scalars.GraphQLID;
+        }
+
+        return scalar(column.type);
+    }
+
     public Extract<?> extract(DataType type) {
         return extracts.get(type).get();
     }
+
+    public boolean isExtractable(DataType type) {
+        return extracts.containsKey(type);
+    }
+
+    public boolean isFilterable(DataType type) {
+        return injectors.containsKey(type);
+    }
+
+    public boolean isMutable(DataType type) {
+        return extracts.containsKey(type);
+    }
+
 }
