@@ -2,6 +2,7 @@ package org.statemach.db.schema;
 
 import java.util.Objects;
 
+import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.sql.SchemaAccess;
 import org.statemach.util.Java;
 
@@ -11,16 +12,29 @@ import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
 public class Schema {
+    public final Vendor                 vendor;
     public final String                 name;
     public final Map<String, TableInfo> tables;
 
-    private final int hash;
-
-    public Schema(String name, Map<String, TableInfo> tables) {
+    public Schema(Vendor vendor, String name, Map<String, TableInfo> tables) {
+        this.vendor = vendor;
         this.name = name;
         this.tables = tables;
+    }
 
-        this.hash = Objects.hash(name, tables);
+    @Override
+    public int hashCode() {
+        return Objects.hash(vendor, name, tables);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return Java.equalsByFields(this, other, t -> t.vendor, t -> t.name, t -> t.tables);
+    }
+
+    @Override
+    public String toString() {
+        return "Schema@{name: " + name + "}";
     }
 
     public static Schema from(SchemaAccess access) {
@@ -48,16 +62,7 @@ public class Schema {
                             incomingByNameByTable.get(t._1).getOrElse(HashMap.empty()),
                             outgoingByNameByTable.get(t._1).getOrElse(HashMap.empty()))));
 
-        return new Schema(access.getSchemaName(), tablesByName);
+        return new Schema(access.getVendor(), access.getSchemaName(), tablesByName);
     }
 
-    @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return Java.equalsByFields(this, other, t -> t.name, t -> t.tables);
-    }
 }

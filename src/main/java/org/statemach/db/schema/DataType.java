@@ -7,12 +7,8 @@ import org.statemach.util.Java;
 public class DataType {
     public final String name;
 
-    private final int hash;
-
     public DataType(String name) {
         this.name = name;
-
-        this.hash = Objects.hash(this.name);
     }
 
     public static DataType unsupported(String name) {
@@ -21,7 +17,7 @@ public class DataType {
 
     @Override
     public int hashCode() {
-        return hash;
+        return Objects.hash(this.name);
     }
 
     @Override

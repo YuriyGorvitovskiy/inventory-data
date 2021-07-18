@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
+import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.sql.SchemaAccess;
 import org.statemach.db.sql.postgres.TestSchema;
 
@@ -32,17 +33,18 @@ public class Schema_UnitTest {
     final Map<String, TableInfo> TABLES_3 = List.of(TABLE_1, TABLE_3).toLinkedMap(t -> t.name, t -> t);
     final Map<String, TableInfo> TABLES_4 = List.of(TABLE_1).toLinkedMap(t -> t.name, t -> t);
 
-    final Schema subject = new Schema(SCHEMA_NAME_1, TABLES_1);
-    final Schema other1  = new Schema(SCHEMA_NAME_1, TABLES_1);
-    final Schema other2  = new Schema(SCHEMA_NAME_2, TABLES_1);
-    final Schema other3  = new Schema(SCHEMA_NAME_1, TABLES_2);
-    final Schema other4  = new Schema(SCHEMA_NAME_1, TABLES_3);
-    final Schema other5  = new Schema(SCHEMA_NAME_1, TABLES_4);
+    final Schema subject = new Schema(Vendor.POSTGRES, SCHEMA_NAME_1, TABLES_1);
+    final Schema other1  = new Schema(Vendor.POSTGRES, SCHEMA_NAME_1, TABLES_1);
+    final Schema other2  = new Schema(Vendor.POSTGRES, SCHEMA_NAME_2, TABLES_1);
+    final Schema other3  = new Schema(Vendor.POSTGRES, SCHEMA_NAME_1, TABLES_2);
+    final Schema other4  = new Schema(Vendor.POSTGRES, SCHEMA_NAME_1, TABLES_3);
+    final Schema other5  = new Schema(Vendor.POSTGRES, SCHEMA_NAME_1, TABLES_4);
 
     @Test
     void from_postgres() {
         // Setup
         SchemaAccess access = mock(SchemaAccess.class);
+        doReturn(Vendor.POSTGRES).when(access).getVendor();
         doReturn(SCHEMA_NAME_1).when(access).getSchemaName();
         doReturn(TestSchema.ALL_TABLES).when(access).getAllTables();
         doReturn(TestSchema.ALL_PRIMARY_KEYS).when(access).getAllPrimaryKeys();
@@ -52,7 +54,7 @@ public class Schema_UnitTest {
         Schema result = Schema.from(access);
 
         // Verify
-        assertEquals(new Schema(SCHEMA_NAME_1, TestSchema.ALL_TABLE_INFO_MAP), result);
+        assertEquals(new Schema(Vendor.POSTGRES, SCHEMA_NAME_1, TestSchema.ALL_TABLE_INFO_MAP), result);
     }
 
     @Test
@@ -85,4 +87,14 @@ public class Schema_UnitTest {
         assertFalse(result4);
         assertFalse(result5);
     }
+
+    @Test
+    void toString_test() {
+        // Execute
+        String result = subject.toString();
+
+        // Verify
+        assertTrue(result.contains(SCHEMA_NAME_1));
+    }
+
 }

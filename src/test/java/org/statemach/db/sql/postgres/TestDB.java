@@ -2,6 +2,7 @@ package org.statemach.db.sql.postgres;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.statemach.db.jdbc.JDBC;
+import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.schema.TableInfo;
 import org.statemach.db.sql.DataAccess;
 import org.statemach.util.Java;
@@ -40,7 +41,7 @@ public class TestDB {
 
     public final static Map<String, String> config  = HashMap.ofAll(System.getenv());
     public final static BasicDataSource     pool    = createDBConnectionPool();
-    public final static JDBC                jdbc    = new JDBC(pool);
+    public final static JDBC                jdbc    = new JDBC(Vendor.POSTGRES, pool);
     public final static String              schema  = config.getOrElse(Config.DB_SCHEMA, "test").toLowerCase();
     public final static DataAccess          da      = new PostgresDataAccess(jdbc, schema, new PostgresSQLBuilder(schema));
     public final static String              product = "inventory-data";

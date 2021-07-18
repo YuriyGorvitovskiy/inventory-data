@@ -71,4 +71,16 @@ public class ForeignKey_UnitTest {
         assertFalse(result7);
         assertFalse(result8);
     }
+
+    @Test
+    void toString_test() {
+        // Execute
+        String result = subject.toString();
+
+        // Verify
+        assertTrue(result.contains(FOREIGN_KEY_NAME_1));
+        assertTrue(result.contains(TABLE_NAME_1));
+        assertTrue(result.contains(TABLE_NAME_2));
+    }
+
 }

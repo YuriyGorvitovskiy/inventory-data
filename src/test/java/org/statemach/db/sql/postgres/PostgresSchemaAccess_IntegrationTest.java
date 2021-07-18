@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.PrimaryKey;
@@ -65,7 +66,7 @@ public class PostgresSchemaAccess_IntegrationTest {
         Schema result = Schema.from(subject);
 
         // Verify
-        assertEquals(new Schema(TestDB.schema, TestSchema.ALL_TABLE_INFO_MAP), result);
+        assertEquals(new Schema(Vendor.POSTGRES, TestDB.schema, TestSchema.ALL_TABLE_INFO_MAP), result);
     }
 
 }

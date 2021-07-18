@@ -1,6 +1,7 @@
 package org.statemach.db.sql;
 
 import org.statemach.db.jdbc.Inject;
+import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.schema.DataType;
 
 import io.vavr.collection.List;
@@ -35,4 +36,7 @@ public interface SQLBuilder {
     public Condition inArray(Select<?> column, DataType elementType, Seq<?> array);
 
     public Condition textSearch(Select<?> column, Seq<String> values);
+
+    public Vendor getVendor();
+
 }

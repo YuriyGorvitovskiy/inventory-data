@@ -14,8 +14,6 @@ public class TableInfo {
     public final Map<String, ForeignKey> incoming;
     public final Map<String, ForeignKey> outgoing;
 
-    private final int hash;
-
     public TableInfo(String name,
                      Map<String, ColumnInfo> columns,
                      PrimaryKey primary,
@@ -26,18 +24,21 @@ public class TableInfo {
         this.primary = primary;
         this.incoming = incoming;
         this.outgoing = outgoing;
-
-        this.hash = Objects.hash(this.name, this.columns, this.primary, this.incoming, this.outgoing);
     }
 
     @Override
     public int hashCode() {
-        return hash;
+        return Objects.hash(this.name, this.columns, this.primary, this.incoming, this.outgoing);
     }
 
     @Override
     public boolean equals(Object other) {
         return Java.equalsByFields(this, other, t -> t.name, t -> t.columns, t -> t.primary, t -> t.incoming, t -> t.outgoing);
+    }
+
+    @Override
+    public String toString() {
+        return "TableInfo@{name: " + name + "}";
     }
 
 }

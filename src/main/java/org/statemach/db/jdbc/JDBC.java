@@ -16,10 +16,16 @@ import io.vavr.control.Option;
 
 public class JDBC {
 
+    final Vendor          vendor;
     final BasicDataSource pool;
 
-    public JDBC(BasicDataSource pool) {
+    public JDBC(Vendor vendor, BasicDataSource pool) {
+        this.vendor = vendor;
         this.pool = pool;
+    }
+
+    public Vendor getVendor() {
+        return vendor;
     }
 
     public <T, E extends Exception> T call(FunctionEx<Connection, T, E> processor) {

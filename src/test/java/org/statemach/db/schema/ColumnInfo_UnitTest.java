@@ -46,4 +46,14 @@ public class ColumnInfo_UnitTest {
         assertFalse(result3);
         assertFalse(result4);
     }
+
+    @Test
+    void toString_test() {
+        // Execute
+        String result = subject.toString();
+
+        // Verify
+        assertTrue(result.contains(COLUMN_NAME_1));
+        assertTrue(result.contains(DATA_TYPE_1.toString()));
+    }
 }

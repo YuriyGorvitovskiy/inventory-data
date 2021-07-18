@@ -1,6 +1,7 @@
 package org.statemach.db.sql.postgres;
 
 import org.statemach.db.jdbc.JDBC;
+import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.PrimaryKey;
@@ -26,6 +27,11 @@ public class PostgresSchemaAccess implements SchemaAccess {
     public PostgresSchemaAccess(JDBC jdbc, String schemaName) {
         this.jdbc = jdbc;
         this.schemaName = schemaName;
+    }
+
+    @Override
+    public Vendor getVendor() {
+        return jdbc.getVendor();
     }
 
     @Override

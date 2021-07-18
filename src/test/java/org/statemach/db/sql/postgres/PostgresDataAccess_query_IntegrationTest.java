@@ -55,11 +55,11 @@ public class PostgresDataAccess_query_IntegrationTest {
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
-                subject.builder().textSearch(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_SEARCH.name, null),
+                subject.builder().textSearch(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_SEARCH.name),
                         List.of("fix", "vary", "2")),
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
                 List.of(
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_ID.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_ID.name, Extract.LONG))),
                 true,
@@ -81,13 +81,13 @@ public class PostgresDataAccess_query_IntegrationTest {
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
                 subject.builder().not(
-                        subject.builder().in(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
+                        subject.builder().in(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name),
                                 List.of(Inject.LONG.apply(TestData.FIRST_ROW_2_ID),
                                         Inject.LONG.apply(TestData.FIRST_ROW_3_ID),
                                         Inject.LONG.apply(-1)))),
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
                 List.of(
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_ID.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_ID.name, Extract.LONG))),
                 true,
@@ -108,12 +108,12 @@ public class PostgresDataAccess_query_IntegrationTest {
         // Setup
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
-                subject.builder().inArray(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
+                subject.builder().inArray(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
                         PostgresDataType.BIGINT,
                         List.of(TestData.FIRST_ROW_2_ID, TestData.FIRST_ROW_3_ID, -1)),
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
                 List.of(
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_ID.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_ID.name, Extract.LONG))),
                 true,
@@ -134,12 +134,12 @@ public class PostgresDataAccess_query_IntegrationTest {
         // Setup
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
-                subject.builder().inArray(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
+                subject.builder().inArray(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
                         PostgresDataType.BIGINT,
                         null),
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
                 List.of(
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_ID.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_ID.name, Extract.LONG))),
                 true,
@@ -160,27 +160,27 @@ public class PostgresDataAccess_query_IntegrationTest {
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
                 Condition.NONE,
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
                 List.of(
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_ID.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_ID.name, Extract.LONG)),
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_SECOND.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_SECOND.name, Extract.OBJECT_AS_UUID)),
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_THIRD_NAME.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_THIRD_NAME.name, Extract.STRING)),
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_THIRD_INDX.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_THIRD_INDX.name, Extract.INTEGER)),
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_FIXED.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_FIXED.name, Extract.STRING)),
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_VARYING.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_VARYING.name, Extract.STRING)),
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_UNLIMITED.name,
                                 new Tuple2<>(TestSchema.COLUMN_FIRST_UNLIMITED.name, Extract.STRING))),
                 true,
@@ -213,33 +213,33 @@ public class PostgresDataAccess_query_IntegrationTest {
             .put(TestSchema.FK_FIRST_SECOND.name,
                     new Join(Kind.LEFT,
                             subject.builder().equal(
-                                    new Select<Void>(ALIAS_1, TestSchema.COLUMN_FIRST_SECOND.name, null),
-                                    new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null))),
+                                    Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_SECOND.name),
+                                    Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name))),
                     NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2)))
             .put(TestSchema.FK_FIRST_THIRD.name,
                     new Join(Kind.RIGHT,
                             subject.builder().and(
                                     subject.builder().equal(
-                                            new Select<Void>(ALIAS_1, TestSchema.COLUMN_FIRST_THIRD_NAME.name, null),
-                                            new Select<Void>(ALIAS_3, TestSchema.COLUMN_THIRD_NAME.name, null)),
+                                            Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_THIRD_NAME.name),
+                                            Select.of(ALIAS_3, TestSchema.COLUMN_THIRD_NAME.name)),
                                     subject.builder().equal(
-                                            new Select<Void>(ALIAS_1, TestSchema.COLUMN_FIRST_THIRD_INDX.name, null),
-                                            new Select<Void>(ALIAS_3, TestSchema.COLUMN_THIRD_INDX.name, null)))),
+                                            Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_THIRD_INDX.name),
+                                            Select.of(ALIAS_3, TestSchema.COLUMN_THIRD_INDX.name)))),
                     NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_THIRD, ALIAS_3)));
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 joins,
                 Condition.NONE,
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE),
-                        new Select<>(ALIAS_3, TestSchema.COLUMN_THIRD_NAME.name, Boolean.FALSE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE),
+                        Select.of(ALIAS_3, TestSchema.COLUMN_THIRD_NAME.name, Boolean.FALSE)),
                 List.of(
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_ID.name,
                                 new Tuple2<>(EXTRACT_NAME_1, Extract.LONG)),
-                        new Select<>(ALIAS_2,
+                        Select.of(ALIAS_2,
                                 TestSchema.COLUMN_SECOND_ID.name,
                                 new Tuple2<>(EXTRACT_NAME_2, Extract.OBJECT_AS_UUID)),
-                        new Select<>(ALIAS_3,
+                        Select.of(ALIAS_3,
                                 TestSchema.COLUMN_THIRD_NAME.name,
                                 new Tuple2<>(EXTRACT_NAME_3, Extract.STRING))),
                 false,
@@ -278,29 +278,29 @@ public class PostgresDataAccess_query_IntegrationTest {
             .put(TestSchema.FK_SECOND_FIRST.name,
                     new Join(Kind.INNER,
                             subject.builder().equal(
-                                    new Select<Void>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
-                                    new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_FIRST.name, null))),
+                                    Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name),
+                                    Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_FIRST.name))),
                     NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2))
                         .put(TestSchema.FK_THIRD_SECOND.name,
                                 new Join(Kind.FULL,
                                         subject.builder().equal(
-                                                new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null),
-                                                new Select<Void>(ALIAS_3, TestSchema.COLUMN_THIRD_SECOND.name, null))),
+                                                Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name),
+                                                Select.of(ALIAS_3, TestSchema.COLUMN_THIRD_SECOND.name))),
                                 NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_THIRD, ALIAS_3))));
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 joins,
                 Condition.NONE,
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE),
-                        new Select<>(ALIAS_3, TestSchema.COLUMN_THIRD_NAME.name, Boolean.FALSE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE),
+                        Select.of(ALIAS_3, TestSchema.COLUMN_THIRD_NAME.name, Boolean.FALSE)),
                 List.of(
-                        new Select<>(ALIAS_1,
+                        Select.of(ALIAS_1,
                                 TestSchema.COLUMN_FIRST_ID.name,
                                 new Tuple2<>(EXTRACT_NAME_1, Extract.LONG)),
-                        new Select<>(ALIAS_2,
+                        Select.of(ALIAS_2,
                                 TestSchema.COLUMN_SECOND_ID.name,
                                 new Tuple2<>(EXTRACT_NAME_2, Extract.OBJECT_AS_UUID)),
-                        new Select<>(ALIAS_3,
+                        Select.of(ALIAS_3,
                                 TestSchema.COLUMN_THIRD_NAME.name,
                                 new Tuple2<>(EXTRACT_NAME_3, Extract.STRING))),
                 false,
@@ -340,31 +340,31 @@ public class PostgresDataAccess_query_IntegrationTest {
             .put(TestSchema.FK_SECOND_FIRST.name,
                     new Join(Kind.LEFT,
                             subject.builder().equal(
-                                    new Select<Void>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
-                                    new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_FIRST.name, null))),
+                                    Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name),
+                                    Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_FIRST.name))),
                     NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2))
                         .put(TestSchema.FK_SECOND_SECOND_ONE.name,
                                 new Join(Kind.LEFT,
                                         subject.builder().or(
                                                 subject.builder().equal(
-                                                        new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null),
-                                                        new Select<Void>(ALIAS_3, TestSchema.COLUMN_SECOND_ONE.name, null)),
+                                                        Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name),
+                                                        Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_ONE.name)),
                                                 subject.builder().equal(
-                                                        new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null),
-                                                        new Select<Void>(ALIAS_3, TestSchema.COLUMN_SECOND_TWO.name, null)))),
+                                                        Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name),
+                                                        Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_TWO.name)))),
                                 NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_3))));
 
         View<String> cte1 = new View<String>(CTE_NAME_1,
                 joins1,
                 subject.builder().or(
                         subject.builder().equal(
-                                new Select<Void>(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name, null),
+                                Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name),
                                 Inject.DOUBLE.apply(TestData.SECOND_ROW_1_DOUBLE)),
                         subject.builder().isNull(
-                                new Select<Void>(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name, null))),
+                                Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name))),
                 List.empty(),
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, CTE_COLUMN_ID),
-                        new Select<>(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name, CTE_COLUMN_DOUBLE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, CTE_COLUMN_ID),
+                        Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name, CTE_COLUMN_DOUBLE)),
                 false,
                 null,
                 null);
@@ -375,27 +375,27 @@ public class PostgresDataAccess_query_IntegrationTest {
             .put(TestSchema.FK_FIRST_SECOND.name,
                     new Join(Kind.LEFT,
                             subject.builder().equal(
-                                    new Select<Void>(ALIAS_1, TestSchema.COLUMN_FIRST_SECOND.name, null),
-                                    new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null))),
+                                    Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_SECOND.name),
+                                    Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name))),
                     NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2))
                         .put(TestSchema.FK_SECOND_SECOND_ONE.name,
                                 new Join(Kind.LEFT,
                                         subject.builder().or(
                                                 subject.builder().equal(
-                                                        new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null),
-                                                        new Select<Void>(ALIAS_3, TestSchema.COLUMN_SECOND_ONE.name, null)),
+                                                        Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name),
+                                                        Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_ONE.name)),
                                                 subject.builder().equal(
-                                                        new Select<Void>(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name, null),
-                                                        new Select<Void>(ALIAS_3, TestSchema.COLUMN_SECOND_TWO.name, null)))),
+                                                        Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name),
+                                                        Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_TWO.name)))),
                                 NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_3))));
 
         View<String> cte2 = new View<String>(CTE_NAME_2,
                 joins2,
                 subject.builder().isNotNull(
-                        new Select<Void>(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name, null)),
+                        Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name)),
                 List.empty(),
-                List.of(new Select<>(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, CTE_COLUMN_ID),
-                        new Select<>(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name, CTE_COLUMN_DOUBLE)),
+                List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, CTE_COLUMN_ID),
+                        Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name, CTE_COLUMN_DOUBLE)),
                 false,
                 null,
                 null);
@@ -406,19 +406,19 @@ public class PostgresDataAccess_query_IntegrationTest {
             .put("ByID",
                     new Join(Kind.INNER,
                             subject.builder().equal(
-                                    new Select<Void>(ALIAS_1, CTE_COLUMN_ID, null),
-                                    new Select<Void>(ALIAS_2, CTE_COLUMN_ID, null))),
+                                    Select.of(ALIAS_1, CTE_COLUMN_ID),
+                                    Select.of(ALIAS_2, CTE_COLUMN_ID))),
                     NodeLinkTree.<String, From, Join>of(new From(CTE_NAME_2, ALIAS_2)));
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 joins,
                 Condition.NONE,
-                List.of(new Select<>(ALIAS_1, CTE_COLUMN_ID, Boolean.TRUE),
-                        new Select<>(ALIAS_2, CTE_COLUMN_DOUBLE, Boolean.FALSE)),
+                List.of(Select.of(ALIAS_1, CTE_COLUMN_ID, Boolean.TRUE),
+                        Select.of(ALIAS_2, CTE_COLUMN_DOUBLE, Boolean.FALSE)),
                 List.of(
-                        new Select<>(ALIAS_1, CTE_COLUMN_ID, new Tuple2<>(EXTRACT_NAME_1, Extract.LONG)),
-                        new Select<>(ALIAS_1, CTE_COLUMN_DOUBLE, new Tuple2<>(EXTRACT_NAME_2, Extract.DOUBLE)),
-                        new Select<>(ALIAS_2, CTE_COLUMN_DOUBLE, new Tuple2<>(EXTRACT_NAME_3, Extract.DOUBLE))),
+                        Select.of(ALIAS_1, CTE_COLUMN_ID, new Tuple2<>(EXTRACT_NAME_1, Extract.LONG)),
+                        Select.of(ALIAS_1, CTE_COLUMN_DOUBLE, new Tuple2<>(EXTRACT_NAME_2, Extract.DOUBLE)),
+                        Select.of(ALIAS_2, CTE_COLUMN_DOUBLE, new Tuple2<>(EXTRACT_NAME_3, Extract.DOUBLE))),
                 false,
                 1L,
                 1);

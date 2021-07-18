@@ -2,6 +2,7 @@ package org.statemach.db.sql.postgres;
 
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
+import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.schema.DataType;
 import org.statemach.db.sql.Condition;
 import org.statemach.db.sql.From;
@@ -24,6 +25,10 @@ public class PostgresSQLBuilder implements SQLBuilder {
 
     PostgresSQLBuilder(String schema) {
         this.schema = schema;
+    }
+
+    public Vendor getVendor() {
+        return Vendor.POSTGRES;
     }
 
     @Override

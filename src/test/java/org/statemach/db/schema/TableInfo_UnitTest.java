@@ -113,4 +113,13 @@ public class TableInfo_UnitTest {
         assertFalse(result11);
         assertFalse(result12);
     }
+
+    @Test
+    void toString_test() {
+        // Execute
+        String result = subject.toString();
+
+        // Verify
+        assertTrue(result.contains(TABLE_NAME_1));
+    }
 }

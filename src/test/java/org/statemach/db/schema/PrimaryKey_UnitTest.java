@@ -58,4 +58,15 @@ public class PrimaryKey_UnitTest {
         assertFalse(result5);
         assertFalse(result6);
     }
+
+    @Test
+    void toString_test() {
+        // Execute
+        String result = subject.toString();
+
+        // Verify
+        assertTrue(result.contains(PRIMARY_KEY_NAME_1));
+        assertTrue(result.contains(TABLE_NAME_1));
+    }
+
 }
