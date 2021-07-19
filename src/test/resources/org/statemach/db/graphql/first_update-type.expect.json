@@ -4,21 +4,14 @@
       "kind" : "INPUT_OBJECT",
       "name" : "first_update",
       "inputFields" : [ {
-        "name" : "unlimited",
+        "name" : "second",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "String",
+          "name" : "ID",
           "ofType" : null
         }
       }, {
         "name" : "third_name",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "varying",
         "type" : {
           "kind" : "SCALAR",
           "name" : "String",
@@ -32,14 +25,21 @@
           "ofType" : null
         }
       }, {
-        "name" : "second",
+        "name" : "fixed",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "ID",
+          "name" : "String",
           "ofType" : null
         }
       }, {
-        "name" : "fixed",
+        "name" : "varying",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
+          "ofType" : null
+        }
+      }, {
+        "name" : "unlimited",
         "type" : {
           "kind" : "SCALAR",
           "name" : "String",

@@ -4,28 +4,7 @@
       "kind" : "INPUT_OBJECT",
       "name" : "first_order",
       "inputFields" : [ {
-        "name" : "unlimited",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "third_name",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "varying",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "third_indx",
+        "name" : "id",
         "type" : {
           "kind" : "ENUM",
           "name" : "SortingOrder",
@@ -39,6 +18,20 @@
           "ofType" : null
         }
       }, {
+        "name" : "third_name",
+        "type" : {
+          "kind" : "ENUM",
+          "name" : "SortingOrder",
+          "ofType" : null
+        }
+      }, {
+        "name" : "third_indx",
+        "type" : {
+          "kind" : "ENUM",
+          "name" : "SortingOrder",
+          "ofType" : null
+        }
+      }, {
         "name" : "fixed",
         "type" : {
           "kind" : "ENUM",
@@ -46,7 +39,14 @@
           "ofType" : null
         }
       }, {
-        "name" : "id",
+        "name" : "varying",
+        "type" : {
+          "kind" : "ENUM",
+          "name" : "SortingOrder",
+          "ofType" : null
+        }
+      }, {
+        "name" : "unlimited",
         "type" : {
           "kind" : "ENUM",
           "name" : "SortingOrder",

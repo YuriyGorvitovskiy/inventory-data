@@ -39,7 +39,7 @@ public class Schema {
 
     public static Schema from(SchemaAccess access) {
         Map<String, Map<String, ColumnInfo>> columnsByNameByTable = access.getAllTables()
-            .mapValues(l -> l.toMap(c -> c.name, c -> c));
+            .mapValues(l -> l.toLinkedMap(c -> c.name, c -> c));
 
         Map<String, PrimaryKey> primaryByTable = access.getAllPrimaryKeys()
             .toMap(p -> new Tuple2<>(p.table, p));
@@ -48,14 +48,14 @@ public class Schema {
 
         Map<String, Map<String, ForeignKey>> incomingByNameByTable = foreignKeys
             .groupBy(f -> f.toTable)
-            .mapValues(s -> s.toMap(f -> new Tuple2<>(f.name, f)));
+            .mapValues(s -> s.toLinkedMap(f -> new Tuple2<>(f.name, f)));
 
         Map<String, Map<String, ForeignKey>> outgoingByNameByTable = foreignKeys
             .groupBy(f -> f.fromTable)
-            .mapValues(s -> s.toMap(f -> new Tuple2<>(f.name, f)));
+            .mapValues(s -> s.toLinkedMap(f -> new Tuple2<>(f.name, f)));
 
         Map<String, TableInfo> tablesByName = columnsByNameByTable
-            .toMap(t -> new Tuple2<>(t._1,
+            .toLinkedMap(t -> new Tuple2<>(t._1,
                     new TableInfo(t._1,
                             t._2,
                             primaryByTable.get(t._1),

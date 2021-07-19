@@ -4,13 +4,23 @@
       "kind" : "INPUT_OBJECT",
       "name" : "second_filter",
       "inputFields" : [ {
-        "name" : "third_name",
+        "name" : "id",
         "type" : {
           "kind" : "LIST",
           "name" : null,
           "ofType" : {
             "kind" : "SCALAR",
-            "name" : "String"
+            "name" : "ID"
+          }
+        }
+      }, {
+        "name" : "first",
+        "type" : {
+          "kind" : "LIST",
+          "name" : null,
+          "ofType" : {
+            "kind" : "SCALAR",
+            "name" : "ID"
           }
         }
       }, {
@@ -34,23 +44,13 @@
           }
         }
       }, {
-        "name" : "int",
+        "name" : "third_name",
         "type" : {
           "kind" : "LIST",
           "name" : null,
           "ofType" : {
             "kind" : "SCALAR",
-            "name" : "Int"
-          }
-        }
-      }, {
-        "name" : "first",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "ID"
+            "name" : "String"
           }
         }
       }, {
@@ -74,13 +74,13 @@
           }
         }
       }, {
-        "name" : "id",
+        "name" : "int",
         "type" : {
           "kind" : "LIST",
           "name" : null,
           "ofType" : {
             "kind" : "SCALAR",
-            "name" : "ID"
+            "name" : "Int"
           }
         }
       }, {
@@ -104,6 +104,13 @@
           }
         }
       }, {
+        "name" : "fk_second_first",
+        "type" : {
+          "kind" : "INPUT_OBJECT",
+          "name" : "first_filter",
+          "ofType" : null
+        }
+      }, {
         "name" : "fk_second_second_one",
         "type" : {
           "kind" : "INPUT_OBJECT",
@@ -125,17 +132,10 @@
           "ofType" : null
         }
       }, {
-        "name" : "fk_second_first",
+        "name" : "fk_first_second_reverse",
         "type" : {
           "kind" : "INPUT_OBJECT",
           "name" : "first_filter",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_third_second_reverse",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "third_filter",
           "ofType" : null
         }
       }, {
@@ -153,10 +153,10 @@
           "ofType" : null
         }
       }, {
-        "name" : "fk_first_second_reverse",
+        "name" : "fk_third_second_reverse",
         "type" : {
           "kind" : "INPUT_OBJECT",
-          "name" : "first_filter",
+          "name" : "third_filter",
           "ofType" : null
         }
       } ]

@@ -4,21 +4,21 @@
       "kind" : "OBJECT",
       "name" : "first",
       "fields" : [ {
-        "name" : "unlimited",
+        "name" : "id",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "String",
+          "name" : "ID",
+          "ofType" : null
+        }
+      }, {
+        "name" : "second",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "ID",
           "ofType" : null
         }
       }, {
         "name" : "third_name",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "varying",
         "type" : {
           "kind" : "SCALAR",
           "name" : "String",
@@ -32,13 +32,6 @@
           "ofType" : null
         }
       }, {
-        "name" : "second",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "ID",
-          "ofType" : null
-        }
-      }, {
         "name" : "fixed",
         "type" : {
           "kind" : "SCALAR",
@@ -46,10 +39,17 @@
           "ofType" : null
         }
       }, {
-        "name" : "id",
+        "name" : "varying",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "ID",
+          "name" : "String",
+          "ofType" : null
+        }
+      }, {
+        "name" : "unlimited",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
           "ofType" : null
         }
       }, {
@@ -67,16 +67,6 @@
           "ofType" : null
         }
       }, {
-        "name" : "fk_third_first_reverse",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "OBJECT",
-            "name" : "third"
-          }
-        }
-      }, {
         "name" : "fk_second_first_reverse",
         "type" : {
           "kind" : "LIST",
@@ -84,6 +74,16 @@
           "ofType" : {
             "kind" : "OBJECT",
             "name" : "second"
+          }
+        }
+      }, {
+        "name" : "fk_third_first_reverse",
+        "type" : {
+          "kind" : "LIST",
+          "name" : null,
+          "ofType" : {
+            "kind" : "OBJECT",
+            "name" : "third"
           }
         }
       } ]

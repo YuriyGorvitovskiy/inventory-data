@@ -1,0 +1,9 @@
+query {
+    __type(name: "SortingOrder") {
+        kind
+        name
+        enumValues {
+            name
+        }
+    }
+}

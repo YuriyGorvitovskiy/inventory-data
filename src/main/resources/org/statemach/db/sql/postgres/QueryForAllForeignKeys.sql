@@ -9,4 +9,4 @@ SELECT rc.constraint_name
                                                        AND fcu.ordinal_position = scu.position_in_unique_constraint
                                                        AND fcu.table_schema = scu.table_schema
  WHERE scu.table_schema = ?
- ORDER BY scu.ordinal_position
+ ORDER BY rc.constraint_name, scu.ordinal_position

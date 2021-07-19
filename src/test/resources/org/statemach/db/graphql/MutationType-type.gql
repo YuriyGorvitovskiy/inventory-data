@@ -1,0 +1,28 @@
+query {
+    __type(name: "MutationType") {
+        kind
+        name
+        fields {
+            name
+            type {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                }
+            }
+            args {
+                name
+                type {
+                    kind
+                    name
+                    ofType {
+                        kind
+                        name
+                    }
+                }
+            }
+        }
+    }
+}

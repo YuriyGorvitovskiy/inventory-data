@@ -4,16 +4,6 @@
       "kind" : "INPUT_OBJECT",
       "name" : "third_filter",
       "inputFields" : [ {
-        "name" : "bool",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "Boolean"
-          }
-        }
-      }, {
         "name" : "name",
         "type" : {
           "kind" : "LIST",
@@ -24,13 +14,13 @@
           }
         }
       }, {
-        "name" : "time",
+        "name" : "indx",
         "type" : {
           "kind" : "LIST",
           "name" : null,
           "ofType" : {
             "kind" : "SCALAR",
-            "name" : "String"
+            "name" : "Int"
           }
         }
       }, {
@@ -54,21 +44,24 @@
           }
         }
       }, {
-        "name" : "indx",
+        "name" : "bool",
         "type" : {
           "kind" : "LIST",
           "name" : null,
           "ofType" : {
             "kind" : "SCALAR",
-            "name" : "Int"
+            "name" : "Boolean"
           }
         }
       }, {
-        "name" : "fk_third_second",
+        "name" : "time",
         "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "second_filter",
-          "ofType" : null
+          "kind" : "LIST",
+          "name" : null,
+          "ofType" : {
+            "kind" : "SCALAR",
+            "name" : "String"
+          }
         }
       }, {
         "name" : "fk_third_first",
@@ -78,7 +71,7 @@
           "ofType" : null
         }
       }, {
-        "name" : "fk_second_third_reverse",
+        "name" : "fk_third_second",
         "type" : {
           "kind" : "INPUT_OBJECT",
           "name" : "second_filter",
@@ -89,6 +82,13 @@
         "type" : {
           "kind" : "INPUT_OBJECT",
           "name" : "first_filter",
+          "ofType" : null
+        }
+      }, {
+        "name" : "fk_second_third_reverse",
+        "type" : {
+          "kind" : "INPUT_OBJECT",
+          "name" : "second_filter",
           "ofType" : null
         }
       } ]

@@ -10,7 +10,6 @@ import org.statemach.db.schema.Schema;
 import org.statemach.db.schema.TableInfo;
 import org.statemach.db.sql.DataAccess;
 
-import graphql.Scalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
@@ -91,56 +90,61 @@ public class GraphQLMutation {
 
     List<GraphQLFieldDefinition> buildMutationFields(TableInfo table) {
         return List.of(
-                buildInsertMutations(table.name),
-                buildUpsertMutations(table.name),
-                buildUpdateMutations(table.name),
-                buildDeleteMutations(table.name));
+                buildInsertMutations(table),
+                buildUpsertMutations(table),
+                buildUpdateMutations(table),
+                buildDeleteMutations(table));
     }
 
-    GraphQLFieldDefinition buildInsertMutations(String tableName) {
+    GraphQLFieldDefinition buildInsertMutations(TableInfo table) {
         return GraphQLFieldDefinition.newFieldDefinition()
-            .name(naming.getInsertMutationName(tableName))
-            .type(naming.getExtractTypeRef(tableName))
+            .name(naming.getInsertMutationName(table.name))
+            .type(naming.getExtractTypeRef(table.name))
             .argument(GraphQLArgument.newArgument()
-                .name(tableName)
-                .type(naming.getInsertTypeRef(tableName)))
+                .name(table.name)
+                .type(naming.getInsertTypeRef(table.name)))
             .build();
     }
 
-    GraphQLFieldDefinition buildUpsertMutations(String tableName) {
+    GraphQLFieldDefinition buildUpsertMutations(TableInfo table) {
         return GraphQLFieldDefinition.newFieldDefinition()
-            .name(naming.getUpsertMutationName(tableName))
-            .type(naming.getExtractTypeRef(tableName))
+            .name(naming.getUpsertMutationName(table.name))
+            .type(naming.getExtractTypeRef(table.name))
+            .arguments(buildPrimaryKeyArguments(table))
             .argument(GraphQLArgument.newArgument()
-                .name(Argument.ID)
-                .type(Scalars.GraphQLID))
-            .argument(GraphQLArgument.newArgument()
-                .name(tableName)
-                .type(naming.getUpdateTypeRef(tableName)))
+                .name(table.name)
+                .type(naming.getUpdateTypeRef(table.name)))
             .build();
     }
 
-    GraphQLFieldDefinition buildUpdateMutations(String tableName) {
+    GraphQLFieldDefinition buildUpdateMutations(TableInfo table) {
         return GraphQLFieldDefinition.newFieldDefinition()
-            .name(naming.getUpdateMutationName(tableName))
-            .type(naming.getExtractTypeRef(tableName))
+            .name(naming.getUpdateMutationName(table.name))
+            .type(naming.getExtractTypeRef(table.name))
+            .arguments(buildPrimaryKeyArguments(table))
             .argument(GraphQLArgument.newArgument()
-                .name(Argument.ID)
-                .type(Scalars.GraphQLID))
-            .argument(GraphQLArgument.newArgument()
-                .name(tableName)
-                .type(naming.getUpdateTypeRef(tableName)))
+                .name(table.name)
+                .type(naming.getUpdateTypeRef(table.name)))
             .build();
     }
 
-    GraphQLFieldDefinition buildDeleteMutations(String tableName) {
+    GraphQLFieldDefinition buildDeleteMutations(TableInfo table) {
+
         return GraphQLFieldDefinition.newFieldDefinition()
-            .name(naming.getDeleteMutationName(tableName))
-            .type(naming.getExtractTypeRef(tableName))
-            .argument(GraphQLArgument.newArgument()
-                .name(Argument.ID)
-                .type(Scalars.GraphQLID))
+            .name(naming.getDeleteMutationName(table.name))
+            .type(naming.getExtractTypeRef(table.name))
+            .arguments(buildPrimaryKeyArguments(table))
             .build();
+    }
+
+    java.util.List<GraphQLArgument> buildPrimaryKeyArguments(TableInfo table) {
+        return table.primary.get().columns
+            .map(n -> table.columns.get(n).get())
+            .map(c -> GraphQLArgument.newArgument()
+                .name(c.name)
+                .type(mapping.scalar(table, c))
+                .build())
+            .toJavaList();
     }
 
     List<GraphQLType> buildTypes(TableInfo table) {

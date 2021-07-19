@@ -4,10 +4,17 @@
       "kind" : "INPUT_OBJECT",
       "name" : "second_insert",
       "inputFields" : [ {
-        "name" : "third_name",
+        "name" : "id",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "String",
+          "name" : "ID",
+          "ofType" : null
+        }
+      }, {
+        "name" : "first",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "ID",
           "ofType" : null
         }
       }, {
@@ -25,17 +32,10 @@
           "ofType" : null
         }
       }, {
-        "name" : "int",
+        "name" : "third_name",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "Int",
-          "ofType" : null
-        }
-      }, {
-        "name" : "first",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "ID",
+          "name" : "String",
           "ofType" : null
         }
       }, {
@@ -53,10 +53,10 @@
           "ofType" : null
         }
       }, {
-        "name" : "id",
+        "name" : "int",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "ID",
+          "name" : "Int",
           "ofType" : null
         }
       }, {

@@ -73,8 +73,33 @@ public class GraphQLHandler_Schema_PostgressTest {
     }
 
     @Test
+    void __Field_Types() {
+        runTest("__Field-type.gql", "__Field-type.expect.json");
+    }
+
+    @Test
+    void __Type_Types() {
+        runTest("__Type-type.gql", "__Type-type.expect.json");
+    }
+
+    @Test
+    void MutationType_Types() {
+        runTest("MutationType-type.gql", "MutationType-type.expect.json");
+    }
+
+    @Test
+    void QueryType_Types() {
+        runTest("QueryType-type.gql", "QueryType-type.expect.json");
+    }
+
+    @Test
+    void SortingOrder_Types() {
+        runTest("SortingOrder-type.gql", "SortingOrder-type.expect.json");
+    }
+
+    @Test
     void __type_Types() {
-        runTest("__type-type.gql", "__type-type.expect.json");
+        runTest("__Type-type.gql", "__Type-type.expect.json");
     }
 
     @Test

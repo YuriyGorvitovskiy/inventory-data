@@ -4,13 +4,6 @@
       "kind" : "INPUT_OBJECT",
       "name" : "third_insert",
       "inputFields" : [ {
-        "name" : "bool",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "Boolean",
-          "ofType" : null
-        }
-      }, {
         "name" : "name",
         "type" : {
           "kind" : "SCALAR",
@@ -18,10 +11,10 @@
           "ofType" : null
         }
       }, {
-        "name" : "time",
+        "name" : "indx",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "String",
+          "name" : "Int",
           "ofType" : null
         }
       }, {
@@ -39,10 +32,17 @@
           "ofType" : null
         }
       }, {
-        "name" : "indx",
+        "name" : "bool",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "Int",
+          "name" : "Boolean",
+          "ofType" : null
+        }
+      }, {
+        "name" : "time",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
           "ofType" : null
         }
       } ]

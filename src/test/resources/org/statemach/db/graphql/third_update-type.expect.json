@@ -4,20 +4,6 @@
       "kind" : "INPUT_OBJECT",
       "name" : "third_update",
       "inputFields" : [ {
-        "name" : "bool",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "Boolean",
-          "ofType" : null
-        }
-      }, {
-        "name" : "time",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
         "name" : "first",
         "type" : {
           "kind" : "SCALAR",
@@ -29,6 +15,20 @@
         "type" : {
           "kind" : "SCALAR",
           "name" : "ID",
+          "ofType" : null
+        }
+      }, {
+        "name" : "bool",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "Boolean",
+          "ofType" : null
+        }
+      }, {
+        "name" : "time",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
           "ofType" : null
         }
       } ]

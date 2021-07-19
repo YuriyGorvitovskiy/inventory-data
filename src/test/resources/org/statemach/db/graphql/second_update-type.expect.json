@@ -4,10 +4,10 @@
       "kind" : "INPUT_OBJECT",
       "name" : "second_update",
       "inputFields" : [ {
-        "name" : "third_name",
+        "name" : "first",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "String",
+          "name" : "ID",
           "ofType" : null
         }
       }, {
@@ -25,17 +25,10 @@
           "ofType" : null
         }
       }, {
-        "name" : "int",
+        "name" : "third_name",
         "type" : {
           "kind" : "SCALAR",
-          "name" : "Int",
-          "ofType" : null
-        }
-      }, {
-        "name" : "first",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "ID",
+          "name" : "String",
           "ofType" : null
         }
       }, {
@@ -50,6 +43,13 @@
         "type" : {
           "kind" : "SCALAR",
           "name" : "Float",
+          "ofType" : null
+        }
+      }, {
+        "name" : "int",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "Int",
           "ofType" : null
         }
       }, {
