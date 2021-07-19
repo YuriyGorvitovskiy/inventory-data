@@ -152,6 +152,21 @@ public class GraphQLHandler_Schema_PostgressTest {
         runTest("third_insert-type.gql", "third_insert-type.expect.json");
     }
 
+    @Test
+    void first_update_type() {
+        runTest("first_update-type.gql", "first_update-type.expect.json");
+    }
+
+    @Test
+    void second_update_type() {
+        runTest("second_update-type.gql", "second_update-type.expect.json");
+    }
+
+    @Test
+    void third_updatetype() {
+        runTest("third_update-type.gql", "third_update-type.expect.json");
+    }
+
     void runTest(String queryResource, String expectedResource) {
         // Setup
         final String TYPE_QUERY  = Java.resource(queryResource);

@@ -1,0 +1,51 @@
+{
+  "data" : {
+    "__type" : {
+      "kind" : "INPUT_OBJECT",
+      "name" : "first_update",
+      "inputFields" : [ {
+        "name" : "unlimited",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
+          "ofType" : null
+        }
+      }, {
+        "name" : "third_name",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
+          "ofType" : null
+        }
+      }, {
+        "name" : "varying",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
+          "ofType" : null
+        }
+      }, {
+        "name" : "third_indx",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "Int",
+          "ofType" : null
+        }
+      }, {
+        "name" : "second",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "ID",
+          "ofType" : null
+        }
+      }, {
+        "name" : "fixed",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
+          "ofType" : null
+        }
+      } ]
+    }
+  }
+}

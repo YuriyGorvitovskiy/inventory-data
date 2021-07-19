@@ -1,0 +1,17 @@
+query {
+    __type(name: "third_update") {
+        kind
+        name
+        inputFields {
+            name
+            type {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                }
+            }
+        }
+    }
+}

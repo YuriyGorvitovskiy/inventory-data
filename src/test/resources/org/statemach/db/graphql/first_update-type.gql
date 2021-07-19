@@ -1,0 +1,17 @@
+query {
+    __type(name: "first_update") {
+        kind
+        name
+        inputFields {
+            name
+            type {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                }
+            }
+        }
+    }
+}
