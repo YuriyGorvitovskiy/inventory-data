@@ -1,0 +1,23 @@
+{
+  "data" : {
+    "__type" : {
+      "kind" : "INPUT_OBJECT",
+      "name" : "version_order",
+      "inputFields" : [ {
+        "name" : "product",
+        "type" : {
+          "kind" : "ENUM",
+          "name" : "SortingOrder",
+          "ofType" : null
+        }
+      }, {
+        "name" : "version",
+        "type" : {
+          "kind" : "ENUM",
+          "name" : "SortingOrder",
+          "ofType" : null
+        }
+      } ]
+    }
+  }
+}

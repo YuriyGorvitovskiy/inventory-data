@@ -1,0 +1,17 @@
+query {
+    __type(name: "version_order") {
+        kind
+        name
+        inputFields {
+            name
+            type {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                }
+            }
+        }
+    }
+}

@@ -117,6 +117,26 @@ public class GraphQLHandler_Schema_PostgressTest {
         runTest("version_filter-type.gql", "version_filter-type.expect.json");
     }
 
+    @Test
+    void first_order_type() {
+        runTest("first_order-type.gql", "first_order-type.expect.json");
+    }
+
+    @Test
+    void second_orderr_type() {
+        runTest("second_order-type.gql", "second_order-type.expect.json");
+    }
+
+    @Test
+    void third_order_type() {
+        runTest("third_order-type.gql", "third_order-type.expect.json");
+    }
+
+    @Test
+    void version_order_type() {
+        runTest("version_order-type.gql", "version_order-type.expect.json");
+    }
+
     void runTest(String queryResource, String expectedResource) {
         // Setup
         final String TYPE_QUERY  = Java.resource(queryResource);

@@ -1,0 +1,17 @@
+query {
+    __type(name: "second_order") {
+        kind
+        name
+        inputFields {
+            name
+            type {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                }
+            }
+        }
+    }
+}

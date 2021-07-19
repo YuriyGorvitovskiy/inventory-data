@@ -50,7 +50,8 @@ public class GraphQLQueryOrder {
     GraphQLType buildType(TableInfo table) {
         return GraphQLInputObjectType.newInputObject()
             .name(naming.getOrderTypeName(table.name))
-            .fields(buildFields(table))
+            .fields(buildScalarFields(table))
+            .fields(buildOutgoingFields(table))
             .build();
     }
 
@@ -62,10 +63,16 @@ public class GraphQLQueryOrder {
             .build();
     }
 
-    java.util.List<GraphQLInputObjectField> buildFields(TableInfo table) {
+    java.util.List<GraphQLInputObjectField> buildScalarFields(TableInfo table) {
         return table.columns.values()
             .filter(this::isOrderableColumn)
-            .map(c -> buildField(c, table.outgoing.get(c.name)))
+            .map(c -> buildScalarField(c, table.outgoing.get(c.name)))
+            .toJavaList();
+    }
+
+    java.util.List<GraphQLInputObjectField> buildOutgoingFields(TableInfo table) {
+        return table.outgoing.values()
+            .map(this::buildOutgoingField)
             .toJavaList();
     }
 
@@ -73,12 +80,19 @@ public class GraphQLQueryOrder {
         return PostgresDataType.TSVECTOR != column.type;
     }
 
-    GraphQLInputObjectField buildField(ColumnInfo column, Option<ForeignKey> outgoing) {
+    GraphQLInputObjectField buildScalarField(ColumnInfo column, Option<ForeignKey> outgoing) {
         return GraphQLInputObjectField.newInputObjectField()
             .name(column.name)
             .type(outgoing.isDefined()
                     ? naming.getOrderTypeRef(outgoing.get().toTable)
                     : SORTING_ORDER_TYPE_REF)
+            .build();
+    }
+
+    GraphQLInputObjectField buildOutgoingField(ForeignKey outgoing) {
+        return GraphQLInputObjectField.newInputObjectField()
+            .name(outgoing.name)
+            .type(naming.getOrderTypeRef(outgoing.toTable))
             .build();
     }
 
