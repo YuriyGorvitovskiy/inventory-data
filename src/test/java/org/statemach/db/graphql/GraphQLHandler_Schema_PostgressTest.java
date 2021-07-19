@@ -123,7 +123,7 @@ public class GraphQLHandler_Schema_PostgressTest {
     }
 
     @Test
-    void second_orderr_type() {
+    void second_order_type() {
         runTest("second_order-type.gql", "second_order-type.expect.json");
     }
 
@@ -135,6 +135,21 @@ public class GraphQLHandler_Schema_PostgressTest {
     @Test
     void version_order_type() {
         runTest("version_order-type.gql", "version_order-type.expect.json");
+    }
+
+    @Test
+    void first_insert_type() {
+        runTest("first_insert-type.gql", "first_insert-type.expect.json");
+    }
+
+    @Test
+    void second_insert_type() {
+        runTest("second_insert-type.gql", "second_insert-type.expect.json");
+    }
+
+    @Test
+    void third_insert_type() {
+        runTest("third_insert-type.gql", "third_insert-type.expect.json");
     }
 
     void runTest(String queryResource, String expectedResource) {

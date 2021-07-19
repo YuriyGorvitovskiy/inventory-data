@@ -154,7 +154,7 @@ public class GraphQLMutation {
             .name(naming.getInsertTypeName(table.name))
             .fields(table.columns.values()
                 .filter(this::isInsertableColumn)
-                .map(this::buildMutableField)
+                .map(c -> buildMutableField(table, c))
                 .toJavaList())
             .build();
     }
@@ -164,15 +164,15 @@ public class GraphQLMutation {
             .name(naming.getUpdateTypeName(table.name))
             .fields(table.columns.values()
                 .filter(c -> isUpdatableColumn(table.primary, c))
-                .map(this::buildMutableField)
+                .map(c -> buildMutableField(table, c))
                 .toJavaList())
             .build();
     }
 
-    GraphQLInputObjectField buildMutableField(ColumnInfo column) {
+    GraphQLInputObjectField buildMutableField(TableInfo table, ColumnInfo column) {
         return GraphQLInputObjectField.newInputObjectField()
             .name(column.name)
-            .type(mapping.scalar(column.type))
+            .type(mapping.scalar(table, column))
             .build();
     }
 

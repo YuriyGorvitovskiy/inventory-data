@@ -1,0 +1,51 @@
+{
+  "data" : {
+    "__type" : {
+      "kind" : "INPUT_OBJECT",
+      "name" : "third_insert",
+      "inputFields" : [ {
+        "name" : "bool",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "Boolean",
+          "ofType" : null
+        }
+      }, {
+        "name" : "name",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
+          "ofType" : null
+        }
+      }, {
+        "name" : "time",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "String",
+          "ofType" : null
+        }
+      }, {
+        "name" : "first",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "ID",
+          "ofType" : null
+        }
+      }, {
+        "name" : "second",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "ID",
+          "ofType" : null
+        }
+      }, {
+        "name" : "indx",
+        "type" : {
+          "kind" : "SCALAR",
+          "name" : "Int",
+          "ofType" : null
+        }
+      } ]
+    }
+  }
+}
