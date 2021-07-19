@@ -2,7 +2,7 @@ query {
     __type(name: "first_filter") {
         kind
         name
-        fields {
+        inputFields {
             name
             type {
                 kind

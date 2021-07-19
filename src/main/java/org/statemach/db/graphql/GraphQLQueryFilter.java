@@ -54,7 +54,7 @@ public class GraphQLQueryFilter {
         return table.columns.values()
             .filter(c -> mapping.isFilterable(c.type))
             .filter(c -> !table.outgoing.containsKey(c.name))
-            .map(this::buildScalarField)
+            .map(c -> buildScalarField(table, c))
             .toJavaList();
     }
 
@@ -70,10 +70,10 @@ public class GraphQLQueryFilter {
             .toJavaList();
     }
 
-    GraphQLInputObjectField buildScalarField(ColumnInfo column) {
+    GraphQLInputObjectField buildScalarField(TableInfo table, ColumnInfo column) {
         return GraphQLInputObjectField.newInputObjectField()
             .name(column.name)
-            .type(GraphQLList.list(mapping.scalar(column.type)))
+            .type(GraphQLList.list(mapping.scalar(table, column)))
             .build();
     }
 

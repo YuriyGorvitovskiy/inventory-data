@@ -2,7 +2,7 @@ query {
     __type(name: "version_filter") {
         kind
         name
-        fields {
+        inputFields {
             name
             type {
                 kind

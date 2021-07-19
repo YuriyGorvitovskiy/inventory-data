@@ -1,8 +1,8 @@
 query {
-    __type(name: "third_filter") {
+    __type(name: "__Type") {
         kind
         name
-        inputFields {
+        fields {
             name
             type {
                 kind

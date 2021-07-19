@@ -73,6 +73,11 @@ public class GraphQLHandler_Schema_PostgressTest {
     }
 
     @Test
+    void __type_Types() {
+        runTest("__type-type.gql", "__type-type.expect.json");
+    }
+
+    @Test
     void first_type() {
         runTest("first-type.gql", "first-type.expect.json");
     }
