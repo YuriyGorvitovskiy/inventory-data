@@ -1,0 +1,19 @@
+{
+  "data" : {
+    "third" : [ {
+      "name" : "Name2",
+      "indx" : 1,
+      "first" : "1",
+      "second" : "${0}",
+      "bool" : false,
+      "time" : "${1}"
+    }, {
+      "name" : "Name3",
+      "indx" : 2,
+      "first" : null,
+      "second" : null,
+      "bool" : null,
+      "time" : null
+    } ]
+  }
+}

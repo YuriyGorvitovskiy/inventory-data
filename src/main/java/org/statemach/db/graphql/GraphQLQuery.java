@@ -195,7 +195,6 @@ public class GraphQLQuery {
                                                                             List<Filter> filters,
                                                                             List<OrderBy> orders,
                                                                             Tuple2<Long, Integer> skipLimit) {
-        PrimaryKey                       pk    = preparedJoins.node.primary.get();
         NodeLinkTree<String, From, Join> joins = preparedJoins
             .mapNodesWithIndex(1, (t, i) -> new From(t.name, "q" + i))
             .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));
@@ -205,6 +204,7 @@ public class GraphQLQuery {
         var sort   = order.buildOrders(joins, orders);
 
         if (cteName.isDefined()) {
+            PrimaryKey pk = preparedJoins.node.primary.get();
             joins = NodeLinkTree.<String, From, Join>of(new From(cteName.get(), "f"))
                 .put("", buildCteJoin("f", pk.columns.map(c -> new ForeignKey.Match(c, c)), joins.getNode()), joins);
         }

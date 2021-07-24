@@ -1,0 +1,10 @@
+query {
+    third(filter: {indx:[1, 2]}, order: {name: ASC}) {
+        name
+        indx
+        first
+        second
+        bool
+        time
+    }
+}

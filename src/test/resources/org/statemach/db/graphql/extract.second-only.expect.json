@@ -1,0 +1,27 @@
+{
+  "data" : {
+    "second" : [ {
+      "id" : "${0}",
+      "first" : "1",
+      "one" : "${0}",
+      "two" : "${1}",
+      "third_name" : "Name1",
+      "third_indx" : 0,
+      "double" : 1.2,
+      "int" : 111,
+      "short" : 11,
+      "long" : "11111"
+    }, {
+      "id" : "${2}",
+      "first" : null,
+      "one" : "${2}",
+      "two" : null,
+      "third_name" : null,
+      "third_indx" : null,
+      "double" : null,
+      "int" : null,
+      "short" : null,
+      "long" : null
+    } ]
+  }
+}

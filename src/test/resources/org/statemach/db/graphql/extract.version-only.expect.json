@@ -1,0 +1,8 @@
+{
+  "data" : {
+    "version" : [ {
+      "product" : "${0}",
+      "version" : "${1}"
+    } ]
+  }
+}

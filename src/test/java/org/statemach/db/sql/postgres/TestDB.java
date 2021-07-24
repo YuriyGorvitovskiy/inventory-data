@@ -109,7 +109,7 @@ public class TestDB {
         });
     }
 
-    static void truncateAll() {
+    public static void truncateAll() {
         jdbc.execute(Java.format(SQL.TRUNCATE, schema, TestSchema.TABLE_NAME_FIRST), ps -> {});
         jdbc.execute(Java.format(SQL.TRUNCATE, schema, TestSchema.TABLE_NAME_SECOND), ps -> {});
         jdbc.execute(Java.format(SQL.TRUNCATE, schema, TestSchema.TABLE_NAME_THIRD), ps -> {});
@@ -131,7 +131,7 @@ public class TestDB {
                 TestData.toInject(table, values));
     }
 
-    static void insertAll() {
+    public static void insertAll() {
         insert(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_1_PK, TestData.FIRST_ROW_1_VAL);
         insert(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_2_PK, TestData.FIRST_ROW_2_VAL);
         insert(TestSchema.TABLE_INFO_FIRST, TestData.FIRST_ROW_3_PK, TestData.FIRST_ROW_3_VAL);
