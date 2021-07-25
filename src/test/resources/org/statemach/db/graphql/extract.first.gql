@@ -1,5 +1,5 @@
 query {
-    first(filter: {id:[1, 3]}, order: {id: ASC}) {
+    first(order: {id: ASC}) {
         id
         second
         third_name

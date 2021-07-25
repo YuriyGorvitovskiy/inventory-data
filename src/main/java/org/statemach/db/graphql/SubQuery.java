@@ -8,7 +8,7 @@ import io.vavr.collection.List;
 
 public class SubQuery {
     final String        name;
-    final List<Extract> extracts;
+    final List<ExtractValue> extracts;
     final List<String>  path;
     final ForeignKey    incoming;
     final TableInfo     table;
@@ -16,7 +16,7 @@ public class SubQuery {
 
     SubQuery(String name,
              List<String> path,
-             List<Extract> extracts,
+             List<ExtractValue> extracts,
              ForeignKey incoming,
              TableInfo table,
              GraphQLField field) {
@@ -29,10 +29,10 @@ public class SubQuery {
     }
 
     public static SubQuery of(List<String> path,
-                              List<Extract> extracts,
+                              List<ExtractValue> extracts,
                               ForeignKey incoming,
                               TableInfo table,
                               SelectedField field) {
-        return new SubQuery(path.mkString(Extract.NAME_DELIMITER), path, extracts, incoming, table, GraphQLField.of(field));
+        return new SubQuery(path.mkString(ExtractValue.NAME_DELIMITER), path, extracts, incoming, table, GraphQLField.of(field));
     }
 }

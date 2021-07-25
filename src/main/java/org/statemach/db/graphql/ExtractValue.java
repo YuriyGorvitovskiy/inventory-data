@@ -7,14 +7,14 @@ import org.statemach.util.Java;
 
 import io.vavr.collection.List;
 
-public class Extract {
+public class ExtractValue {
     static final String NAME_DELIMITER = ".";
 
     final String       name;
     final List<String> path;
     final DataType     type;
 
-    Extract(String name, List<String> path, DataType type) {
+    ExtractValue(String name, List<String> path, DataType type) {
         this.name = name;
         this.path = path;
         this.type = type;
@@ -32,14 +32,14 @@ public class Extract {
 
     @Override
     public String toString() {
-        return "Extract@{name: " + name +
+        return "ExtractValue@{name: " + name +
                 ", path: " + path +
                 ", type: " + type +
                 "}";
     }
 
-    public static Extract of(List<String> path, DataType type) {
-        return new Extract(path.mkString(NAME_DELIMITER), path, type);
+    public static ExtractValue of(List<String> path, DataType type) {
+        return new ExtractValue(path.mkString(NAME_DELIMITER), path, type);
     }
 
 }

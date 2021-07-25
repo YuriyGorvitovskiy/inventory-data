@@ -11,28 +11,37 @@ public class GraphQLHandler_Extract_PostgresTest extends GraphQLHandler_Common_P
 
     @Test
     void firstOnly() {
-        runTest("extract.first-only.gql", "extract.first-only.expect.json", TestData.SECOND_ROW_1_ID);
+        runTest("extract.first.gql", "extract.first.expect.json", TestData.SECOND_ROW_1_ID);
     }
 
     @Test
-    void secondOnly() {
-        runTest("extract.second-only.gql",
-                "extract.second-only.expect.json",
+    void second() {
+        runTest("extract.second.gql",
+                "extract.second.expect.json",
                 TestData.SECOND_ROW_1_ID,
                 TestData.SECOND_ROW_2_ID,
                 TestData.SECOND_ROW_3_ID);
     }
 
     @Test
-    void thirdOnly() {
-        runTest("extract.third-only.gql",
-                "extract.third-only.expect.json",
+    void third() {
+        runTest("extract.third.gql",
+                "extract.third.expect.json",
                 TestData.SECOND_ROW_1_ID,
+                Json.toISO8601(TestData.THIRD_ROW_1_TIME),
                 Json.toISO8601(TestData.THIRD_ROW_2_TIME));
     }
 
     @Test
-    void versionOnly() {
-        runTest("extract.version-only.gql", "extract.version-only.expect.json", TestDB.product, TestDB.version);
+    void version() {
+        runTest("extract.version.gql", "extract.version.expect.json", TestDB.product, TestDB.version);
+    }
+
+    @Test
+    void fk_first_second() {
+        runTest("extract.fk_first_second.gql",
+                "extract.fk_first_second.expect.json",
+                TestData.SECOND_ROW_1_ID,
+                TestData.SECOND_ROW_2_ID);
     }
 }

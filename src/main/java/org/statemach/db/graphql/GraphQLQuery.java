@@ -1,5 +1,6 @@
 package org.statemach.db.graphql;
 
+import org.statemach.db.jdbc.Extract;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.PrimaryKey;
 import org.statemach.db.schema.Schema;
@@ -127,11 +128,8 @@ public class GraphQLQuery {
                                                          TableInfo table,
                                                          Option<List<String>> extraColumn,
                                                          Option<Tuple2<String, Set<List<Object>>>> columnNameWithIds) {
-        Tuple2<List<Extract>, List<SubQuery>> selects = extract.parse(table, field.getSelectionSet(), extraColumn);
-        List<Filter>                          filters = filter.parse(
-                table,
-                field.getArgument(Argument.FILTER),
-                columnNameWithIds);
+        ExtractPortion selects = extract.parse(table, field.getSelectionSet(), extraColumn);
+        List<Filter>   filters = filter.parse(table, field.getArgument(Argument.FILTER), columnNameWithIds);
 
         List<OrderBy>         orders    = order.parse(table, field.getArgument(Argument.ORDER));
         Integer               skip      = Java.ifNull((Integer) field.getArgument(Argument.SKIP), 0);
@@ -150,25 +148,38 @@ public class GraphQLQuery {
         }
 
         preparedJoins = order.buildJoins(preparedJoins, orders);
-        preparedJoins = extract.buildJoins(preparedJoins, selects._1);
-        View<Tuple2<String, org.statemach.db.jdbc.Extract<?>>> extractView = buildExtractView(preparedJoins,
+        preparedJoins = extract.buildJoins(preparedJoins, selects.values);
+        View<Tuple2<String, Extract<?>>> extractView = buildExtractView(preparedJoins,
                 cteName,
-                selects._1,
+                selects.values,
                 filters,
                 orders,
                 skipLimit);
 
         List<Map<String, Object>> subResult = dataAccess.query(views, extractView);
-        subResult = selects._2.foldLeft(subResult, this::fetchSubQuery);
+        subResult = selects.queries.foldLeft(subResult, this::fetchSubQuery);
 
-        Map<String, List<String>> paths = selects._1.toMap(e -> new Tuple2<>(e.name, e.path))
-            .merge(selects._2.toMap(q -> new Tuple2<>(q.name, q.path)));
-        return subResult.map(r -> buildGraphQLResult(r, paths));
+        Map<String, List<String>> paths = selects.values.toMap(e -> new Tuple2<>(e.name, e.path))
+            .merge(selects.queries.toMap(q -> new Tuple2<>(q.name, q.path)));
+        return subResult.map(r -> buildGraphQLResult(r, paths, selects.keys));
     }
 
-    java.util.Map<String, Object> buildGraphQLResult(Map<String, Object> row, Map<String, List<String>> paths) {
+    java.util.Map<String, Object> buildGraphQLResult(Map<String, Object> row,
+                                                     Map<String, List<String>> paths,
+                                                     List<ForeignKeyPath> keysPaths) {
+        List<List<String>> nullPaths = keysPaths
+            // If all keys for the path are null, we should drop path the result tree
+            .filter(f -> f.extracts.find(e -> null != row.get(e.name).getOrNull()).isEmpty())
+            .map(f -> f.path);
+
         java.util.Map<String, Object> result = new java.util.HashMap<>();
         row.forEach(t -> putIntoMapTree(result, paths.get(t._1).get(), t._2));
+
+        nullPaths
+            // Remove longer paths if shorter is present
+            .filter(n -> nullPaths.find(p -> n != p && n.startsWith(p)).isEmpty())
+            .forEach(p -> putIntoMapTree(result, p, null));
+
         return result;
     }
 
@@ -189,12 +200,12 @@ public class GraphQLQuery {
         last.put(path.last(), value);
     }
 
-    View<Tuple2<String, org.statemach.db.jdbc.Extract<?>>> buildExtractView(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins,
-                                                                            Option<String> cteName,
-                                                                            List<Extract> extracts,
-                                                                            List<Filter> filters,
-                                                                            List<OrderBy> orders,
-                                                                            Tuple2<Long, Integer> skipLimit) {
+    View<Tuple2<String, Extract<?>>> buildExtractView(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins,
+                                                      Option<String> cteName,
+                                                      List<ExtractValue> extracts,
+                                                      List<Filter> filters,
+                                                      List<OrderBy> orders,
+                                                      Tuple2<Long, Integer> skipLimit) {
         NodeLinkTree<String, From, Join> joins = preparedJoins
             .mapNodesWithIndex(1, (t, i) -> new From(t.name, "q" + i))
             .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));
@@ -209,7 +220,7 @@ public class GraphQLQuery {
                 .put("", buildCteJoin("f", pk.columns.map(c -> new ForeignKey.Match(c, c)), joins.getNode()), joins);
         }
 
-        return new View<Tuple2<String, org.statemach.db.jdbc.Extract<?>>>(
+        return new View<Tuple2<String, Extract<?>>>(
                 "",
                 joins,
                 where,

@@ -11,7 +11,18 @@
       "int" : 111,
       "short" : 11,
       "long" : "11111"
-    }, {
+   }, {
+      "id" : "${1}",
+      "first" : "1",
+      "one" : "${1}",
+      "two" : "${2}",
+      "third_name" : "Name1",
+      "third_indx" : 0,
+      "double" : 3.4,
+      "int" : 222,
+      "short" : 22,
+      "long" : "22222"
+     }, {
       "id" : "${2}",
       "first" : null,
       "one" : "${2}",

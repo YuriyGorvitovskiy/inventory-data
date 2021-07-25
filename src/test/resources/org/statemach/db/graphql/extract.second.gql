@@ -1,5 +1,5 @@
 query {
-    second(filter: {id:["${0}", "${2}"]}, order: {int: ASC}) {
+    second(order: {int: ASC}) {
         id
         first
         one

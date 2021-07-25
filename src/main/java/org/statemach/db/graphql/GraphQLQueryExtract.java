@@ -1,5 +1,6 @@
 package org.statemach.db.graphql;
 
+import org.statemach.db.jdbc.Extract;
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.Schema;
@@ -19,7 +20,6 @@ import graphql.schema.GraphQLType;
 import graphql.schema.SelectedField;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
-import io.vavr.control.Either;
 import io.vavr.control.Option;
 
 public class GraphQLQueryExtract {
@@ -109,31 +109,29 @@ public class GraphQLQueryExtract {
         return mapping.isExtractable(column.type);
     }
 
-    public Tuple2<List<Extract>, List<SubQuery>> parse(TableInfo table,
-                                                       DataFetchingFieldSelectionSet selection,
-                                                       Option<List<String>> extraColumn) {
-        List<Either<Extract, SubQuery>> result = parse(List.empty(), table, selection)
-            .appendAll(parseExtraColumn(table, extraColumn));
-
-        return result.partition(e -> e.isLeft())
-            .map1(l -> l.map(e -> e.getLeft()).distinctBy(e -> e.name))
-            .map2(l -> l.map(e -> e.get()));
+    public ExtractPortion parse(TableInfo table,
+                                DataFetchingFieldSelectionSet selection,
+                                Option<List<String>> extraColumn) {
+        return parse(List.empty(), table, selection)
+            .append(parseExtraColumn(table, extraColumn))
+            .distinctValues();
     }
 
-    List<Either<Extract, SubQuery>> parseExtraColumn(TableInfo table, Option<List<String>> extraColumn) {
+    ExtractPortion parseExtraColumn(TableInfo table, Option<List<String>> extraColumn) {
         if (extraColumn.isEmpty()) {
-            return List.empty();
+            return ExtractPortion.EMPTY;
         }
+
         List<ColumnInfo> columns = extraColumn.get().map(c -> table.columns.get(c).get());
-        return columns.map(c -> Either.left(Extract.of(List.of(c.name), c.type)));
+        return ExtractPortion.ofValues(columns.map(c -> ExtractValue.of(List.of(c.name), c.type)));
     }
 
-    List<Either<Extract, SubQuery>> parse(List<String> path, TableInfo table, DataFetchingFieldSelectionSet selection) {
+    ExtractPortion parse(List<String> path, TableInfo table, DataFetchingFieldSelectionSet selection) {
         return List.ofAll(selection.getImmediateFields())
-            .flatMap(f -> parse(path, table, f));
+            .foldLeft(ExtractPortion.EMPTY, (a, f) -> a.append(parse(path, table, f)));
     }
 
-    List<Either<Extract, SubQuery>> parse(List<String> tablePath, TableInfo table, SelectedField field) {
+    ExtractPortion parse(List<String> tablePath, TableInfo table, SelectedField field) {
         String       name      = field.getName();
         List<String> fieldPath = tablePath.append(name);
 
@@ -141,35 +139,48 @@ public class GraphQLQueryExtract {
         if (outgoing.isDefined()) {
             Option<TableInfo> join = schema.tables.get(outgoing.get().toTable);
             if (join.isEmpty()) {
-                return List.empty();
+                return ExtractPortion.EMPTY;
             }
-            return parse(fieldPath, join.get(), field.getSelectionSet());
+            return outgoingExtract(fieldPath, outgoing.get(), join.get())
+                .append(parse(fieldPath, join.get(), field.getSelectionSet()));
         }
 
         Option<ColumnInfo> column = table.columns.get(name);
         if (column.isDefined()) {
-            return List.of(Either.left(Extract.of(fieldPath, column.get().type)));
+            return ExtractPortion.ofValue(ExtractValue.of(fieldPath, column.get().type));
         }
 
         Option<ForeignKey> incoming = table.incoming.get(naming.getReverseName(name));
         if (incoming.isDefined()) {
             Option<TableInfo> join = schema.tables.get(incoming.get().fromTable);
-            if (column.isEmpty() || join.isEmpty()) {
-                return List.empty();
+            if (join.isEmpty()) {
+                return ExtractPortion.EMPTY;
             }
-            List<Extract> extracts = incoming.get().matchingColumns
-                .map(m -> {
-                                           ColumnInfo c = table.columns.get(m.to).get();
-                                           return Extract.of(tablePath.append(c.name), c.type);
-                                       });
-            SubQuery      query    = SubQuery.of(fieldPath, extracts, incoming.get(), join.get(), field);
-            return extracts.map(Either::<Extract, SubQuery>left).append(Either.right(query));
+            return incomingExtract(fieldPath, incoming.get(), table, join.get(), field);
         }
-        return List.empty();
+        return ExtractPortion.EMPTY;
+    }
+
+    ExtractPortion outgoingExtract(List<String> path, ForeignKey outgoing, TableInfo to) {
+        return ExtractPortion.ofKey(path, foreignKeyExtracts(path, outgoing, to));
+    }
+
+    ExtractPortion incomingExtract(List<String> path,
+                                   ForeignKey incoming,
+                                   TableInfo to,
+                                   TableInfo from,
+                                   SelectedField field) {
+        SubQuery query = SubQuery.of(path, foreignKeyExtracts(path, incoming, to), incoming, from, field);
+        return ExtractPortion.ofQuery(query);
+    }
+
+    List<ExtractValue> foreignKeyExtracts(List<String> path, ForeignKey foreignKey, TableInfo to) {
+        return foreignKey.matchingColumns
+            .map(m -> ExtractValue.of(path.append(m.to), to.columns.get(m.to).get().type));
     }
 
     public NodeLinkTree<String, TableInfo, ForeignKeyJoin> buildJoins(NodeLinkTree<String, TableInfo, ForeignKeyJoin> tree,
-                                                                      List<Extract> extracts) {
+                                                                      List<ExtractValue> extracts) {
         return extracts.foldLeft(tree,
                 (t, e) -> t.putIfMissed(e.path.dropRight(1), (p, c) -> buildJoin(p, c, Join.Kind.LEFT)));
     }
@@ -179,13 +190,13 @@ public class GraphQLQueryExtract {
         return new Tuple2<>(new ForeignKeyJoin(join, outgoing, true), schema.tables.get(outgoing.toTable).get());
     }
 
-    public List<Select<Tuple2<String, org.statemach.db.jdbc.Extract<?>>>> buildExtracts(NodeLinkTree<String, From, Join> joinTree,
-                                                                                        List<Extract> extracts) {
+    public List<Select<Tuple2<String, Extract<?>>>> buildExtracts(NodeLinkTree<String, From, Join> joinTree,
+                                                                  List<ExtractValue> extracts) {
         return extracts.map(e -> buildExtract(joinTree, e));
     }
 
-    Select<Tuple2<String, org.statemach.db.jdbc.Extract<?>>> buildExtract(NodeLinkTree<String, From, Join> joinTree,
-                                                                          Extract extract) {
+    Select<Tuple2<String, Extract<?>>> buildExtract(NodeLinkTree<String, From, Join> joinTree,
+                                                    ExtractValue extract) {
         String alias  = joinTree.getNode(extract.path.dropRight(1)).get().alias;
         String column = extract.path.last();
         return Select.of(alias, column, new Tuple2<>(extract.name, mapping.extract(extract.type)));
