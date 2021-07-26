@@ -1,6 +1,9 @@
 package org.statemach.db.graphql;
 
+import java.util.Objects;
+
 import org.statemach.db.sql.Select;
+import org.statemach.util.Java;
 
 import io.vavr.collection.List;
 
@@ -21,4 +24,20 @@ public class OrderBy {
         return Select.of(tableAlias, columnName, assending);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, assending);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return Java.equalsByFields(this, other, t -> t.path, t -> t.assending);
+    }
+
+    @Override
+    public String toString() {
+        return "OrderBy@{path: " + path +
+                ", assending: " + assending +
+                "}";
+    }
 }

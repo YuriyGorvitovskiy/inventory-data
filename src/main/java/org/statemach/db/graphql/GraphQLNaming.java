@@ -1,5 +1,7 @@
 package org.statemach.db.graphql;
 
+import org.statemach.db.schema.ForeignKey;
+
 import graphql.schema.GraphQLTypeReference;
 
 public class GraphQLNaming {
@@ -19,6 +21,10 @@ public class GraphQLNaming {
         static final String DELETE = "_delete";
 
         static final String REVERSE = "_reverse";
+
+        static final String FROM = "_from";
+        static final String TO   = "_to";
+
     }
 
     public GraphQLTypeReference getExtractTypeRef(String tableName) {
@@ -83,7 +89,15 @@ public class GraphQLNaming {
 
     public String getForeignKey(String reverse) {
         return reverse.endsWith(Suffix.REVERSE)
-                ? reverse.substring(reverse.length() - Suffix.REVERSE.length())
+                ? reverse.substring(0, reverse.length() - Suffix.REVERSE.length())
                 : reverse;
+    }
+
+    public String getFromType(ForeignKey fk) {
+        return fk.name + Suffix.FROM;
+    }
+
+    public String getToType(ForeignKey fk) {
+        return fk.name + Suffix.TO;
     }
 }

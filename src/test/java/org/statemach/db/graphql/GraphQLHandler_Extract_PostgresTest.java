@@ -10,7 +10,7 @@ import org.statemach.util.Json;
 public class GraphQLHandler_Extract_PostgresTest extends GraphQLHandler_Common_PostgresTest {
 
     @Test
-    void firstOnly() {
+    void first() {
         runTest("extract.first.gql", "extract.first.expect.json", TestData.SECOND_ROW_1_ID);
     }
 
@@ -44,4 +44,47 @@ public class GraphQLHandler_Extract_PostgresTest extends GraphQLHandler_Common_P
                 TestData.SECOND_ROW_1_ID,
                 TestData.SECOND_ROW_2_ID);
     }
+
+    @Test
+    void fk_first_second_reverse() {
+        runTest("extract.fk_first_second_reverse.gql",
+                "extract.fk_first_second_reverse.expect.json",
+                TestData.SECOND_ROW_1_ID,
+                TestData.SECOND_ROW_2_ID,
+                TestData.SECOND_ROW_3_ID);
+    }
+
+    @Test
+    void fk_first_third() {
+        runTest("extract.fk_first_third.gql",
+                "extract.fk_first_third.expect.json",
+                TestData.SECOND_ROW_1_ID,
+                TestData.THIRD_ROW_1_TIME);
+    }
+
+    @Test
+    void fk_first_third_reverse() {
+        runTest("extract.fk_first_third_reverse.gql",
+                "extract.fk_first_third_reverse.expect.json",
+                TestData.THIRD_ROW_1_TIME,
+                TestData.THIRD_ROW_2_TIME);
+    }
+
+    @Test
+    void fk_second_one_fk_second_two() {
+        runTest("extract.fk_second_one-fk_second_two.gql",
+                "extract.fk_second_one-fk_second_two.expect.json",
+                TestData.SECOND_ROW_1_ID,
+                TestData.SECOND_ROW_2_ID,
+                TestData.SECOND_ROW_3_ID);
+    }
+
+    @Test
+    void fk_third_first_fk_third_second() {
+        runTest("extract.fk_third_first-fk_third_second.gql",
+                "extract.fk_third_first-fk_third_second.expect.json",
+                TestData.THIRD_ROW_1_TIME,
+                TestData.THIRD_ROW_2_TIME);
+    }
+
 }

@@ -183,7 +183,7 @@ public class GraphQLQueryFilter {
     Filter buildSubQueryFilter(TableInfo table, ForeignKey foreignKey, boolean reverse, Set<List<Object>> ids) {
         if (foreignKey.matchingColumns.size() == 1) {
             ForeignKey.Match match  = foreignKey.matchingColumns.get();
-            String           column = reverse ? match.from : match.to;
+            String           column = reverse ? match.to : match.from;
             DataType         type   = table.columns.get(column).get().type;
             return Filter.of(
                     List.of(column),

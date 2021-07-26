@@ -23,9 +23,9 @@ public class TableInfo_UnitTest {
     final DataType DATA_TYPE_2 = new DataType("DataType2");
     final DataType DATA_TYPE_3 = new DataType("DataType3");
 
-    final ColumnInfo COLUMN_1 = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1);
-    final ColumnInfo COLUMN_2 = new ColumnInfo(COLUMN_NAME_2, DATA_TYPE_2);
-    final ColumnInfo COLUMN_3 = new ColumnInfo(COLUMN_NAME_3, DATA_TYPE_3);
+    final ColumnInfo COLUMN_1 = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1, null);
+    final ColumnInfo COLUMN_2 = new ColumnInfo(COLUMN_NAME_2, DATA_TYPE_2, null);
+    final ColumnInfo COLUMN_3 = new ColumnInfo(COLUMN_NAME_3, DATA_TYPE_3, null);
 
     final Map<String, ColumnInfo> COLUMNS_1 = List.of(COLUMN_1, COLUMN_2).toLinkedMap(c -> c.name, c -> c);
     final Map<String, ColumnInfo> COLUMNS_2 = List.of(COLUMN_2, COLUMN_1).toLinkedMap(c -> c.name, c -> c);

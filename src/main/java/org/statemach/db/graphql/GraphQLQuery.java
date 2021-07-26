@@ -1,6 +1,7 @@
 package org.statemach.db.graphql;
 
 import org.statemach.db.jdbc.Extract;
+import org.statemach.db.schema.CompositeType;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.PrimaryKey;
 import org.statemach.db.schema.Schema;
@@ -9,6 +10,7 @@ import org.statemach.db.sql.DataAccess;
 import org.statemach.db.sql.From;
 import org.statemach.db.sql.Join;
 import org.statemach.db.sql.SQLBuilder;
+import org.statemach.db.sql.SchemaAccess;
 import org.statemach.db.sql.Select;
 import org.statemach.db.sql.View;
 import org.statemach.util.Java;
@@ -42,6 +44,7 @@ public class GraphQLQuery {
     final Schema              schema;
     final DataAccess          dataAccess;
     final SQLBuilder          sqlBuilder;
+    final GraphQLNaming       naming;
     final GraphQLQueryExtract extract;
     final GraphQLQueryFilter  filter;
     final GraphQLQueryOrder   order;
@@ -49,12 +52,14 @@ public class GraphQLQuery {
     GraphQLQuery(Schema schema,
                  DataAccess dataAccess,
                  SQLBuilder sqlBuilder,
+                 GraphQLNaming naming,
                  GraphQLQueryExtract extract,
                  GraphQLQueryFilter filter,
                  GraphQLQueryOrder order) {
         this.schema = schema;
         this.dataAccess = dataAccess;
         this.sqlBuilder = sqlBuilder;
+        this.naming = naming;
         this.extract = extract;
         this.filter = filter;
         this.order = order;
@@ -66,9 +71,39 @@ public class GraphQLQuery {
         return new GraphQLQuery(schema,
                 dataAccess,
                 dataAccess.builder(),
+                naming,
                 new GraphQLQueryExtract(schema, naming, mapping),
                 new GraphQLQueryFilter(schema, dataAccess.builder(), naming, mapping),
                 new GraphQLQueryOrder(schema, naming));
+    }
+
+    public void instrumentSchema(SchemaAccess schemaAccess) {
+        List<CompositeType> existing = schemaAccess.getAllCompositeTypes();
+        List<CompositeType> required = requiredCompositeTypes();
+
+        List<CompositeType> create = required.removeAll(existing);
+        List<String>        delete = create.map(c -> c.name).retainAll(existing.map(c -> c.name));
+
+        delete.forEach(c -> schemaAccess.dropCompositeType(c));
+        create.forEach(c -> schemaAccess.createCompositeType(c));
+    }
+
+    public List<CompositeType> requiredCompositeTypes() {
+        return schema.tables.values()
+            .flatMap(t -> t.outgoing.values())
+            .filter(f -> f.matchingColumns.size() > 1)
+            .distinct()
+            .flatMap(f -> requiredCompositeTypes(f))
+            .toList();
+    }
+
+    public List<CompositeType> requiredCompositeTypes(ForeignKey fk) {
+        TableInfo from = schema.tables.get(fk.fromTable).get();
+        TableInfo to   = schema.tables.get(fk.toTable).get();
+
+        return List.of(
+                new CompositeType(naming.getFromType(fk), fk.matchingColumns.map(c -> from.columns.get(c.from).get())),
+                new CompositeType(naming.getToType(fk), fk.matchingColumns.map(c -> to.columns.get(c.to).get())));
     }
 
     public GraphQLObjectType buildQueryType() {
@@ -172,14 +207,18 @@ public class GraphQLQuery {
             .filter(f -> f.extracts.find(e -> null != row.get(e.name).getOrNull()).isEmpty())
             .map(f -> f.path);
 
-        java.util.Map<String, Object> result = new java.util.HashMap<>();
-        row.forEach(t -> putIntoMapTree(result, paths.get(t._1).get(), t._2));
-
-        nullPaths
+        List<List<String>> topNullPaths = nullPaths
             // Remove longer paths if shorter is present
-            .filter(n -> nullPaths.find(p -> n != p && n.startsWith(p)).isEmpty())
-            .forEach(p -> putIntoMapTree(result, p, null));
+            .filter(n -> nullPaths.find(p -> n != p && n.startsWith(p)).isEmpty());
 
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+
+        paths
+            // Filter paths that not starts with any of Top Null Path
+            .filter(t -> topNullPaths.find(n -> t._2.startsWith(n)).isEmpty())
+            .forEach(t -> putIntoMapTree(result, t._2, row.get(t._1).getOrNull()));
+
+        topNullPaths.forEach(p -> putIntoMapTree(result, p, null));
         return result;
     }
 
@@ -271,4 +310,5 @@ public class GraphQLQuery {
                             Select.of(cteAlias, m.from),
                             Select.of(right.alias, m.to)))));
     }
+
 }

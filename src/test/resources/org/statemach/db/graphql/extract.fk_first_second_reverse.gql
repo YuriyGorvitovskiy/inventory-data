@@ -1,0 +1,23 @@
+query {
+    second(order: {int: ASC}) {
+        id
+        first
+        one
+        two
+        third_name
+        third_indx
+        double
+        int
+        short
+        long
+        fk_first_second_reverse(order: {id: DESC}) {
+            id
+            second
+            third_name
+            third_indx
+            fixed
+            varying
+            unlimited
+        }
+    }
+}

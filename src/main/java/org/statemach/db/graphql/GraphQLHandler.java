@@ -4,8 +4,9 @@ import java.io.IOException;
 
 import org.statemach.db.schema.Schema;
 import org.statemach.db.sql.DataAccess;
-import org.statemach.util.Json;
+import org.statemach.db.sql.SchemaAccess;
 import org.statemach.util.Http;
+import org.statemach.util.Json;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -45,12 +46,14 @@ public class GraphQLHandler implements HttpHandler {
         this.graphQL = graphQL;
     }
 
-    public static GraphQLHandler build(Schema schema, DataAccess dataAccess) {
+    public static GraphQLHandler build(Schema schema, SchemaAccess schemaAccess, DataAccess dataAccess) {
         GraphQLNaming   naming   = new GraphQLNaming();
         GraphQLQuery    query    = GraphQLQuery.of(schema, naming, dataAccess);
         GraphQLMutation mutation = GraphQLMutation.of(schema, naming, dataAccess);
         GraphQLSchema   schemaQL = buildSchema(query, mutation);
         GraphQL         graphQL  = GraphQL.newGraphQL(schemaQL).build();
+
+        query.instrumentSchema(schemaAccess);
 
         return new GraphQLHandler(graphQL);
     }

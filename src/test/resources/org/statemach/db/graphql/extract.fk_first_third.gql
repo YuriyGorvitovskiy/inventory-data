@@ -1,0 +1,19 @@
+query {
+    first(order: {id: ASC}) {
+        id
+        second
+        third_name
+        third_indx
+        fixed
+        varying
+        unlimited
+        fk_first_third {
+            name
+            indx
+            first
+            second
+            bool
+            time
+        }
+    }
+}

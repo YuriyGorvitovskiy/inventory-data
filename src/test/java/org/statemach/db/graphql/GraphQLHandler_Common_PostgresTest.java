@@ -30,11 +30,11 @@ import com.sun.net.httpserver.HttpExchange;
 import io.vavr.collection.HashMap;
 
 public class GraphQLHandler_Common_PostgresTest {
-    final DataAccess   dataAccess   = PostgresDataAccess.of(TestDB.jdbc, TestDB.schema);
     final SchemaAccess schemaAccess = new PostgresSchemaAccess(TestDB.jdbc, TestDB.schema);
+    final DataAccess   dataAccess   = PostgresDataAccess.of(TestDB.jdbc, TestDB.schema);
     final Schema       schema       = Schema.from(schemaAccess);
 
-    final GraphQLHandler subject = GraphQLHandler.build(schema, dataAccess);
+    final GraphQLHandler subject = GraphQLHandler.build(schema, schemaAccess, dataAccess);
 
     final HttpExchange exchange        = mock(HttpExchange.class);
     final Headers      responseHeaders = mock(Headers.class);

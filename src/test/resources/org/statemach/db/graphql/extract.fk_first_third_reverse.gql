@@ -1,0 +1,19 @@
+query {
+    third(order: {name: ASC}) {
+        name
+        indx
+        first
+        second
+        bool
+        time
+        fk_first_third_reverse(order: {id: DESC}) {
+            id
+            second
+            third_name
+            third_indx
+            fixed
+            varying
+            unlimited
+        }
+    }
+}

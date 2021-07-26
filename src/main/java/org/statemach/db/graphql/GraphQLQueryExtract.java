@@ -150,7 +150,7 @@ public class GraphQLQueryExtract {
             return ExtractPortion.ofValue(ExtractValue.of(fieldPath, column.get().type));
         }
 
-        Option<ForeignKey> incoming = table.incoming.get(naming.getReverseName(name));
+        Option<ForeignKey> incoming = table.incoming.get(naming.getForeignKey(name));
         if (incoming.isDefined()) {
             Option<TableInfo> join = schema.tables.get(incoming.get().fromTable);
             if (join.isEmpty()) {
@@ -170,7 +170,7 @@ public class GraphQLQueryExtract {
                                    TableInfo to,
                                    TableInfo from,
                                    SelectedField field) {
-        SubQuery query = SubQuery.of(path, foreignKeyExtracts(path, incoming, to), incoming, from, field);
+        SubQuery query = SubQuery.of(path, foreignKeyExtracts(path.dropRight(1), incoming, to), incoming, from, field);
         return ExtractPortion.ofQuery(query);
     }
 

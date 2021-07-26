@@ -1,0 +1,17 @@
+query {
+    third(order: {name: ASC}) {
+        bool
+        time
+        fk_third_first {
+            fixed
+            varying
+            unlimited
+        }
+        fk_third_second {
+            double
+            int
+            short
+            long
+        }
+    }
+}

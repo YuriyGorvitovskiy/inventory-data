@@ -1,0 +1,99 @@
+{
+  "data" : {
+    "second" : [ {
+      "id" : "${0}",
+      "first" : "1",
+      "one" : "${0}",
+      "two" : "${1}",
+      "third_name" : "Name1",
+      "third_indx" : 0,
+      "double" : 1.2,
+      "int" : 111,
+      "short" : 11,
+      "long" : "11111",
+      "fk_second_second_one" : {
+        "id" : "${0}",
+        "first" : "1",
+        "one" : "${0}",
+        "two" : "${1}",
+        "third_name" : "Name1",
+        "third_indx" : 0,
+        "double" : 1.2,
+        "int" : 111,
+        "short" : 11,
+        "long" : "11111"
+      },
+      "fk_second_second_two" : {
+        "id" : "${1}",
+        "first" : "1",
+        "one" : "${1}",
+        "two" : "${2}",
+        "third_name" : "Name1",
+        "third_indx" : 0,
+        "double" : 3.4,
+        "int" : 222,
+        "short" : 22,
+        "long" : "22222"
+      }
+    }, {
+      "id" : "${1}",
+      "first" : "1",
+      "one" : "${1}",
+      "two" : "${2}",
+      "third_name" : "Name1",
+      "third_indx" : 0,
+      "double" : 3.4,
+      "int" : 222,
+      "short" : 22,
+      "long" : "22222",
+      "fk_second_second_one" : {
+        "id" : "${1}",
+        "first" : "1",
+        "one" : "${1}",
+        "two" : "${2}",
+        "third_name" : "Name1",
+        "third_indx" : 0,
+        "double" : 3.4,
+        "int" : 222,
+        "short" : 22,
+        "long" : "22222"
+      },
+      "fk_second_second_two" : {
+        "id" : "${2}",
+        "first" : null,
+        "one" : "${2}",
+        "two" : null,
+        "third_name" : null,
+        "third_indx" : null,
+        "double" : null,
+        "int" : null,
+        "short" : null,
+        "long" : null
+      }
+    }, {
+      "id" : "${2}",
+      "first" : null,
+      "one" : "${2}",
+      "two" : null,
+      "third_name" : null,
+      "third_indx" : null,
+      "double" : null,
+      "int" : null,
+      "short" : null,
+      "long" : null,
+      "fk_second_second_one" : {
+        "id" : "${2}",
+        "first" : null,
+        "one" : "${2}",
+        "two" : null,
+        "third_name" : null,
+        "third_indx" : null,
+        "double" : null,
+        "int" : null,
+        "short" : null,
+        "long" : null
+      },
+      "fk_second_second_two" : null
+    } ]
+  }
+}

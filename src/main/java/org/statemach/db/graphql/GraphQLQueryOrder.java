@@ -1,5 +1,6 @@
 package org.statemach.db.graphql;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import org.statemach.db.schema.ColumnInfo;
@@ -97,7 +98,11 @@ public class GraphQLQueryOrder {
     }
 
     public List<OrderBy> parse(TableInfo table, Object argument) {
-        return parse(List.empty(), table, argument);
+        if (!(argument instanceof Collection)) {
+            return List.empty();
+        }
+        return List.ofAll((Collection<?>) argument)
+            .flatMap(a -> parse(List.empty(), table, a));
     }
 
     @SuppressWarnings("unchecked")
@@ -123,7 +128,7 @@ public class GraphQLQueryOrder {
 
         Option<ColumnInfo> column = table.columns.get(field);
         if (column.isDefined()) {
-            return List.of(new OrderBy(path, Sort.DESC.equalsIgnoreCase(Objects.toString(value))));
+            return List.of(new OrderBy(path.append(field), !Sort.DESC.equalsIgnoreCase(Objects.toString(value))));
         }
         return List.empty();
     }

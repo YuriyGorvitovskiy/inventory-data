@@ -7,18 +7,22 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 
+import io.vavr.control.Option;
+
 public class ColumnInfo_UnitTest {
 
-    final String   COLUMN_NAME_1 = "Column1";
-    final String   COLUMN_NAME_2 = "Column2";
-    final DataType DATA_TYPE_1   = mock(DataType.class);
-    final DataType DATA_TYPE_2   = mock(DataType.class);
+    final String          COLUMN_NAME_1 = "Column1";
+    final String          COLUMN_NAME_2 = "Column2";
+    final DataType        DATA_TYPE_1   = mock(DataType.class);
+    final DataType        DATA_TYPE_2   = mock(DataType.class);
+    final Option<Integer> SIZE_1        = Option.of(256);
+    final Option<Integer> SIZE_2        = Option.none();
 
-    final ColumnInfo subject = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1);
-    final ColumnInfo other1  = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1);
-    final ColumnInfo other2  = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_2);
-    final ColumnInfo other3  = new ColumnInfo(COLUMN_NAME_2, DATA_TYPE_1);
-    final ColumnInfo other4  = new ColumnInfo(COLUMN_NAME_2, DATA_TYPE_2);
+    final ColumnInfo subject = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1, SIZE_1);
+    final ColumnInfo other1  = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1, SIZE_1);
+    final ColumnInfo other2  = new ColumnInfo(COLUMN_NAME_2, DATA_TYPE_1, SIZE_1);
+    final ColumnInfo other3  = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_2, SIZE_1);
+    final ColumnInfo other4  = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1, SIZE_2);
 
     @Test
     void hashCode_test() {
@@ -55,5 +59,6 @@ public class ColumnInfo_UnitTest {
         // Verify
         assertTrue(result.contains(COLUMN_NAME_1));
         assertTrue(result.contains(DATA_TYPE_1.toString()));
+        assertTrue(result.contains(SIZE_1.get().toString()));
     }
 }

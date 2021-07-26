@@ -58,38 +58,38 @@ public interface TestSchema {
             TABLE_NAME_SECOND,
             List.of(new Match("second", "id")));
 
-    static final ColumnInfo COLUMN_FIRST_ID         = new ColumnInfo("id", PostgresDataType.BIGINT);
-    static final ColumnInfo COLUMN_FIRST_SECOND     = new ColumnInfo("second", PostgresDataType.UUID);
-    static final ColumnInfo COLUMN_FIRST_THIRD_NAME = new ColumnInfo("third_name", PostgresDataType.NAME);
-    static final ColumnInfo COLUMN_FIRST_THIRD_INDX = new ColumnInfo("third_indx", PostgresDataType.INTEGER);
-    static final ColumnInfo COLUMN_FIRST_FIXED      = new ColumnInfo("fixed", PostgresDataType.CHARACTER);
-    static final ColumnInfo COLUMN_FIRST_VARYING    = new ColumnInfo("varying", PostgresDataType.CHARACTER_VARYING);
-    static final ColumnInfo COLUMN_FIRST_UNLIMITED  = new ColumnInfo("unlimited", PostgresDataType.TEXT);
-    static final ColumnInfo COLUMN_FIRST_SEARCH     = new ColumnInfo("search", PostgresDataType.TSVECTOR);
+    static final ColumnInfo COLUMN_FIRST_ID         = ColumnInfo.of("id", PostgresDataType.BIGINT);
+    static final ColumnInfo COLUMN_FIRST_SECOND     = ColumnInfo.of("second", PostgresDataType.UUID);
+    static final ColumnInfo COLUMN_FIRST_THIRD_NAME = ColumnInfo.of("third_name", PostgresDataType.NAME);
+    static final ColumnInfo COLUMN_FIRST_THIRD_INDX = ColumnInfo.of("third_indx", PostgresDataType.INTEGER);
+    static final ColumnInfo COLUMN_FIRST_FIXED      = ColumnInfo.of("fixed", PostgresDataType.CHARACTER, 256);
+    static final ColumnInfo COLUMN_FIRST_VARYING    = ColumnInfo.of("varying", PostgresDataType.CHARACTER_VARYING, 256);
+    static final ColumnInfo COLUMN_FIRST_UNLIMITED  = ColumnInfo.of("unlimited", PostgresDataType.TEXT);
+    static final ColumnInfo COLUMN_FIRST_SEARCH     = ColumnInfo.of("search", PostgresDataType.TSVECTOR);
 
-    static final ColumnInfo COLUMN_SECOND_ID         = new ColumnInfo("id", PostgresDataType.UUID);
-    static final ColumnInfo COLUMN_SECOND_FIRST      = new ColumnInfo("first", PostgresDataType.BIGINT);
-    static final ColumnInfo COLUMN_SECOND_ONE        = new ColumnInfo("one", PostgresDataType.UUID);
-    static final ColumnInfo COLUMN_SECOND_TWO        = new ColumnInfo("two", PostgresDataType.UUID);
-    static final ColumnInfo COLUMN_SECOND_THIRD_NAME = new ColumnInfo("third_name", PostgresDataType.NAME);
-    static final ColumnInfo COLUMN_SECOND_THIRD_INDX = new ColumnInfo("third_indx", PostgresDataType.INTEGER);
-    static final ColumnInfo COLUMN_SECOND_DOUBLE     = new ColumnInfo("double", PostgresDataType.DOUBLE_PRECISION);
-    static final ColumnInfo COLUMN_SECOND_INT        = new ColumnInfo("int", PostgresDataType.INTEGER);
-    static final ColumnInfo COLUMN_SECOND_SHORT      = new ColumnInfo("short", PostgresDataType.SMALLINT);
-    static final ColumnInfo COLUMN_SECOND_LONG       = new ColumnInfo("long", PostgresDataType.BIGINT);
+    static final ColumnInfo COLUMN_SECOND_ID         = ColumnInfo.of("id", PostgresDataType.UUID);
+    static final ColumnInfo COLUMN_SECOND_FIRST      = ColumnInfo.of("first", PostgresDataType.BIGINT);
+    static final ColumnInfo COLUMN_SECOND_ONE        = ColumnInfo.of("one", PostgresDataType.UUID);
+    static final ColumnInfo COLUMN_SECOND_TWO        = ColumnInfo.of("two", PostgresDataType.UUID);
+    static final ColumnInfo COLUMN_SECOND_THIRD_NAME = ColumnInfo.of("third_name", PostgresDataType.NAME);
+    static final ColumnInfo COLUMN_SECOND_THIRD_INDX = ColumnInfo.of("third_indx", PostgresDataType.INTEGER);
+    static final ColumnInfo COLUMN_SECOND_DOUBLE     = ColumnInfo.of("double", PostgresDataType.DOUBLE_PRECISION);
+    static final ColumnInfo COLUMN_SECOND_INT        = ColumnInfo.of("int", PostgresDataType.INTEGER);
+    static final ColumnInfo COLUMN_SECOND_SHORT      = ColumnInfo.of("short", PostgresDataType.SMALLINT);
+    static final ColumnInfo COLUMN_SECOND_LONG       = ColumnInfo.of("long", PostgresDataType.BIGINT);
 
-    static final ColumnInfo COLUMN_THIRD_NAME        = new ColumnInfo("name", PostgresDataType.NAME);
-    static final ColumnInfo COLUMN_THIRD_INDX        = new ColumnInfo("indx", PostgresDataType.INTEGER);
-    static final ColumnInfo COLUMN_THIRD_FIRST       = new ColumnInfo("first", PostgresDataType.BIGINT);
-    static final ColumnInfo COLUMN_THIRD_SECOND      = new ColumnInfo("second", PostgresDataType.UUID);
-    static final ColumnInfo COLUMN_THIRD_BOOL        = new ColumnInfo("bool", PostgresDataType.BOOLEAN);
-    static final ColumnInfo COLUMN_THIRD_TIME        = new ColumnInfo("time", PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE);
-    static final ColumnInfo COLUMN_THIRD_UNSUPPORTED = new ColumnInfo(
+    static final ColumnInfo COLUMN_THIRD_NAME        = ColumnInfo.of("name", PostgresDataType.NAME);
+    static final ColumnInfo COLUMN_THIRD_INDX        = ColumnInfo.of("indx", PostgresDataType.INTEGER);
+    static final ColumnInfo COLUMN_THIRD_FIRST       = ColumnInfo.of("first", PostgresDataType.BIGINT);
+    static final ColumnInfo COLUMN_THIRD_SECOND      = ColumnInfo.of("second", PostgresDataType.UUID);
+    static final ColumnInfo COLUMN_THIRD_BOOL        = ColumnInfo.of("bool", PostgresDataType.BOOLEAN);
+    static final ColumnInfo COLUMN_THIRD_TIME        = ColumnInfo.of("time", PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE);
+    static final ColumnInfo COLUMN_THIRD_UNSUPPORTED = ColumnInfo.of(
             "unsupported",
             DataType.unsupported("timestamp with time zone"));
 
-    static final ColumnInfo COLUMN_VERSION_PRODUCT = new ColumnInfo("product", PostgresDataType.CHARACTER_VARYING);
-    static final ColumnInfo COLUMN_VERSION_VERSION = new ColumnInfo("version", PostgresDataType.CHARACTER_VARYING);
+    static final ColumnInfo COLUMN_VERSION_PRODUCT = ColumnInfo.of("product", PostgresDataType.CHARACTER_VARYING, 256);
+    static final ColumnInfo COLUMN_VERSION_VERSION = ColumnInfo.of("version", PostgresDataType.CHARACTER_VARYING, 256);
 
     static final List<ColumnInfo> FIRST_COLUMNS   = List.of(
             COLUMN_FIRST_ID,
