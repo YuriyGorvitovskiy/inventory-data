@@ -21,6 +21,8 @@ public interface TestSchema {
     static final String TABLE_NAME_THIRD   = "third";
     static final String TABLE_NAME_VERSION = "version";
 
+    static final String TYPE_NAME_CUSTOM = "custom";
+
     static final Option<PrimaryKey> PK_FIRST  = Option.of(new PrimaryKey("pk_first", "first", List.of("id")));
     static final Option<PrimaryKey> PK_SECOND = Option.of(new PrimaryKey("pk_second", "second", List.of("id")));
     static final Option<PrimaryKey> PK_THIRD  = Option.of(new PrimaryKey("pk_third", "third", List.of("name", "indx")));
@@ -83,13 +85,17 @@ public interface TestSchema {
     static final ColumnInfo COLUMN_THIRD_FIRST       = ColumnInfo.of("first", PostgresDataType.BIGINT);
     static final ColumnInfo COLUMN_THIRD_SECOND      = ColumnInfo.of("second", PostgresDataType.UUID);
     static final ColumnInfo COLUMN_THIRD_BOOL        = ColumnInfo.of("bool", PostgresDataType.BOOLEAN);
-    static final ColumnInfo COLUMN_THIRD_TIME        = ColumnInfo.of("time", PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE);
+    static final ColumnInfo COLUMN_THIRD_TIME        = ColumnInfo.of("time", PostgresDataType.TIMESTAMP_WITH_TIME_ZONE);
     static final ColumnInfo COLUMN_THIRD_UNSUPPORTED = ColumnInfo.of(
             "unsupported",
-            DataType.unsupported("timestamp with time zone"));
+            DataType.unsupported("timestamp without time zone"));
 
     static final ColumnInfo COLUMN_VERSION_PRODUCT = ColumnInfo.of("product", PostgresDataType.CHARACTER_VARYING, 256);
     static final ColumnInfo COLUMN_VERSION_VERSION = ColumnInfo.of("version", PostgresDataType.CHARACTER_VARYING, 256);
+
+    static final ColumnInfo COLUMN_CUSTOM_STR  = ColumnInfo.of("str", PostgresDataType.CHARACTER_VARYING, 256);
+    static final ColumnInfo COLUMN_CUSTOM_NUM  = ColumnInfo.of("num", PostgresDataType.BIGINT);
+    static final ColumnInfo COLUMN_CUSTOM_TIME = ColumnInfo.of("time", PostgresDataType.TIMESTAMP_WITH_TIME_ZONE);
 
     static final List<ColumnInfo> FIRST_COLUMNS   = List.of(
             COLUMN_FIRST_ID,
@@ -122,6 +128,11 @@ public interface TestSchema {
     static final List<ColumnInfo> VERSION_COLUMNS = List.of(
             COLUMN_VERSION_PRODUCT,
             COLUMN_VERSION_VERSION);
+
+    static final List<ColumnInfo> CUSTOM_COLUMNS = List.of(
+            COLUMN_CUSTOM_STR,
+            COLUMN_CUSTOM_NUM,
+            COLUMN_CUSTOM_TIME);
 
     @SuppressWarnings("unchecked")
     static final Map<String, List<ColumnInfo>> ALL_TABLES = LinkedHashMap.ofEntries(
@@ -169,6 +180,8 @@ public interface TestSchema {
             Option.none(),
             HashMap.empty(),
             HashMap.empty());
+
+    static final DataType TYPE_CUSTOM = new DataType(TYPE_NAME_CUSTOM);
 
     static final Map<String, TableInfo> ALL_TABLE_INFO_MAP = List.of(
             TABLE_INFO_FIRST,

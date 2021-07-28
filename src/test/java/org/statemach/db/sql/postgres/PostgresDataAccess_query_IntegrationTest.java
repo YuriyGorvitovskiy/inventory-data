@@ -2,11 +2,14 @@ package org.statemach.db.sql.postgres;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
+import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.sql.Condition;
 import org.statemach.db.sql.From;
 import org.statemach.db.sql.Join;
@@ -433,5 +436,63 @@ public class PostgresDataAccess_query_IntegrationTest {
                         new Tuple2<>(EXTRACT_NAME_2, TestData.SECOND_ROW_1_DOUBLE),
                         new Tuple2<>(EXTRACT_NAME_3, TestData.SECOND_ROW_1_DOUBLE))),
                 result);
+    }
+
+    @Test
+    void arrayAsTable_singleColumn() {
+        // Setup
+        ColumnInfo   info = ColumnInfo.of("id", PostgresDataType.UUID);
+        List<Object> data = List.of(TestData.SECOND_ROW_1_ID, TestData.SECOND_ROW_2_ID, null);
+
+        Condition from = subject.builder.arrayAsTable(info, data);
+        String    sql  = "SELECT a.id FROM " + from.sql + " a";
+
+        // Execute
+        List<UUID> result = subject.jdbc.query(sql,
+                ps -> from.inject.set(ps, 1),
+                rs -> Extract.OBJECT_AS_UUID.get(rs, 1));
+
+        // Verify
+        assertEquals(
+                List.of(TestData.SECOND_ROW_1_ID, TestData.SECOND_ROW_2_ID, null),
+                result);
+
+    }
+
+    @Test
+    void arrayAsTable_customType() {
+        // Setup
+        List<Map<String, Object>> data = List.of(
+                HashMap.ofEntries(
+                        new Tuple2<>(TestSchema.COLUMN_CUSTOM_STR.name, "Hello"),
+                        new Tuple2<>(TestSchema.COLUMN_CUSTOM_NUM.name, 123L),
+                        new Tuple2<>(TestSchema.COLUMN_CUSTOM_TIME.name, TestData.THIRD_ROW_1_TIME)),
+                HashMap.ofEntries(
+                        new Tuple2<>(TestSchema.COLUMN_CUSTOM_STR.name, "World"),
+                        new Tuple2<>(TestSchema.COLUMN_CUSTOM_NUM.name, "345"),
+                        new Tuple2<>(TestSchema.COLUMN_CUSTOM_TIME.name, TestData.THIRD_ROW_2_TIME)),
+                HashMap.ofEntries(
+                        new Tuple2<>(TestSchema.COLUMN_CUSTOM_NUM.name, 567),
+                        new Tuple2<>(TestSchema.COLUMN_CUSTOM_TIME.name, null)));
+
+        Condition from = subject.builder.arrayAsTable(TestSchema.TYPE_CUSTOM, TestSchema.CUSTOM_COLUMNS, data);
+        String    sql  = "SELECT a.str, a.num, a.time FROM " + from.sql + " a ORDER BY a.num ASC";
+
+        // Execute
+        List<List<Object>> result = subject.jdbc.query(sql,
+                ps -> from.inject.set(ps, 1),
+                rs -> List.of(
+                        Extract.STRING.get(rs, 1),
+                        Extract.LONG.get(rs, 2),
+                        Extract.TIMESTAMP_AS_INSTANT.get(rs, 3)));
+
+        // Verify
+        assertEquals(
+                List.of(
+                        List.of("Hello", 123L, TestData.THIRD_ROW_1_TIME),
+                        List.of("World", 345L, TestData.THIRD_ROW_2_TIME),
+                        List.of(null, 567L, null)),
+                result);
+
     }
 }

@@ -33,6 +33,7 @@ public class TestDB {
         static final String CREATE_TABLE_SECOND        = Java.resource("CreateTableSecond.sql");
         static final String CREATE_TABLE_THIRD         = Java.resource("CreateTableThird.sql");
         static final String CREATE_TABLE_VERSION       = Java.resource("CreateTableVersion.sql");
+        static final String CREATE_TYPE_CUSTOM         = Java.resource("CreateTypeCustom.sql");
         static final String DROP_SCHEMA                = Java.resource("DropSchema.sql");
         static final String INSERT_PRODUCT_VERSION     = Java.resource("InsertProductVersion.sql");
         static final String SELECT_PRODUCT_VERSION     = Java.resource("SelectProductVersion.sql");
@@ -45,7 +46,7 @@ public class TestDB {
     public final static String              schema  = config.getOrElse(Config.DB_SCHEMA, "test").toLowerCase();
     public final static DataAccess          da      = new PostgresDataAccess(jdbc, schema, new PostgresSQLBuilder(schema));
     public final static String              product = "inventory-data";
-    public final static String              version = "0.0.5";
+    public final static String              version = "0.0.7";
 
     static boolean prepared = false;
 
@@ -100,6 +101,7 @@ public class TestDB {
         jdbc.execute(Java.format(SQL.CREATE_TABLE_FIRST, schema), ps -> {});
         jdbc.execute(Java.format(SQL.CREATE_TABLE_SECOND, schema), ps -> {});
         jdbc.execute(Java.format(SQL.CREATE_TABLE_THIRD, schema), ps -> {});
+        jdbc.execute(Java.format(SQL.CREATE_TYPE_CUSTOM, schema), ps -> {});
         jdbc.execute(Java.format(SQL.CREATE_FOREIGN_KEYS_FIRST, schema), ps -> {});
         jdbc.execute(Java.format(SQL.CREATE_FOREIGN_KEYS_SECOND, schema), ps -> {});
         jdbc.execute(Java.format(SQL.CREATE_FOREIGN_KEYS_THIRD, schema), ps -> {});

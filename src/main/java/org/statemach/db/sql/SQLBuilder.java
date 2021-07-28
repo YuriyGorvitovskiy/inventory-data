@@ -2,12 +2,16 @@ package org.statemach.db.sql;
 
 import org.statemach.db.jdbc.Inject;
 import org.statemach.db.jdbc.Vendor;
+import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.DataType;
 
 import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
 
 public interface SQLBuilder {
+
+    public Vendor getVendor();
 
     public default Condition and(Condition... child) {
         return and(List.of(child));
@@ -37,6 +41,8 @@ public interface SQLBuilder {
 
     public Condition textSearch(Select<?> column, Seq<String> values);
 
-    public Vendor getVendor();
+    public Condition arrayAsTable(DataType type, List<ColumnInfo> columns, List<Map<String, Object>> values);
+
+    public Condition arrayAsTable(ColumnInfo column, List<Object> values);
 
 }

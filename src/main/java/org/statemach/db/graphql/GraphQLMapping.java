@@ -29,7 +29,7 @@ public class GraphQLMapping {
             new Tuple2<>(PostgresDataType.NAME, Extract.STRING),
             new Tuple2<>(PostgresDataType.SMALLINT, Extract.INTEGER),
             new Tuple2<>(PostgresDataType.TEXT, Extract.STRING),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE, Extract.TIMESTAMP_AS_ISO8601),
+            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Extract.TIMESTAMP_AS_ISO8601),
             new Tuple2<>(PostgresDataType.UUID, Extract.OBJECT_AS_UUID_STRING));
 
     static final Map<DataType, Function<Object, Inject>> POSTGRES_INJECTORS = HashMap.ofEntries(
@@ -42,7 +42,7 @@ public class GraphQLMapping {
             new Tuple2<>(PostgresDataType.NAME, Java.asString(Inject.STRING)),
             new Tuple2<>(PostgresDataType.SMALLINT, Java.asNumber(Inject.INTEGER)),
             new Tuple2<>(PostgresDataType.TEXT, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE, Java.asString(Inject.ISO8601_AS_TIMESTAMP)),
+            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Java.asString(Inject.ISO8601_AS_TIMESTAMP)),
             new Tuple2<>(PostgresDataType.TSVECTOR, Java.asString(Inject.STRING)),
             new Tuple2<>(PostgresDataType.UUID, Java.asString(Inject.STRING_AS_UUID_OBJECT)));
 
@@ -56,7 +56,7 @@ public class GraphQLMapping {
             new Tuple2<>(PostgresDataType.NAME, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.SMALLINT, Scalars.GraphQLInt),
             new Tuple2<>(PostgresDataType.TEXT, Scalars.GraphQLString),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE, Scalars.GraphQLString),
+            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.TSVECTOR, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.UUID, Scalars.GraphQLString));
 

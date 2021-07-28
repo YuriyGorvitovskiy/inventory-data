@@ -238,7 +238,7 @@ public interface TestData {
             new Tuple2<>(PostgresDataType.NAME, Inject.STRING),
             new Tuple2<>(PostgresDataType.SMALLINT, Inject.INTEGER),
             new Tuple2<>(PostgresDataType.TEXT, Inject.STRING),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITHOUT_TIME_ZONE, Inject.INSTANT_AS_TIMESTAMP),
+            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Inject.INSTANT_AS_TIMESTAMP),
             new Tuple2<>(PostgresDataType.UUID, Inject.UUID_AS_OBJECT))
         .toMap(t -> t);
 

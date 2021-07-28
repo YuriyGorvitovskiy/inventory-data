@@ -3,6 +3,7 @@ package org.statemach.db.sql.postgres;
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
 import org.statemach.db.jdbc.Vendor;
+import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.DataType;
 import org.statemach.db.sql.Condition;
 import org.statemach.db.sql.From;
@@ -12,10 +13,12 @@ import org.statemach.db.sql.SQLBuilder;
 import org.statemach.db.sql.Select;
 import org.statemach.db.sql.View;
 import org.statemach.util.Java;
+import org.statemach.util.Json;
 import org.statemach.util.NodeLinkTree;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
 import io.vavr.collection.Set;
 
@@ -27,6 +30,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
         this.schema = schema;
     }
 
+    @Override
     public Vendor getVendor() {
         return Vendor.POSTGRES;
     }
@@ -203,4 +207,27 @@ public class PostgresSQLBuilder implements SQLBuilder {
             .foldLeft(sb, (s, c) -> joinSql(c._1, c._2, cteNames, sb, indent));
     }
 
+    @Override
+    public Condition arrayAsTable(DataType type, List<ColumnInfo> columns, List<Map<String, Object>> values) {
+        // JSON_POPULATE_RECORDSET(null::scm.type, ?::JSON)
+        String sql = SQL.JSON_POPULATE_RS_OPEN + schema + SQL.DOT + type.name
+                + SQL.COMMA + SQL.PARAM + SQL.JSON_CAST
+                + SQL.CLOSE;
+
+        String json   = Java.soft(() -> Json.MAPPER.writeValueAsString(values));
+        Inject inject = Inject.STRING.apply(json);
+
+        return new Condition(sql, inject);
+    }
+
+    @Override
+    public Condition arrayAsTable(ColumnInfo column, List<Object> values) {
+        // (SELECT UNNEST((?)::type) AS col)
+        String sql = SQL.OPEN
+                + SQL.SELECT + SQL.UNNEST_PARAM_OPEN + column.type.name + SQL.ARRAY + SQL.CLOSE
+                + SQL.AS + column.name
+                + SQL.CLOSE;
+
+        return new Condition(sql, Inject.ARRAY.apply(column.type, values));
+    }
 }

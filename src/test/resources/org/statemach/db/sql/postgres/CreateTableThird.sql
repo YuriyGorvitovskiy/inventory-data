@@ -4,8 +4,8 @@ CREATE TABLE ${0}.third
      , first        bigint
      , second       uuid
      , bool         boolean
-     , time         timestamp without time zone
-     , unsupported  timestamp with time zone
+     , time         timestamp with time zone
+     , unsupported  timestamp without time zone
 
      , CONSTRAINT pk_third PRIMARY KEY (name, indx)
      )
