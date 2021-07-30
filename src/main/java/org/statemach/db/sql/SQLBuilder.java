@@ -7,7 +7,7 @@ import org.statemach.db.schema.DataType;
 
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Seq;
+import io.vavr.collection.Traversable;
 
 public interface SQLBuilder {
 
@@ -35,14 +35,14 @@ public interface SQLBuilder {
 
     public Condition equal(Select<?> left, Select<?> right);
 
-    public Condition in(Select<?> column, Seq<Inject> values);
+    public Condition in(Select<?> column, Traversable<Inject> values);
 
-    public Condition inArray(Select<?> column, DataType elementType, Seq<?> array);
+    public Condition inArray(Select<?> column, DataType elementType, Traversable<?> array);
 
-    public Condition textSearch(Select<?> column, Seq<String> values);
+    public Condition textSearch(Select<?> column, Traversable<String> values);
 
-    public Condition arrayAsTable(DataType type, List<ColumnInfo> columns, List<Map<String, Object>> values);
+    public TableLike arrayAsTable(DataType type, List<ColumnInfo> columns, Traversable<Map<String, Object>> values);
 
-    public Condition arrayAsTable(ColumnInfo column, List<Object> values);
+    public TableLike arrayAsTable(ColumnInfo column, Traversable<Object> values);
 
 }

@@ -7,12 +7,12 @@ import graphql.schema.SelectedField;
 import io.vavr.collection.List;
 
 public class SubQuery {
-    final String        name;
+    final String             name;
     final List<ExtractValue> extracts;
-    final List<String>  path;
-    final ForeignKey    incoming;
-    final TableInfo     table;
-    final GraphQLField  field;
+    final List<String>       path;
+    final ForeignKey         incoming;
+    final TableInfo          table;
+    final GraphQLField       field;
 
     SubQuery(String name,
              List<String> path,
@@ -33,6 +33,7 @@ public class SubQuery {
                               ForeignKey incoming,
                               TableInfo table,
                               SelectedField field) {
-        return new SubQuery(path.mkString(ExtractValue.NAME_DELIMITER), path, extracts, incoming, table, GraphQLField.of(field));
+        return new SubQuery(path
+            .mkString(ExtractValue.NAME_DELIMITER), path, extracts, incoming, table, GraphQLField.of(field));
     }
 }

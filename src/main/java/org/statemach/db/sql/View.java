@@ -41,7 +41,7 @@ public class View<T> {
     List<Inject> injectJoins(NodeLinkTree<String, From, Join> tree) {
         return tree.links
             .values()
-            .flatMap(t -> List.of(t._1.condition.inject).appendAll(injectJoins(t._2)))
+            .flatMap(t -> List.of(tree.node.table.inject, t._1.condition.inject).appendAll(injectJoins(t._2)))
             .toList();
     }
 }

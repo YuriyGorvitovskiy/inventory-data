@@ -1,7 +1,9 @@
 package org.statemach.db.graphql;
 
 import org.statemach.db.jdbc.Extract;
+import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.CompositeType;
+import org.statemach.db.schema.DataType;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.PrimaryKey;
 import org.statemach.db.schema.Schema;
@@ -12,6 +14,7 @@ import org.statemach.db.sql.Join;
 import org.statemach.db.sql.SQLBuilder;
 import org.statemach.db.sql.SchemaAccess;
 import org.statemach.db.sql.Select;
+import org.statemach.db.sql.TableLike;
 import org.statemach.db.sql.View;
 import org.statemach.util.Java;
 import org.statemach.util.NodeLinkTree;
@@ -143,15 +146,18 @@ public class GraphQLQuery {
     }
 
     List<Map<String, Object>> fetchSubQuery(List<Map<String, Object>> result, SubQuery q) {
-        Set<List<Object>> ids         = result.map(r -> q.extracts.map(e -> r.get(e.name).get())).toSet();
-        List<String>      fromColumns = q.incoming.matchingColumns.map(m -> m.from);
-        String            fk          = q.incoming.name;
+        Set<Map<String, Object>> ids         = result
+            .map(r -> q.extracts
+                .map(e -> new Tuple2<>(e.name, r.get(e.name).get()))
+                .toMap(t -> t))
+            .toSet();
+        List<String>             fromColumns = q.incoming.matchingColumns.map(m -> m.from);
 
         List<java.util.Map<String, Object>> subResult = fetchQueryCommon(
                 q.field,
                 q.table,
                 Option.of(fromColumns),
-                Option.of(new Tuple2<>(fk, ids)));
+                Option.of(new Tuple2<>(q.incoming, ids)));
 
         Map<List<Object>, List<java.util.Map<String, Object>>> subResultById = subResult
             .groupBy(r -> fromColumns.map(r::get));
@@ -162,30 +168,32 @@ public class GraphQLQuery {
     List<java.util.Map<String, Object>> fetchQueryCommon(GraphQLField field,
                                                          TableInfo table,
                                                          Option<List<String>> extraColumn,
-                                                         Option<Tuple2<String, Set<List<Object>>>> columnNameWithIds) {
+                                                         Option<Tuple2<ForeignKey, Set<Map<String, Object>>>> foreignKeyWithIds) {
         ExtractPortion selects = extract.parse(table, field.getSelectionSet(), extraColumn);
-        List<Filter>   filters = filter.parse(table, field.getArgument(Argument.FILTER), columnNameWithIds);
+        List<Filter>   filters = filter.parse(table, field.getArgument(Argument.FILTER));
 
         List<OrderBy>         orders    = order.parse(table, field.getArgument(Argument.ORDER));
         Integer               skip      = Java.ifNull((Integer) field.getArgument(Argument.SKIP), 0);
         Integer               limit     = Java.ifNull((Integer) field.getArgument(Argument.LIMIT), 10);
         Tuple2<Long, Integer> skipLimit = new Tuple2<>(skip.longValue(), limit);
 
-        Option<String> cteName = Option.none();
+        Option<View<String>> cte = Option.none();
 
         NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins = filter.buildJoins(table, filters);
         List<View<String>>                              views         = List.empty();
         if (filters.exists(f -> f.plural)) {
-            views = views.append(buildFilterView(preparedJoins, filters));
-            cteName = Option.of(CTE_FILTER_NAME);
+            cte = Option.of(buildFilterView(preparedJoins, filters, foreignKeyWithIds));
+            views = views.append(cte.get());
             filters = List.empty();
             preparedJoins = NodeLinkTree.of(table);
+            foreignKeyWithIds = Option.none();
         }
 
         preparedJoins = order.buildJoins(preparedJoins, orders);
         preparedJoins = extract.buildJoins(preparedJoins, selects.values);
         View<Tuple2<String, Extract<?>>> extractView = buildExtractView(preparedJoins,
-                cteName,
+                cte,
+                foreignKeyWithIds,
                 selects.values,
                 filters,
                 orders,
@@ -240,24 +248,20 @@ public class GraphQLQuery {
     }
 
     View<Tuple2<String, Extract<?>>> buildExtractView(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins,
-                                                      Option<String> cteName,
+                                                      Option<View<String>> cte,
+                                                      Option<Tuple2<ForeignKey, Set<Map<String, Object>>>> foreignKeyWithIds,
                                                       List<ExtractValue> extracts,
                                                       List<Filter> filters,
                                                       List<OrderBy> orders,
                                                       Tuple2<Long, Integer> skipLimit) {
-        NodeLinkTree<String, From, Join> joins = preparedJoins
-            .mapNodesWithIndex(1, (t, i) -> new From(t.name, "q" + i))
-            .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));
+
+        var joins = mapJoins(preparedJoins);
 
         var select = extract.buildExtracts(joins, extracts);
         var where  = filter.buildWhere(joins, filters);
         var sort   = order.buildOrders(joins, orders);
 
-        if (cteName.isDefined()) {
-            PrimaryKey pk = preparedJoins.node.primary.get();
-            joins = NodeLinkTree.<String, From, Join>of(new From(cteName.get(), "f"))
-                .put("", buildCteJoin("f", pk.columns.map(c -> new ForeignKey.Match(c, c)), joins.getNode()), joins);
-        }
+        joins = prependJoins(joins, cte.map(c -> new Tuple2<>(c, preparedJoins.node.primary.get())), foreignKeyWithIds);
 
         return new View<Tuple2<String, Extract<?>>>(
                 "",
@@ -270,11 +274,11 @@ public class GraphQLQuery {
                 skipLimit._2);
     }
 
-    View<String> buildFilterView(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins, List<Filter> filters) {
+    View<String> buildFilterView(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins,
+                                 List<Filter> filters,
+                                 Option<Tuple2<ForeignKey, Set<Map<String, Object>>>> foreignKeyWithIds) {
         PrimaryKey                       pk    = preparedJoins.node.primary.get();
-        NodeLinkTree<String, From, Join> joins = preparedJoins
-            .mapNodesWithIndex(1, (t, i) -> new From(t.name, "f" + i))
-            .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));
+        NodeLinkTree<String, From, Join> joins = prependJoins(mapJoins(preparedJoins), Option.none(), foreignKeyWithIds);
 
         var select = pk.columns.map(c -> Select.of(joins.getNode().alias, c, c));
         var where  = filter.buildWhere(joins, filters);
@@ -289,9 +293,45 @@ public class GraphQLQuery {
                 Integer.MAX_VALUE);
     }
 
+    NodeLinkTree<String, From, Join> mapJoins(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins) {
+        return preparedJoins
+            .mapNodesWithIndex(1, (t, i) -> new From(TableLike.of(schema, t), "t" + i))
+            .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));
+    }
+
+    NodeLinkTree<String, From, Join> prependJoins(NodeLinkTree<String, From, Join> joins,
+                                                  Option<Tuple2<View<String>, PrimaryKey>> cteWithPrimaryKey,
+                                                  Option<Tuple2<ForeignKey, Set<Map<String, Object>>>> foreignKeyWithIds) {
+
+        if (cteWithPrimaryKey.isDefined()) {
+            PrimaryKey pk = cteWithPrimaryKey.get()._2;
+            joins = NodeLinkTree.<String, From, Join>of(new From(TableLike.of(cteWithPrimaryKey.get()._1), "t"))
+                .put("", buildCteJoin("t", pk.columns.map(c -> new ForeignKey.Match(c, c)), joins.getNode()), joins);
+        } else if (foreignKeyWithIds.isDefined()) {
+            ForeignKey fk    = foreignKeyWithIds.get()._1;
+            TableLike  array = buildForeignKeyToArray(fk, foreignKeyWithIds.get()._2);
+
+            joins = NodeLinkTree.<String, From, Join>of(new From(array, "t"))
+                .put("", buildToArrayJoin("t", fk.matchingColumns, joins.getNode()), joins);
+        }
+        return joins;
+    }
+
+    TableLike buildForeignKeyToArray(ForeignKey fk, Set<Map<String, Object>> ids) {
+        TableInfo        table   = schema.tables.get(fk.toTable).get();
+        List<ColumnInfo> columns = fk.matchingColumns.map(m -> table.columns.get(m.to).get());
+        if (columns.size() == 1) {
+            ColumnInfo column = columns.get();
+            return sqlBuilder.arrayAsTable(columns.get(), ids.map(m -> m.get(column.name).getOrNull()));
+        }
+
+        DataType type = new DataType(naming.getToType(fk));
+        return sqlBuilder.arrayAsTable(type, columns, ids);
+    }
+
     NodeLinkTree<String, From, Join> buildJoins(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins) {
         return preparedJoins
-            .mapNodesWithIndex(1, (t, i) -> new From(t.name, "f" + i))
+            .mapNodesWithIndex(1, (t, i) -> new From(TableLike.of(schema, t), "f" + i))
             .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));
     }
 
@@ -311,4 +351,11 @@ public class GraphQLQuery {
                             Select.of(right.alias, m.to)))));
     }
 
+    Join buildToArrayJoin(String cteAlias, List<ForeignKey.Match> matchingColumns, From right) {
+        return new Join(Join.Kind.INNER,
+                sqlBuilder.and(matchingColumns
+                    .map(m -> sqlBuilder.equal(
+                            Select.of(cteAlias, m.to),
+                            Select.of(right.alias, m.from)))));
+    }
 }

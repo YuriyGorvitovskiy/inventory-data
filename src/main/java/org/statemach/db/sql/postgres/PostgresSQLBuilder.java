@@ -11,6 +11,7 @@ import org.statemach.db.sql.Join;
 import org.statemach.db.sql.SQL;
 import org.statemach.db.sql.SQLBuilder;
 import org.statemach.db.sql.Select;
+import org.statemach.db.sql.TableLike;
 import org.statemach.db.sql.View;
 import org.statemach.util.Java;
 import org.statemach.util.Json;
@@ -19,8 +20,8 @@ import org.statemach.util.NodeLinkTree;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Seq;
 import io.vavr.collection.Set;
+import io.vavr.collection.Traversable;
 
 public class PostgresSQLBuilder implements SQLBuilder {
 
@@ -87,13 +88,13 @@ public class PostgresSQLBuilder implements SQLBuilder {
     }
 
     @Override
-    public Condition in(Select<?> column, Seq<Inject> values) {
+    public Condition in(Select<?> column, Traversable<Inject> values) {
         return new Condition(column.sql() + SQL.IN_OPEN + Java.repeat(SQL.PARAM, SQL.COMMA, values.size()) + SQL.CLOSE,
                 Inject.fold(values));
     }
 
     @Override
-    public Condition inArray(Select<?> column, DataType elementType, Seq<?> array) {
+    public Condition inArray(Select<?> column, DataType elementType, Traversable<?> array) {
         return new Condition(column.sql() + SQL.IN_OPEN + SQL.SELECT +
                 SQL.UNNEST_PARAM_OPEN + elementType.name + SQL.ARRAY + SQL.CLOSE +
                 SQL.CLOSE,
@@ -101,7 +102,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
     }
 
     @Override
-    public Condition textSearch(Select<?> column, Seq<String> values) {
+    public Condition textSearch(Select<?> column, Traversable<String> values) {
         return new Condition(SQL.WEB_SEARCH + column.sql(),
                 Inject.STRING.apply(values.mkString(" ")));
     }
@@ -176,8 +177,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
     StringBuilder joinSql(NodeLinkTree<String, From, Join> joins, Set<String> cteNames, StringBuilder sb, String indent) {
         sb.append(indent)
             .append(SQL.FROM)
-            .append(cteNames.contains(joins.getNode().table) ? "" : schema + SQL.DOT)
-            .append(joins.getNode().table)
+            .append(joins.getNode().table.sql)
             .append(SQL.SPACE)
             .append(joins.getNode().alias)
             .append(SQL.NEXT_LINE);
@@ -194,8 +194,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
                           String indent) {
         sb.append(indent)
             .append(join.kind.sql)
-            .append(cteNames.contains(right.getNode().table) ? "" : schema + SQL.DOT)
-            .append(right.getNode().table)
+            .append(right.getNode().table.sql)
             .append(SQL.SPACE)
             .append(right.getNode().alias)
             .append(SQL.ON)
@@ -208,7 +207,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
     }
 
     @Override
-    public Condition arrayAsTable(DataType type, List<ColumnInfo> columns, List<Map<String, Object>> values) {
+    public TableLike arrayAsTable(DataType type, List<ColumnInfo> columns, Traversable<Map<String, Object>> values) {
         // JSON_POPULATE_RECORDSET(null::scm.type, ?::JSON)
         String sql = SQL.JSON_POPULATE_RS_OPEN + schema + SQL.DOT + type.name
                 + SQL.COMMA + SQL.PARAM + SQL.JSON_CAST
@@ -217,17 +216,17 @@ public class PostgresSQLBuilder implements SQLBuilder {
         String json   = Java.soft(() -> Json.MAPPER.writeValueAsString(values));
         Inject inject = Inject.STRING.apply(json);
 
-        return new Condition(sql, inject);
+        return TableLike.of(sql, inject);
     }
 
     @Override
-    public Condition arrayAsTable(ColumnInfo column, List<Object> values) {
+    public TableLike arrayAsTable(ColumnInfo column, Traversable<Object> values) {
         // (SELECT UNNEST((?)::type) AS col)
         String sql = SQL.OPEN
                 + SQL.SELECT + SQL.UNNEST_PARAM_OPEN + column.type.name + SQL.ARRAY + SQL.CLOSE
                 + SQL.AS + column.name
                 + SQL.CLOSE;
 
-        return new Condition(sql, Inject.ARRAY.apply(column.type, values));
+        return TableLike.of(sql, Inject.ARRAY.apply(column.type, values));
     }
 }

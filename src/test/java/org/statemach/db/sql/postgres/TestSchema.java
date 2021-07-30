@@ -5,6 +5,7 @@ import org.statemach.db.schema.DataType;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.ForeignKey.Match;
 import org.statemach.db.schema.PrimaryKey;
+import org.statemach.db.schema.Schema;
 import org.statemach.db.schema.TableInfo;
 
 import io.vavr.Tuple2;
@@ -189,4 +190,7 @@ public interface TestSchema {
             TABLE_INFO_THIRD,
             TABLE_INFO_VERSION)
         .toMap(t -> t.name, t -> t);
+
+    static final Schema SCHEMA = new Schema(TestDB.jdbc.getVendor(), TestDB.schema, ALL_TABLE_INFO_MAP);
+
 }

@@ -1,7 +1,6 @@
 package org.statemach.db.graphql;
 
 import org.statemach.db.schema.ColumnInfo;
-import org.statemach.db.schema.DataType;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.Schema;
 import org.statemach.db.schema.TableInfo;
@@ -18,7 +17,6 @@ import graphql.schema.GraphQLType;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
-import io.vavr.collection.Set;
 import io.vavr.control.Option;
 
 public class GraphQLQueryFilter {
@@ -91,9 +89,8 @@ public class GraphQLQueryFilter {
             .build();
     }
 
-    public List<Filter> parse(TableInfo table, Object argument, Option<Tuple2<String, Set<List<Object>>>> columnNameWithIds) {
-        return parse(List.empty(), false, table, argument)
-            .prependAll(columnNameWithIds.map(t -> buildSubQueryFilter(table, t._1, t._2)));
+    public List<Filter> parse(TableInfo table, Object argument) {
+        return parse(List.empty(), false, table, argument);
     }
 
     @SuppressWarnings("unchecked")
@@ -167,30 +164,4 @@ public class GraphQLQueryFilter {
         return filter.buildCondition(mapping, sql, alias);
     }
 
-    Filter buildSubQueryFilter(TableInfo table, String name, Set<List<Object>> ids) {
-        Option<ForeignKey> fk = table.outgoing.get(name);
-        if (fk.isDefined()) {
-            return buildSubQueryFilter(table, fk.get(), false, ids);
-        }
-
-        fk = table.incoming.get(naming.getForeignKey(name));
-        if (fk.isDefined()) {
-            return buildSubQueryFilter(table, fk.get(), true, ids);
-        }
-        throw new RuntimeException("No Foreign Key found with name " + name + ".");
-    }
-
-    Filter buildSubQueryFilter(TableInfo table, ForeignKey foreignKey, boolean reverse, Set<List<Object>> ids) {
-        if (foreignKey.matchingColumns.size() == 1) {
-            ForeignKey.Match match  = foreignKey.matchingColumns.get();
-            String           column = reverse ? match.to : match.from;
-            DataType         type   = table.columns.get(column).get().type;
-            return Filter.of(
-                    List.of(column),
-                    false,
-                    type,
-                    ids.map(List::get).toList());
-        }
-        throw new RuntimeException("No implementation for multi-column Foreign Key: " + foreignKey + ".");
-    }
 }

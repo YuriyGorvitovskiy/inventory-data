@@ -15,6 +15,7 @@ import org.statemach.db.sql.From;
 import org.statemach.db.sql.Join;
 import org.statemach.db.sql.Join.Kind;
 import org.statemach.db.sql.Select;
+import org.statemach.db.sql.TableLike;
 import org.statemach.db.sql.View;
 import org.statemach.util.NodeLinkTree;
 
@@ -40,6 +41,14 @@ public class PostgresDataAccess_query_IntegrationTest {
     static final String CTE_COLUMN_ID     = "id";
     static final String CTE_COLUMN_DOUBLE = "dbl";
 
+    static final TableLike TABLE_FIRST   = TableLike.of(TestSchema.SCHEMA, TestSchema.TABLE_INFO_FIRST);
+    static final TableLike TABLE_SECOND  = TableLike.of(TestSchema.SCHEMA, TestSchema.TABLE_INFO_SECOND);
+    static final TableLike TABLE_THIRD   = TableLike.of(TestSchema.SCHEMA, TestSchema.TABLE_INFO_THIRD);
+    static final TableLike TABLE_VERSION = TableLike.of(TestSchema.SCHEMA, TestSchema.TABLE_INFO_VERSION);
+
+    static final TableLike CTE_1 = TableLike.of(CTE_NAME_1, Inject.NOTHING);
+    static final TableLike CTE_2 = TableLike.of(CTE_NAME_2, Inject.NOTHING);
+
     final PostgresDataAccess subject = new PostgresDataAccess(
             TestDB.jdbc,
             TestDB.schema,
@@ -57,7 +66,7 @@ public class PostgresDataAccess_query_IntegrationTest {
         // Setup
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
-                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
+                NodeLinkTree.<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1)),
                 subject.builder().textSearch(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_SEARCH.name),
                         List.of("fix", "vary", "2")),
                 List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
@@ -82,7 +91,7 @@ public class PostgresDataAccess_query_IntegrationTest {
     void query_first_not_in() {
         // Setup
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
-                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
+                NodeLinkTree.<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1)),
                 subject.builder().not(
                         subject.builder().in(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name),
                                 List.of(Inject.LONG.apply(TestData.FIRST_ROW_2_ID),
@@ -110,7 +119,7 @@ public class PostgresDataAccess_query_IntegrationTest {
     void query_first_in_array() {
         // Setup
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
-                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
+                NodeLinkTree.<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1)),
                 subject.builder().inArray(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
                         PostgresDataType.BIGINT,
                         List.of(TestData.FIRST_ROW_2_ID, TestData.FIRST_ROW_3_ID, -1)),
@@ -136,7 +145,7 @@ public class PostgresDataAccess_query_IntegrationTest {
     void query_first_in_null_array() {
         // Setup
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
-                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
+                NodeLinkTree.<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1)),
                 subject.builder().inArray(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
                         PostgresDataType.BIGINT,
                         null),
@@ -161,7 +170,7 @@ public class PostgresDataAccess_query_IntegrationTest {
         // Setup
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
-                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1)),
+                NodeLinkTree.<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1)),
                 Condition.NONE,
                 List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
                 List.of(
@@ -212,13 +221,13 @@ public class PostgresDataAccess_query_IntegrationTest {
     void query_first_left_second_and_right_third() {
         // Setup
         NodeLinkTree<String, From, Join> joins = NodeLinkTree
-            .<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1))
+            .<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1))
             .put(TestSchema.FK_FIRST_SECOND.name,
                     new Join(Kind.LEFT,
                             subject.builder().equal(
                                     Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_SECOND.name),
                                     Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name))),
-                    NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2)))
+                    NodeLinkTree.<String, From, Join>of(new From(TABLE_SECOND, ALIAS_2)))
             .put(TestSchema.FK_FIRST_THIRD.name,
                     new Join(Kind.RIGHT,
                             subject.builder().and(
@@ -228,7 +237,7 @@ public class PostgresDataAccess_query_IntegrationTest {
                                     subject.builder().equal(
                                             Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_THIRD_INDX.name),
                                             Select.of(ALIAS_3, TestSchema.COLUMN_THIRD_INDX.name)))),
-                    NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_THIRD, ALIAS_3)));
+                    NodeLinkTree.<String, From, Join>of(new From(TABLE_THIRD, ALIAS_3)));
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 joins,
@@ -277,19 +286,19 @@ public class PostgresDataAccess_query_IntegrationTest {
     void query_first_inner_second_chain_full_third() {
         // Setup
         NodeLinkTree<String, From, Join> joins = NodeLinkTree
-            .<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1))
+            .<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1))
             .put(TestSchema.FK_SECOND_FIRST.name,
                     new Join(Kind.INNER,
                             subject.builder().equal(
                                     Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name),
                                     Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_FIRST.name))),
-                    NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2))
+                    NodeLinkTree.<String, From, Join>of(new From(TABLE_SECOND, ALIAS_2))
                         .put(TestSchema.FK_THIRD_SECOND.name,
                                 new Join(Kind.FULL,
                                         subject.builder().equal(
                                                 Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name),
                                                 Select.of(ALIAS_3, TestSchema.COLUMN_THIRD_SECOND.name))),
-                                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_THIRD, ALIAS_3))));
+                                NodeLinkTree.<String, From, Join>of(new From(TABLE_THIRD, ALIAS_3))));
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 joins,
@@ -339,13 +348,13 @@ public class PostgresDataAccess_query_IntegrationTest {
         // Setup
         // Common Table Expression 1
         NodeLinkTree<String, From, Join> joins1 = NodeLinkTree
-            .<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1))
+            .<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1))
             .put(TestSchema.FK_SECOND_FIRST.name,
                     new Join(Kind.LEFT,
                             subject.builder().equal(
                                     Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name),
                                     Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_FIRST.name))),
-                    NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2))
+                    NodeLinkTree.<String, From, Join>of(new From(TABLE_SECOND, ALIAS_2))
                         .put(TestSchema.FK_SECOND_SECOND_ONE.name,
                                 new Join(Kind.LEFT,
                                         subject.builder().or(
@@ -355,7 +364,7 @@ public class PostgresDataAccess_query_IntegrationTest {
                                                 subject.builder().equal(
                                                         Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name),
                                                         Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_TWO.name)))),
-                                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_3))));
+                                NodeLinkTree.<String, From, Join>of(new From(TABLE_SECOND, ALIAS_3))));
 
         View<String> cte1 = new View<String>(CTE_NAME_1,
                 joins1,
@@ -374,13 +383,13 @@ public class PostgresDataAccess_query_IntegrationTest {
 
         // Common Table Expression 2
         NodeLinkTree<String, From, Join> joins2 = NodeLinkTree
-            .<String, From, Join>of(new From(TestSchema.TABLE_NAME_FIRST, ALIAS_1))
+            .<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1))
             .put(TestSchema.FK_FIRST_SECOND.name,
                     new Join(Kind.LEFT,
                             subject.builder().equal(
                                     Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_SECOND.name),
                                     Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name))),
-                    NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_2))
+                    NodeLinkTree.<String, From, Join>of(new From(TABLE_SECOND, ALIAS_2))
                         .put(TestSchema.FK_SECOND_SECOND_ONE.name,
                                 new Join(Kind.LEFT,
                                         subject.builder().or(
@@ -390,7 +399,7 @@ public class PostgresDataAccess_query_IntegrationTest {
                                                 subject.builder().equal(
                                                         Select.of(ALIAS_2, TestSchema.COLUMN_SECOND_ID.name),
                                                         Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_TWO.name)))),
-                                NodeLinkTree.<String, From, Join>of(new From(TestSchema.TABLE_NAME_SECOND, ALIAS_3))));
+                                NodeLinkTree.<String, From, Join>of(new From(TABLE_SECOND, ALIAS_3))));
 
         View<String> cte2 = new View<String>(CTE_NAME_2,
                 joins2,
@@ -405,13 +414,13 @@ public class PostgresDataAccess_query_IntegrationTest {
 
         // Query
         NodeLinkTree<String, From, Join> joins = NodeLinkTree
-            .<String, From, Join>of(new From(CTE_NAME_1, ALIAS_1))
+            .<String, From, Join>of(new From(CTE_1, ALIAS_1))
             .put("ByID",
                     new Join(Kind.INNER,
                             subject.builder().equal(
                                     Select.of(ALIAS_1, CTE_COLUMN_ID),
                                     Select.of(ALIAS_2, CTE_COLUMN_ID))),
-                    NodeLinkTree.<String, From, Join>of(new From(CTE_NAME_2, ALIAS_2)));
+                    NodeLinkTree.<String, From, Join>of(new From(CTE_2, ALIAS_2)));
 
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 joins,
@@ -444,7 +453,7 @@ public class PostgresDataAccess_query_IntegrationTest {
         ColumnInfo   info = ColumnInfo.of("id", PostgresDataType.UUID);
         List<Object> data = List.of(TestData.SECOND_ROW_1_ID, TestData.SECOND_ROW_2_ID, null);
 
-        Condition from = subject.builder.arrayAsTable(info, data);
+        TableLike from = subject.builder.arrayAsTable(info, data);
         String    sql  = "SELECT a.id FROM " + from.sql + " a";
 
         // Execute
@@ -456,7 +465,6 @@ public class PostgresDataAccess_query_IntegrationTest {
         assertEquals(
                 List.of(TestData.SECOND_ROW_1_ID, TestData.SECOND_ROW_2_ID, null),
                 result);
-
     }
 
     @Test
@@ -475,7 +483,7 @@ public class PostgresDataAccess_query_IntegrationTest {
                         new Tuple2<>(TestSchema.COLUMN_CUSTOM_NUM.name, 567),
                         new Tuple2<>(TestSchema.COLUMN_CUSTOM_TIME.name, null)));
 
-        Condition from = subject.builder.arrayAsTable(TestSchema.TYPE_CUSTOM, TestSchema.CUSTOM_COLUMNS, data);
+        TableLike from = subject.builder.arrayAsTable(TestSchema.TYPE_CUSTOM, TestSchema.CUSTOM_COLUMNS, data);
         String    sql  = "SELECT a.str, a.num, a.time FROM " + from.sql + " a ORDER BY a.num ASC";
 
         // Execute

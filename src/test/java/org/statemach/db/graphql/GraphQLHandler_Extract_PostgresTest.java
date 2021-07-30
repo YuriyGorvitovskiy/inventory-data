@@ -66,6 +66,7 @@ public class GraphQLHandler_Extract_PostgresTest extends GraphQLHandler_Common_P
     void fk_first_third_reverse() {
         runTest("extract.fk_first_third_reverse.gql",
                 "extract.fk_first_third_reverse.expect.json",
+                TestData.SECOND_ROW_1_ID,
                 TestData.THIRD_ROW_1_TIME,
                 TestData.THIRD_ROW_2_TIME);
     }
