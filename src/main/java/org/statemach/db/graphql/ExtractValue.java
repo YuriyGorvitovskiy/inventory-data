@@ -42,4 +42,8 @@ public class ExtractValue {
         return new ExtractValue(path.mkString(NAME_DELIMITER), path, type);
     }
 
+    public static String nameOf(List<String> path) {
+        return path.mkString(NAME_DELIMITER);
+    }
+
 }

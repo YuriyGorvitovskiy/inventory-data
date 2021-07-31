@@ -1,0 +1,15 @@
+query {
+    first(order: {id: ASC}) {
+        id
+        fk_first_second {
+            int
+            fk_third_second_reverse(order: {name: ASC}) {
+                name
+                indx
+            }
+            fk_first_second_reverse(order: {id: ASC}) {
+                id
+            }
+        }
+    }
+}

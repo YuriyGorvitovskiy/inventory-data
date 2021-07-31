@@ -1,0 +1,15 @@
+query {
+    third(order: {name: ASC}) {
+        bool
+        time
+        fk_first_third_reverse(order: {id: DESC}) {
+            fixed
+            varying
+            unlimited
+        }
+        fk_second_third_reverse(order: {int: DESC}) {
+            short
+            long
+        }
+    }
+}

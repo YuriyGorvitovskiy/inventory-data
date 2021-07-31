@@ -146,9 +146,13 @@ public class GraphQLQuery {
     }
 
     List<Map<String, Object>> fetchSubQuery(List<Map<String, Object>> result, SubQuery q) {
+        List<String>                 parent                = q.path.dropRight(1);
+        List<Tuple2<String, String>> toColumnAndResultName = q.incoming.matchingColumns
+            .map(m -> new Tuple2<>(m.to, ExtractValue.nameOf(parent.append(m.to))));
+
         Set<Map<String, Object>> ids         = result
-            .map(r -> q.extracts
-                .map(e -> new Tuple2<>(e.name, r.get(e.name).get()))
+            .map(r -> toColumnAndResultName
+                .map(t -> new Tuple2<>(t._1, r.get(t._2).get()))
                 .toMap(t -> t))
             .toSet();
         List<String>             fromColumns = q.incoming.matchingColumns.map(m -> m.from);

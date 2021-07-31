@@ -1,0 +1,27 @@
+{
+  "data" : {
+    "second" : [ {
+      "int" : 111,
+      "fk_second_second_one_reverse" : [ {
+        "int" : 111,
+        "fk_second_second_two" : {
+          "int" : 222
+        }
+      } ]
+    }, {
+      "int" : 222,
+      "fk_second_second_one_reverse" : [ {
+        "int" : 222,
+        "fk_second_second_two" : {
+          "int" : null
+        }
+      } ]
+    }, {
+      "int" : null,
+      "fk_second_second_one_reverse" : [ {
+        "int" : null,
+        "fk_second_second_two" : null
+      } ]
+    } ]
+  }
+}

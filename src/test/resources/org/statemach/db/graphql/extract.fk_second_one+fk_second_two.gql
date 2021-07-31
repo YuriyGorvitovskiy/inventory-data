@@ -1,0 +1,38 @@
+query {
+    second(order: {int: ASC}) {
+        id
+        first
+        one
+        two
+        third_name
+        third_indx
+        double
+        int
+        short
+        long
+        fk_second_second_one {
+            id
+            first
+            one
+            two
+            third_name
+            third_indx
+            double
+            int
+            short
+            long
+        }
+        fk_second_second_two {
+            id
+            first
+            one
+            two
+            third_name
+            third_indx
+            double
+            int
+            short
+            long
+        }
+    }
+}

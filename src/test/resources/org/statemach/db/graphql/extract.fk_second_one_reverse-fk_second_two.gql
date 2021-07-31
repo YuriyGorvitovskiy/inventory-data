@@ -1,0 +1,11 @@
+query {
+    second(order: {int: ASC}) {
+        int
+        fk_second_second_one_reverse(order: {long: DESC}) {
+            int
+            fk_second_second_two {
+                int
+            }
+        }
+    }
+}
