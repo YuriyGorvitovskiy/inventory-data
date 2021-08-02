@@ -1,0 +1,20 @@
+{
+  "data" : {
+    "first" : [ {
+      "id" : "1",
+      "fk_second_first_reverse" : [ {
+        "int" : 111,
+        "fk_third_second_reverse" : [ {
+          "indx" : 0,
+          "time" : "${0}"
+        }, {
+          "indx" : 1,
+          "time" : "${1}"
+        } ]
+      }, {
+        "int" : 222,
+        "fk_third_second_reverse" : [ ]
+      } ]
+    } ]
+  }
+}

@@ -1,0 +1,5 @@
+query {
+    first(filter: {search: ["Fixed", "Varying", null]}, order: {id: ASC}) {
+        id
+    }
+}

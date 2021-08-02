@@ -1,0 +1,5 @@
+query {
+    first(filter: {third_name: [null, "Name2"]}, order: {id: ASC}) {
+        id
+    }
+}

@@ -1,0 +1,5 @@
+query {
+    first(filter: {second: null}, order: {id: ASC}) {
+        id
+    }
+}

@@ -137,12 +137,9 @@ public class GraphQLQueryExtract {
 
         Option<ForeignKey> outgoing = table.outgoing.get(name);
         if (outgoing.isDefined()) {
-            Option<TableInfo> join = schema.tables.get(outgoing.get().toTable);
-            if (join.isEmpty()) {
-                return ExtractPortion.EMPTY;
-            }
-            return outgoingExtract(fieldPath, outgoing.get(), join.get())
-                .append(parse(fieldPath, join.get(), field.getSelectionSet()));
+            TableInfo join = schema.tables.get(outgoing.get().toTable).get();
+            return outgoingExtract(fieldPath, outgoing.get(), join)
+                .append(parse(fieldPath, join, field.getSelectionSet()));
         }
 
         Option<ColumnInfo> column = table.columns.get(name);
@@ -151,14 +148,8 @@ public class GraphQLQueryExtract {
         }
 
         Option<ForeignKey> incoming = table.incoming.get(naming.getForeignKey(name));
-        if (incoming.isDefined()) {
-            Option<TableInfo> join = schema.tables.get(incoming.get().fromTable);
-            if (join.isEmpty()) {
-                return ExtractPortion.EMPTY;
-            }
-            return incomingExtract(fieldPath, incoming.get(), table, join.get(), field);
-        }
-        return ExtractPortion.EMPTY;
+        TableInfo          join     = schema.tables.get(incoming.get().fromTable).get();
+        return incomingExtract(fieldPath, incoming.get(), table, join, field);
     }
 
     ExtractPortion outgoingExtract(List<String> path, ForeignKey outgoing, TableInfo to) {

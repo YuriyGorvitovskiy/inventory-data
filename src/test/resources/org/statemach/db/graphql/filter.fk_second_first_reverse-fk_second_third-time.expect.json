@@ -1,0 +1,20 @@
+{
+  "data" : {
+    "first" : [ {
+      "id" : "1",
+      "fk_second_first_reverse" : [ {
+        "int" : 111,
+        "fk_second_third" : {
+          "indx" : 0,
+          "time" : "1970-01-01T00:00:00Z"
+        }
+      }, {
+        "int" : 222,
+        "fk_second_third" : {
+          "indx" : 0,
+          "time" : "1970-01-01T00:00:00Z"
+        }
+      } ]
+    } ]
+  }
+}

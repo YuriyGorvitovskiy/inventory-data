@@ -51,7 +51,6 @@ public class GraphQLQueryFilter {
     java.util.List<GraphQLInputObjectField> buildScalarFields(TableInfo table) {
         return table.columns.values()
             .filter(c -> mapping.isFilterable(c.type))
-            .filter(c -> !table.outgoing.containsKey(c.name))
             .map(c -> buildScalarField(table, c))
             .toJavaList();
     }
@@ -106,30 +105,21 @@ public class GraphQLQueryFilter {
 
     List<Filter> parse(List<String> path, boolean plural, TableInfo table, String field, Object value) {
         path = path.append(field);
-        Option<ForeignKey> incoming = table.incoming.get(field);
-        if (incoming.isDefined()) {
-            Option<TableInfo> join = schema.tables.get(incoming.get().fromTable);
-            if (join.isEmpty()) {
-                return List.empty();
-            }
-            return parse(path.append(field), true, join.get(), value);
+        Option<ColumnInfo> column = table.columns.get(field);
+        if (column.isDefined()) {
+            List<?> valuesAsList = value instanceof java.util.List<?> ? List.ofAll((java.util.List<?>) value) : List.of(value);
+            return List.of(Filter.of(path, plural, column.get().type, valuesAsList));
         }
 
         Option<ForeignKey> outgoing = table.outgoing.get(field);
         if (outgoing.isDefined()) {
-            Option<TableInfo> join = schema.tables.get(incoming.get().toTable);
-            if (join.isEmpty()) {
-                return List.empty();
-            }
-            return parse(path.append(field), plural, join.get(), value);
+            TableInfo join = schema.tables.get(outgoing.get().toTable).get();
+            return parse(path, plural, join, value);
         }
 
-        Option<ColumnInfo> column = table.columns.get(field);
-        if (column.isDefined()) {
-            return List.of(Filter.of(path, plural, column.get().type, List.ofAll((java.util.List<?>) value)));
-        }
-
-        return List.empty();
+        Option<ForeignKey> incoming = table.incoming.get(naming.getForeignKey(field));
+        TableInfo          join     = schema.tables.get(incoming.get().fromTable).get();
+        return parse(path, true, join, value);
     }
 
     public NodeLinkTree<String, TableInfo, ForeignKeyJoin> buildJoins(TableInfo table, List<Filter> filters) {
@@ -145,14 +135,15 @@ public class GraphQLQueryFilter {
     }
 
     Tuple2<ForeignKeyJoin, TableInfo> buildJoin(TableInfo parent, String step, Join.Kind join) {
-        Option<ForeignKey> incoming = parent.incoming.get(step);
-        if (incoming.isDefined()) {
-            return new Tuple2<>(new ForeignKeyJoin(join, incoming.get(), false),
-                    schema.tables.get(incoming.get().fromTable).get());
+        Option<ForeignKey> outgoing = parent.outgoing.get(step);
+        if (outgoing.isDefined()) {
+            return new Tuple2<>(new ForeignKeyJoin(join, outgoing.get(), true),
+                    schema.tables.get(outgoing.get().toTable).get());
         }
 
-        ForeignKey outgoing = parent.outgoing.get(step).get();
-        return new Tuple2<>(new ForeignKeyJoin(join, outgoing, true), schema.tables.get(outgoing.toTable).get());
+        Option<ForeignKey> incoming = parent.incoming.get(naming.getForeignKey(step));
+        return new Tuple2<>(new ForeignKeyJoin(join, incoming.get(), false),
+                schema.tables.get(incoming.get().fromTable).get());
     }
 
     public Condition buildWhere(NodeLinkTree<String, From, Join> joinTree, List<Filter> filters) {

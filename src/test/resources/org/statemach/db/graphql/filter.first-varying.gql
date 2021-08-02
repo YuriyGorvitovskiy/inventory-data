@@ -1,0 +1,5 @@
+query {
+    first(filter: {varying: "Varying 1"}, order: {id: ASC}) {
+        id
+    }
+}

@@ -1,0 +1,5 @@
+query {
+    first(filter: {fixed: "Fixed 2"}, order: {id: ASC}) {
+        id
+    }
+}

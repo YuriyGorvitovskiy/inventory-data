@@ -1,0 +1,12 @@
+query {
+    first(filter: {fk_second_first_reverse: {fk_third_second_reverse:{time: ["${1}", null]}}}, order: {id: ASC}) {
+        id
+        fk_second_first_reverse(order: {int: ASC}) {
+            int
+            fk_third_second_reverse(order: {indx: ASC}) {
+                indx
+                time
+            }
+        }
+    }
+}

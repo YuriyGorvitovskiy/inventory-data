@@ -1,0 +1,18 @@
+query {
+    first(
+        filter: {
+            fk_first_second: {int: 111},
+            fk_first_third: {bool: true}
+        },
+        order: {id: ASC}
+    ) {
+        id
+        fk_first_second {
+            int
+        }
+        fk_first_third {
+            indx
+            bool
+        }
+    }
+}

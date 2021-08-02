@@ -1,0 +1,8 @@
+query {
+    first(filter: {fk_first_second: {first: "1"}}, order: {id: ASC}) {
+        id
+        fk_first_second {
+            int
+        }
+    }
+}

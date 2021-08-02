@@ -1,0 +1,5 @@
+query {
+    first(filter: {third_indx: [0, 1, null]}, order: {id: ASC}) {
+        id
+    }
+}

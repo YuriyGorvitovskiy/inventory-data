@@ -333,12 +333,6 @@ public class GraphQLQuery {
         return sqlBuilder.arrayAsTable(type, columns, ids);
     }
 
-    NodeLinkTree<String, From, Join> buildJoins(NodeLinkTree<String, TableInfo, ForeignKeyJoin> preparedJoins) {
-        return preparedJoins
-            .mapNodesWithIndex(1, (t, i) -> new From(TableLike.of(schema, t), "f" + i))
-            .mapLinksWithNodes(t -> buildJoin(t._1, t._2, t._3));
-    }
-
     Join buildJoin(From left, ForeignKeyJoin preparedJoin, From right) {
         return new Join(preparedJoin.joinKind,
                 sqlBuilder.and(preparedJoin.foreignKey.matchingColumns
