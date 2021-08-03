@@ -1,0 +1,6 @@
+query {
+    second(order: {short: DESC}) {
+        int
+        short
+    }
+}

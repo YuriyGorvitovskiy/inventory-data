@@ -1,0 +1,6 @@
+query {
+    third(order: {name: ASC}) {
+        name
+        indx
+    }
+}

@@ -1,0 +1,14 @@
+query {
+    first(order: [
+        {fk_first_second: {fk_second_third: {bool: ASC}}},
+        {id: DESC}
+    ]) {
+        id
+        fk_first_second {
+            double
+            fk_second_third {
+                bool
+            }
+        }
+    }
+}

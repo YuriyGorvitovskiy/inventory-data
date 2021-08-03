@@ -1,0 +1,5 @@
+query {
+    second(order: {int: DESC}) {
+        int
+    }
+}

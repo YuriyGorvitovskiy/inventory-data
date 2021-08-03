@@ -1,0 +1,6 @@
+query {
+    first(order: {fixed: ASC}) {
+        id
+        fixed
+    }
+}

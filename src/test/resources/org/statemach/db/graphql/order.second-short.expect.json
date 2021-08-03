@@ -1,0 +1,14 @@
+{
+  "data" : {
+    "second" : [ {
+      "int" : null,
+      "short" : null
+    }, {
+      "int" : 222,
+      "short" : 22
+    }, {
+      "int" : 111,
+      "short" : 11
+    } ]
+  }
+}

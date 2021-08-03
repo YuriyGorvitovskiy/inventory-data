@@ -1,0 +1,11 @@
+query {
+    first(order: [
+        {fk_first_third: {time: ASC}},
+        {id: DESC}
+    ]) {
+        id
+        fk_first_third {
+            time
+        }
+    }
+}

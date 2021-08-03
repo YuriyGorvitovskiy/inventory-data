@@ -1,0 +1,7 @@
+query {
+    third(order: {time: ASC}) {
+        name
+        indx
+        time
+    }
+}

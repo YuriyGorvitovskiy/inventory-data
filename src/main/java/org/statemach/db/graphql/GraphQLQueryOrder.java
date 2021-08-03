@@ -67,7 +67,7 @@ public class GraphQLQueryOrder {
     java.util.List<GraphQLInputObjectField> buildScalarFields(TableInfo table) {
         return table.columns.values()
             .filter(this::isOrderableColumn)
-            .map(c -> buildScalarField(c, table.outgoing.get(c.name)))
+            .map(c -> buildScalarField(c))
             .toJavaList();
     }
 
@@ -81,12 +81,10 @@ public class GraphQLQueryOrder {
         return PostgresDataType.TSVECTOR != column.type;
     }
 
-    GraphQLInputObjectField buildScalarField(ColumnInfo column, Option<ForeignKey> outgoing) {
+    GraphQLInputObjectField buildScalarField(ColumnInfo column) {
         return GraphQLInputObjectField.newInputObjectField()
             .name(column.name)
-            .type(outgoing.isDefined()
-                    ? naming.getOrderTypeRef(outgoing.get().toTable)
-                    : SORTING_ORDER_TYPE_REF)
+            .type(SORTING_ORDER_TYPE_REF)
             .build();
     }
 
@@ -107,10 +105,6 @@ public class GraphQLQueryOrder {
 
     @SuppressWarnings("unchecked")
     List<OrderBy> parse(List<String> path, TableInfo table, Object argument) {
-        if (!(argument instanceof java.util.Map)) {
-            return List.empty();
-        }
-
         return HashMap.ofAll((java.util.Map<String, Object>) argument)
             .flatMap(t -> parse(path, table, t._1, t._2))
             .toList();
@@ -120,17 +114,11 @@ public class GraphQLQueryOrder {
         Option<ForeignKey> outgoing = table.outgoing.get(field);
         if (outgoing.isDefined()) {
             Option<TableInfo> join = schema.tables.get(outgoing.get().toTable);
-            if (join.isEmpty()) {
-                return List.empty();
-            }
             return parse(path.append(field), join.get(), value);
         }
 
         Option<ColumnInfo> column = table.columns.get(field);
-        if (column.isDefined()) {
-            return List.of(new OrderBy(path.append(field), !Sort.DESC.equalsIgnoreCase(Objects.toString(value))));
-        }
-        return List.empty();
+        return List.of(new OrderBy(path.append(column.get().name), !Sort.DESC.equalsIgnoreCase(Objects.toString(value))));
     }
 
     public NodeLinkTree<String, TableInfo, ForeignKeyJoin> buildJoins(NodeLinkTree<String, TableInfo, ForeignKeyJoin> tree,

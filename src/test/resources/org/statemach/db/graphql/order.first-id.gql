@@ -1,0 +1,5 @@
+query {
+    first(order: {id: ASC}) {
+        id
+    }
+}

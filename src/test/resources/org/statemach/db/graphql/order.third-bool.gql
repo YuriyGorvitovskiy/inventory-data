@@ -1,0 +1,7 @@
+query {
+    third(order: {bool: ASC}) {
+        name
+        indx
+        bool
+    }
+}

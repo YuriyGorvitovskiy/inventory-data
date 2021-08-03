@@ -1,0 +1,6 @@
+query {
+    first(order: {varying: ASC}) {
+        id
+        varying
+    }
+}
