@@ -1,97 +1,108 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "INPUT_OBJECT",
-      "name" : "third_filter",
-      "inputFields" : [ {
-        "name" : "name",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "String"
+  "data": {
+    "__type": {
+      "kind": "INPUT_OBJECT",
+      "name": "third_filter",
+      "inputFields": [
+        {
+          "name": "name",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        },
+        {
+          "name": "indx",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "Int"
+            }
+          }
+        },
+        {
+          "name": "first",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "ID"
+            }
+          }
+        },
+        {
+          "name": "second",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "ID"
+            }
+          }
+        },
+        {
+          "name": "bool",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            }
+          }
+        },
+        {
+          "name": "time",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        },
+        {
+          "name": "fk_third_first",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "first_filter",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_third_second",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "second_filter",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_first_third_reverse",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "first_filter",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_second_third_reverse",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "second_filter",
+            "ofType": null
           }
         }
-      }, {
-        "name" : "indx",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "Int"
-          }
-        }
-      }, {
-        "name" : "first",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "ID"
-          }
-        }
-      }, {
-        "name" : "second",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "ID"
-          }
-        }
-      }, {
-        "name" : "bool",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "Boolean"
-          }
-        }
-      }, {
-        "name" : "time",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "String"
-          }
-        }
-      }, {
-        "name" : "fk_third_first",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "first_filter",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_third_second",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "second_filter",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_first_third_reverse",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "first_filter",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_second_third_reverse",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "second_filter",
-          "ofType" : null
-        }
-      } ]
+      ]
     }
   }
 }

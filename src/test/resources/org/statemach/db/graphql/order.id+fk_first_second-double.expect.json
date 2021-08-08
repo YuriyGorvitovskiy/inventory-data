@@ -1,18 +1,22 @@
 {
-  "data" : {
-    "first" : [ {
-      "id" : "2",
-      "fk_first_second" : {
-        "double" : 1.2
+  "data": {
+    "first": [
+      {
+        "id": "2",
+        "fk_first_second": {
+          "double": 1.2
+        }
+      },
+      {
+        "id": "1",
+        "fk_first_second": {
+          "double": 1.2
+        }
+      },
+      {
+        "id": "3",
+        "fk_first_second": null
       }
-    }, {
-      "id" : "1",
-      "fk_first_second" : {
-        "double" : 1.2
-      }
-    }, {
-      "id" : "3",
-      "fk_first_second" : null
-    } ]
+    ]
   }
 }

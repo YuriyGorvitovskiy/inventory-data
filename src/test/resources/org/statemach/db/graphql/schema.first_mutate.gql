@@ -1,0 +1,17 @@
+query {
+    __type(name: "first_mutate") {
+        kind
+        name
+        fields {
+            name
+            type {
+                kind
+                name
+                ofType {
+                    kind
+                    name
+                }
+            }
+        }
+    }
+}

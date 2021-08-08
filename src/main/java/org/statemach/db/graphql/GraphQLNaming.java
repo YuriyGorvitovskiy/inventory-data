@@ -19,6 +19,7 @@ public class GraphQLNaming {
         static final String UPSERT = "_upsert";
         static final String UPDATE = "_update";
         static final String DELETE = "_delete";
+        static final String MUTATE = "_mutate";
 
         static final String REVERSE = "_reverse";
 
@@ -33,6 +34,14 @@ public class GraphQLNaming {
 
     public String getExtractTypeName(String tableName) {
         return tableName;
+    }
+
+    public GraphQLTypeReference getMutateTypeRef(String tableName) {
+        return GraphQLTypeReference.typeRef(getMutateTypeName(tableName));
+    }
+
+    public String getMutateTypeName(String tableName) {
+        return tableName + Suffix.MUTATE;
     }
 
     public GraphQLTypeReference getFilterTypeRef(String tableName) {

@@ -1,63 +1,70 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "OBJECT",
-      "name" : "__Field",
-      "fields" : [ {
-        "name" : "name",
-        "type" : {
-          "kind" : "NON_NULL",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "String"
+  "data": {
+    "__type": {
+      "kind": "OBJECT",
+      "name": "__Field",
+      "fields": [
+        {
+          "name": "name",
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        },
+        {
+          "name": "description",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "args",
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "LIST",
+              "name": null
+            }
+          }
+        },
+        {
+          "name": "type",
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "OBJECT",
+              "name": "__Type"
+            }
+          }
+        },
+        {
+          "name": "isDeprecated",
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            }
+          }
+        },
+        {
+          "name": "deprecationReason",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
           }
         }
-      }, {
-        "name" : "description",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "args",
-        "type" : {
-          "kind" : "NON_NULL",
-          "name" : null,
-          "ofType" : {
-            "kind" : "LIST",
-            "name" : null
-          }
-        }
-      }, {
-        "name" : "type",
-        "type" : {
-          "kind" : "NON_NULL",
-          "name" : null,
-          "ofType" : {
-            "kind" : "OBJECT",
-            "name" : "__Type"
-          }
-        }
-      }, {
-        "name" : "isDeprecated",
-        "type" : {
-          "kind" : "NON_NULL",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "Boolean"
-          }
-        }
-      }, {
-        "name" : "deprecationReason",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      } ]
+      ]
     }
   }
 }

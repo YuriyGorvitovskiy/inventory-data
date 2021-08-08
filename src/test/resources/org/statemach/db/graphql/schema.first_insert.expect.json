@@ -1,58 +1,66 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "INPUT_OBJECT",
-      "name" : "first_insert",
-      "inputFields" : [ {
-        "name" : "id",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "ID",
-          "ofType" : null
+  "data": {
+    "__type": {
+      "kind": "INPUT_OBJECT",
+      "name": "first_insert",
+      "inputFields": [
+        {
+          "name": "id",
+          "type": {
+            "kind": "SCALAR",
+            "name": "ID",
+            "ofType": null
+          }
+        },
+        {
+          "name": "second",
+          "type": {
+            "kind": "SCALAR",
+            "name": "ID",
+            "ofType": null
+          }
+        },
+        {
+          "name": "third_name",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "third_indx",
+          "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fixed",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "varying",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "unlimited",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
         }
-      }, {
-        "name" : "second",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "ID",
-          "ofType" : null
-        }
-      }, {
-        "name" : "third_name",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "third_indx",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "Int",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fixed",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "varying",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "unlimited",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      } ]
+      ]
     }
   }
 }

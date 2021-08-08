@@ -1,97 +1,108 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "OBJECT",
-      "name" : "__Type",
-      "fields" : [ {
-        "name" : "kind",
-        "type" : {
-          "kind" : "NON_NULL",
-          "name" : null,
-          "ofType" : {
-            "kind" : "ENUM",
-            "name" : "__TypeKind"
+  "data": {
+    "__type": {
+      "kind": "OBJECT",
+      "name": "__Type",
+      "fields": [
+        {
+          "name": "kind",
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "ENUM",
+              "name": "__TypeKind"
+            }
+          }
+        },
+        {
+          "name": "name",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "description",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fields",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "NON_NULL",
+              "name": null
+            }
+          }
+        },
+        {
+          "name": "interfaces",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "NON_NULL",
+              "name": null
+            }
+          }
+        },
+        {
+          "name": "possibleTypes",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "NON_NULL",
+              "name": null
+            }
+          }
+        },
+        {
+          "name": "enumValues",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "NON_NULL",
+              "name": null
+            }
+          }
+        },
+        {
+          "name": "inputFields",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "NON_NULL",
+              "name": null
+            }
+          }
+        },
+        {
+          "name": "ofType",
+          "type": {
+            "kind": "OBJECT",
+            "name": "__Type",
+            "ofType": null
+          }
+        },
+        {
+          "name": "specifiedByUrl",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
           }
         }
-      }, {
-        "name" : "name",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "description",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fields",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "NON_NULL",
-            "name" : null
-          }
-        }
-      }, {
-        "name" : "interfaces",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "NON_NULL",
-            "name" : null
-          }
-        }
-      }, {
-        "name" : "possibleTypes",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "NON_NULL",
-            "name" : null
-          }
-        }
-      }, {
-        "name" : "enumValues",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "NON_NULL",
-            "name" : null
-          }
-        }
-      }, {
-        "name" : "inputFields",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "NON_NULL",
-            "name" : null
-          }
-        }
-      }, {
-        "name" : "ofType",
-        "type" : {
-          "kind" : "OBJECT",
-          "name" : "__Type",
-          "ofType" : null
-        }
-      }, {
-        "name" : "specifiedByUrl",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      } ]
+      ]
     }
   }
 }

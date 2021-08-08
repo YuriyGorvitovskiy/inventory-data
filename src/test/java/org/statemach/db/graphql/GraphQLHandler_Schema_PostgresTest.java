@@ -57,6 +57,21 @@ public class GraphQLHandler_Schema_PostgresTest extends GraphQLHandler_Common_Po
     }
 
     @Test
+    void first_mutate_type() {
+        runTest("schema.first_mutate.gql", "schema.first_mutate.expect.json");
+    }
+
+    @Test
+    void second_mutate_type() {
+        runTest("schema.second_mutate.gql", "schema.second_mutate.expect.json");
+    }
+
+    @Test
+    void third_mutate_type() {
+        runTest("schema.third_mutate.gql", "schema.third_mutate.expect.json");
+    }
+
+    @Test
     void version_type() {
         runTest("schema.version.gql", "schema.version.expect.json");
     }

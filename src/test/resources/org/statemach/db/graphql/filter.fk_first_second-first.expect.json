@@ -1,15 +1,18 @@
 {
-  "data" : {
-    "first" : [ {
-      "id" : "1",
-      "fk_first_second" : {
-        "int" : 111
+  "data": {
+    "first": [
+      {
+        "id": "1",
+        "fk_first_second": {
+          "int": 111
+        }
+      },
+      {
+        "id": "2",
+        "fk_first_second": {
+          "int": 111
+        }
       }
-    }, {
-      "id" : "2",
-      "fk_first_second" : {
-        "int" : 111
-      }
-    } ]
+    ]
   }
 }

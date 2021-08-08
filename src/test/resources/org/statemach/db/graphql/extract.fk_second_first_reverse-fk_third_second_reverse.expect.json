@@ -1,26 +1,36 @@
 {
-  "data" : {
-    "first" : [ {
-      "id" : "1",
-      "fk_second_first_reverse" : [ {
-        "id" : "${0}",
-        "fk_third_second_reverse" : [ {
-          "name" : "Name1",
-          "indx" : 0
-        }, {
-          "name" : "Name2",
-          "indx" : 1
-        } ]
-      }, {
-        "id" : "${1}",
-        "fk_third_second_reverse" : [ ]
-      } ]
-    }, {
-      "id" : "2",
-      "fk_second_first_reverse" : [ ]
-    }, {
-      "id" : "3",
-      "fk_second_first_reverse" : [ ]
-    } ]
+  "data": {
+    "first": [
+      {
+        "id": "1",
+        "fk_second_first_reverse": [
+          {
+            "id": "${0}",
+            "fk_third_second_reverse": [
+              {
+                "name": "Name1",
+                "indx": 0
+              },
+              {
+                "name": "Name2",
+                "indx": 1
+              }
+            ]
+          },
+          {
+            "id": "${1}",
+            "fk_third_second_reverse": []
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "fk_second_first_reverse": []
+      },
+      {
+        "id": "3",
+        "fk_second_first_reverse": []
+      }
+    ]
   }
 }

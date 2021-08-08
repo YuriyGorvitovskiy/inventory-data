@@ -1,42 +1,58 @@
 {
-  "data" : {
-    "first" : [ {
-      "id" : "1",
-      "fk_first_second" : {
-        "int" : 111,
-        "fk_third_second_reverse" : [ {
-          "name" : "Name1",
-          "indx" : 0
-        }, {
-          "name" : "Name2",
-          "indx" : 1
-        } ],
-        "fk_first_second_reverse" : [ {
-          "id" : "1"
-        }, {
-          "id" : "2"
-        } ]
+  "data": {
+    "first": [
+      {
+        "id": "1",
+        "fk_first_second": {
+          "int": 111,
+          "fk_third_second_reverse": [
+            {
+              "name": "Name1",
+              "indx": 0
+            },
+            {
+              "name": "Name2",
+              "indx": 1
+            }
+          ],
+          "fk_first_second_reverse": [
+            {
+              "id": "1"
+            },
+            {
+              "id": "2"
+            }
+          ]
+        }
+      },
+      {
+        "id": "2",
+        "fk_first_second": {
+          "int": 111,
+          "fk_third_second_reverse": [
+            {
+              "name": "Name1",
+              "indx": 0
+            },
+            {
+              "name": "Name2",
+              "indx": 1
+            }
+          ],
+          "fk_first_second_reverse": [
+            {
+              "id": "1"
+            },
+            {
+              "id": "2"
+            }
+          ]
+        }
+      },
+      {
+        "id": "3",
+        "fk_first_second": null
       }
-    }, {
-      "id" : "2",
-      "fk_first_second" : {
-        "int" : 111,
-        "fk_third_second_reverse" : [ {
-          "name" : "Name1",
-          "indx" : 0
-        }, {
-          "name" : "Name2",
-          "indx" : 1
-        } ],
-        "fk_first_second_reverse" : [ {
-          "id" : "1"
-        }, {
-          "id" : "2"
-        } ]
-      }
-    }, {
-      "id" : "3",
-      "fk_first_second" : null
-    } ]
+    ]
   }
 }

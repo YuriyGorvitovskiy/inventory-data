@@ -1,14 +1,18 @@
 {
-  "data" : {
-    "second" : [ {
-      "int" : null,
-      "double" : null
-    }, {
-      "int" : 222,
-      "double" : 3.4
-    }, {
-      "int" : 111,
-      "double" : 1.2
-    } ]
+  "data": {
+    "second": [
+      {
+        "int": null,
+        "double": null
+      },
+      {
+        "int": 222,
+        "double": 3.4
+      },
+      {
+        "int": 111,
+        "double": 1.2
+      }
+    ]
   }
 }

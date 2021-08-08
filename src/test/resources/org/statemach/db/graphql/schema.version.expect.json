@@ -1,23 +1,26 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "OBJECT",
-      "name" : "version",
-      "fields" : [ {
-        "name" : "product",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
+  "data": {
+    "__type": {
+      "kind": "OBJECT",
+      "name": "version",
+      "fields": [
+        {
+          "name": "product",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "version",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
         }
-      }, {
-        "name" : "version",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      } ]
+      ]
     }
   }
 }

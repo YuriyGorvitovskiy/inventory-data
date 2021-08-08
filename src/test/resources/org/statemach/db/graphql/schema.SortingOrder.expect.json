@@ -1,13 +1,16 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "ENUM",
-      "name" : "SortingOrder",
-      "enumValues" : [ {
-        "name" : "ASC"
-      }, {
-        "name" : "DESC"
-      } ]
+  "data": {
+    "__type": {
+      "kind": "ENUM",
+      "name": "SortingOrder",
+      "enumValues": [
+        {
+          "name": "ASC"
+        },
+        {
+          "name": "DESC"
+        }
+      ]
     }
   }
 }

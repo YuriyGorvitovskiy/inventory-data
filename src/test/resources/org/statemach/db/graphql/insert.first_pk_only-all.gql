@@ -1,0 +1,11 @@
+mutation {
+    insert_first(first: {id: 4}) {
+        id
+        second
+        third_name
+        third_indx
+        fixed
+        varying
+        unlimited
+    }
+}

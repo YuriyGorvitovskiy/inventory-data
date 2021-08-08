@@ -1,0 +1,13 @@
+mutation {
+    insert_third(third: {
+        name: "Name 4",
+        indx: 3,
+    }) {
+        name
+        indx
+        first
+        second
+        bool
+        time
+    }
+}

@@ -1,117 +1,130 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "INPUT_OBJECT",
-      "name" : "first_filter",
-      "inputFields" : [ {
-        "name" : "id",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "ID"
+  "data": {
+    "__type": {
+      "kind": "INPUT_OBJECT",
+      "name": "first_filter",
+      "inputFields": [
+        {
+          "name": "id",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "ID"
+            }
+          }
+        },
+        {
+          "name": "second",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "ID"
+            }
+          }
+        },
+        {
+          "name": "third_name",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        },
+        {
+          "name": "third_indx",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "Int"
+            }
+          }
+        },
+        {
+          "name": "fixed",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        },
+        {
+          "name": "varying",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        },
+        {
+          "name": "unlimited",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        },
+        {
+          "name": "search",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        },
+        {
+          "name": "fk_first_second",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "second_filter",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_first_third",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "third_filter",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_second_first_reverse",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "second_filter",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_third_first_reverse",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "third_filter",
+            "ofType": null
           }
         }
-      }, {
-        "name" : "second",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "ID"
-          }
-        }
-      }, {
-        "name" : "third_name",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "String"
-          }
-        }
-      }, {
-        "name" : "third_indx",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "Int"
-          }
-        }
-      }, {
-        "name" : "fixed",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "String"
-          }
-        }
-      }, {
-        "name" : "varying",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "String"
-          }
-        }
-      }, {
-        "name" : "unlimited",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "String"
-          }
-        }
-      }, {
-        "name" : "search",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "SCALAR",
-            "name" : "String"
-          }
-        }
-      }, {
-        "name" : "fk_first_second",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "second_filter",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_first_third",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "third_filter",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_second_first_reverse",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "second_filter",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_third_first_reverse",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "third_filter",
-          "ofType" : null
-        }
-      } ]
+      ]
     }
   }
 }

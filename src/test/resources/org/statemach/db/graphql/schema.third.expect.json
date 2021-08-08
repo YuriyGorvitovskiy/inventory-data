@@ -1,85 +1,96 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "OBJECT",
-      "name" : "third",
-      "fields" : [ {
-        "name" : "name",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "indx",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "Int",
-          "ofType" : null
-        }
-      }, {
-        "name" : "first",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "ID",
-          "ofType" : null
-        }
-      }, {
-        "name" : "second",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "ID",
-          "ofType" : null
-        }
-      }, {
-        "name" : "bool",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "Boolean",
-          "ofType" : null
-        }
-      }, {
-        "name" : "time",
-        "type" : {
-          "kind" : "SCALAR",
-          "name" : "String",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_third_first",
-        "type" : {
-          "kind" : "OBJECT",
-          "name" : "first",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_third_second",
-        "type" : {
-          "kind" : "OBJECT",
-          "name" : "second",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_first_third_reverse",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "OBJECT",
-            "name" : "first"
+  "data": {
+    "__type": {
+      "kind": "OBJECT",
+      "name": "third",
+      "fields": [
+        {
+          "name": "name",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "indx",
+          "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+          }
+        },
+        {
+          "name": "first",
+          "type": {
+            "kind": "SCALAR",
+            "name": "ID",
+            "ofType": null
+          }
+        },
+        {
+          "name": "second",
+          "type": {
+            "kind": "SCALAR",
+            "name": "ID",
+            "ofType": null
+          }
+        },
+        {
+          "name": "bool",
+          "type": {
+            "kind": "SCALAR",
+            "name": "Boolean",
+            "ofType": null
+          }
+        },
+        {
+          "name": "time",
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_third_first",
+          "type": {
+            "kind": "OBJECT",
+            "name": "first",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_third_second",
+          "type": {
+            "kind": "OBJECT",
+            "name": "second",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_first_third_reverse",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "OBJECT",
+              "name": "first"
+            }
+          }
+        },
+        {
+          "name": "fk_second_third_reverse",
+          "type": {
+            "kind": "LIST",
+            "name": null,
+            "ofType": {
+              "kind": "OBJECT",
+              "name": "second"
+            }
           }
         }
-      }, {
-        "name" : "fk_second_third_reverse",
-        "type" : {
-          "kind" : "LIST",
-          "name" : null,
-          "ofType" : {
-            "kind" : "OBJECT",
-            "name" : "second"
-          }
-        }
-      } ]
+      ]
     }
   }
 }

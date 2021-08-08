@@ -1,38 +1,42 @@
 {
-  "data" : {
-    "third" : [ {
-      "bool" : true,
-      "time" : "${0}",
-      "fk_third_first" : {
-        "fixed" : "Fixed 1                                                                                                                                                                                                                                                         ",
-        "varying" : "Varying 1",
-        "unlimited" : "Unlimited 1"
+  "data": {
+    "third": [
+      {
+        "bool": true,
+        "time": "${0}",
+        "fk_third_first": {
+          "fixed": "Fixed 1                                                                                                                                                                                                                                                         ",
+          "varying": "Varying 1",
+          "unlimited": "Unlimited 1"
+        },
+        "fk_third_second": {
+          "double": 1.2,
+          "int": 111,
+          "short": 11,
+          "long": "11111"
+        }
       },
-      "fk_third_second" : {
-        "double" : 1.2,
-        "int" : 111,
-        "short" : 11,
-        "long" : "11111"
-      }
-    }, {
-      "bool" : false,
-      "time" : "${1}",
-      "fk_third_first" : {
-        "fixed" : "Fixed 1                                                                                                                                                                                                                                                         ",
-        "varying" : "Varying 1",
-        "unlimited" : "Unlimited 1"
+      {
+        "bool": false,
+        "time": "${1}",
+        "fk_third_first": {
+          "fixed": "Fixed 1                                                                                                                                                                                                                                                         ",
+          "varying": "Varying 1",
+          "unlimited": "Unlimited 1"
+        },
+        "fk_third_second": {
+          "double": 1.2,
+          "int": 111,
+          "short": 11,
+          "long": "11111"
+        }
       },
-      "fk_third_second" : {
-        "double" : 1.2,
-        "int" : 111,
-        "short" : 11,
-        "long" : "11111"
+      {
+        "bool": null,
+        "time": null,
+        "fk_third_first": null,
+        "fk_third_second": null
       }
-    }, {
-      "bool" : null,
-      "time" : null,
-      "fk_third_first" : null,
-      "fk_third_second" : null
-    } ]
+    ]
   }
 }

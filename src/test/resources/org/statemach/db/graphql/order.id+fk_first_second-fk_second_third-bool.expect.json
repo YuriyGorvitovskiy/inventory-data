@@ -1,24 +1,28 @@
 {
-  "data" : {
-    "first" : [ {
-      "id" : "2",
-      "fk_first_second" : {
-        "double" : 1.2,
-        "fk_second_third" : {
-          "bool" : true
+  "data": {
+    "first": [
+      {
+        "id": "2",
+        "fk_first_second": {
+          "double": 1.2,
+          "fk_second_third": {
+            "bool": true
+          }
         }
-      }
-    }, {
-      "id" : "1",
-      "fk_first_second" : {
-        "double" : 1.2,
-        "fk_second_third" : {
-          "bool" : true
+      },
+      {
+        "id": "1",
+        "fk_first_second": {
+          "double": 1.2,
+          "fk_second_third": {
+            "bool": true
+          }
         }
+      },
+      {
+        "id": "3",
+        "fk_first_second": null
       }
-    }, {
-      "id" : "3",
-      "fk_first_second" : null
-    } ]
+    ]
   }
 }

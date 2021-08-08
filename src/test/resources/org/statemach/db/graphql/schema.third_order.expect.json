@@ -1,72 +1,82 @@
 {
-  "data" : {
-    "__type" : {
-      "kind" : "INPUT_OBJECT",
-      "name" : "third_order",
-      "inputFields" : [ {
-        "name" : "name",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
+  "data": {
+    "__type": {
+      "kind": "INPUT_OBJECT",
+      "name": "third_order",
+      "inputFields": [
+        {
+          "name": "name",
+          "type": {
+            "kind": "ENUM",
+            "name": "SortingOrder",
+            "ofType": null
+          }
+        },
+        {
+          "name": "indx",
+          "type": {
+            "kind": "ENUM",
+            "name": "SortingOrder",
+            "ofType": null
+          }
+        },
+        {
+          "name": "first",
+          "type": {
+            "kind": "ENUM",
+            "name": "SortingOrder",
+            "ofType": null
+          }
+        },
+        {
+          "name": "second",
+          "type": {
+            "kind": "ENUM",
+            "name": "SortingOrder",
+            "ofType": null
+          }
+        },
+        {
+          "name": "bool",
+          "type": {
+            "kind": "ENUM",
+            "name": "SortingOrder",
+            "ofType": null
+          }
+        },
+        {
+          "name": "time",
+          "type": {
+            "kind": "ENUM",
+            "name": "SortingOrder",
+            "ofType": null
+          }
+        },
+        {
+          "name": "unsupported",
+          "type": {
+            "kind": "ENUM",
+            "name": "SortingOrder",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_third_first",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "first_order",
+            "ofType": null
+          }
+        },
+        {
+          "name": "fk_third_second",
+          "type": {
+            "kind": "INPUT_OBJECT",
+            "name": "second_order",
+            "ofType": null
+          }
         }
-      }, {
-        "name" : "indx",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "first",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "second",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "bool",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "time",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "unsupported",
-        "type" : {
-          "kind" : "ENUM",
-          "name" : "SortingOrder",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_third_first",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "first_order",
-          "ofType" : null
-        }
-      }, {
-        "name" : "fk_third_second",
-        "type" : {
-          "kind" : "INPUT_OBJECT",
-          "name" : "second_order",
-          "ofType" : null
-        }
-      } ]
+      ]
     }
   }
 }

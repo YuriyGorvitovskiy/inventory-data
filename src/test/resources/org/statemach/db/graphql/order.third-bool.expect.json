@@ -1,17 +1,21 @@
 {
-  "data" : {
-    "third" : [ {
-      "name" : "Name2",
-      "indx" : 1,
-      "bool" : false
-    }, {
-      "name" : "Name1",
-      "indx" : 0,
-      "bool" : true
-    }, {
-      "name" : "Name3",
-      "indx" : 2,
-      "bool" : null
-    } ]
+  "data": {
+    "third": [
+      {
+        "name": "Name2",
+        "indx": 1,
+        "bool": false
+      },
+      {
+        "name": "Name1",
+        "indx": 0,
+        "bool": true
+      },
+      {
+        "name": "Name3",
+        "indx": 2,
+        "bool": null
+      }
+    ]
   }
 }

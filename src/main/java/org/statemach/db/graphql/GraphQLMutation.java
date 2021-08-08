@@ -28,13 +28,7 @@ import io.vavr.collection.Map;
 import io.vavr.control.Option;
 
 public class GraphQLMutation {
-
-    static interface Argument {
-        static final String ID = "ID";
-    }
-
     static final String MUTATION_TYPE = "MutationType";
-    static final String ID_COLUMN     = "id";
 
     final Schema         schema;
     final GraphQLNaming  naming;
@@ -90,26 +84,26 @@ public class GraphQLMutation {
 
     List<GraphQLFieldDefinition> buildMutationFields(TableInfo table) {
         return List.of(
-                buildInsertMutations(table),
-                buildUpsertMutations(table),
-                buildUpdateMutations(table),
-                buildDeleteMutations(table));
+                buildInsertMutation(table),
+                buildUpsertMutation(table),
+                buildUpdateMutation(table),
+                buildDeleteMutation(table));
     }
 
-    GraphQLFieldDefinition buildInsertMutations(TableInfo table) {
+    GraphQLFieldDefinition buildInsertMutation(TableInfo table) {
         return GraphQLFieldDefinition.newFieldDefinition()
             .name(naming.getInsertMutationName(table.name))
-            .type(naming.getExtractTypeRef(table.name))
+            .type(naming.getMutateTypeRef(table.name))
             .argument(GraphQLArgument.newArgument()
                 .name(table.name)
                 .type(naming.getInsertTypeRef(table.name)))
             .build();
     }
 
-    GraphQLFieldDefinition buildUpsertMutations(TableInfo table) {
+    GraphQLFieldDefinition buildUpsertMutation(TableInfo table) {
         return GraphQLFieldDefinition.newFieldDefinition()
             .name(naming.getUpsertMutationName(table.name))
-            .type(naming.getExtractTypeRef(table.name))
+            .type(naming.getMutateTypeRef(table.name))
             .arguments(buildPrimaryKeyArguments(table))
             .argument(GraphQLArgument.newArgument()
                 .name(table.name)
@@ -117,10 +111,10 @@ public class GraphQLMutation {
             .build();
     }
 
-    GraphQLFieldDefinition buildUpdateMutations(TableInfo table) {
+    GraphQLFieldDefinition buildUpdateMutation(TableInfo table) {
         return GraphQLFieldDefinition.newFieldDefinition()
             .name(naming.getUpdateMutationName(table.name))
-            .type(naming.getExtractTypeRef(table.name))
+            .type(naming.getMutateTypeRef(table.name))
             .arguments(buildPrimaryKeyArguments(table))
             .argument(GraphQLArgument.newArgument()
                 .name(table.name)
@@ -128,11 +122,11 @@ public class GraphQLMutation {
             .build();
     }
 
-    GraphQLFieldDefinition buildDeleteMutations(TableInfo table) {
+    GraphQLFieldDefinition buildDeleteMutation(TableInfo table) {
 
         return GraphQLFieldDefinition.newFieldDefinition()
             .name(naming.getDeleteMutationName(table.name))
-            .type(naming.getExtractTypeRef(table.name))
+            .type(naming.getMutateTypeRef(table.name))
             .arguments(buildPrimaryKeyArguments(table))
             .build();
     }
@@ -149,8 +143,30 @@ public class GraphQLMutation {
 
     List<GraphQLType> buildTypes(TableInfo table) {
         return List.of(
+                buildMutateType(table),
                 buildInsertType(table),
                 buildUpdateType(table));
+    }
+
+    GraphQLType buildMutateType(TableInfo table) {
+        return GraphQLObjectType.newObject()
+            .name(naming.getMutateTypeName(table.name))
+            .fields(buildScalarFields(table))
+            .build();
+    }
+
+    java.util.List<GraphQLFieldDefinition> buildScalarFields(TableInfo table) {
+        return table.columns.values()
+            .filter(c -> mapping.isExtractable(c.type))
+            .map(c -> buildScalarField(table, c))
+            .toJavaList();
+    }
+
+    GraphQLFieldDefinition buildScalarField(TableInfo table, ColumnInfo column) {
+        return GraphQLFieldDefinition.newFieldDefinition()
+            .name(column.name)
+            .type(mapping.scalar(table, column))
+            .build();
     }
 
     GraphQLType buildInsertType(TableInfo table) {
@@ -167,7 +183,7 @@ public class GraphQLMutation {
         return GraphQLInputObjectType.newInputObject()
             .name(naming.getUpdateTypeName(table.name))
             .fields(table.columns.values()
-                .filter(c -> isUpdatableColumn(table.primary, c))
+                .filter(c -> isUpdatableColumn(table.primary.get(), c))
                 .map(c -> buildMutableField(table, c))
                 .toJavaList())
             .build();
@@ -184,8 +200,8 @@ public class GraphQLMutation {
         return mapping.isMutable(column.type);
     }
 
-    boolean isUpdatableColumn(Option<PrimaryKey> pk, ColumnInfo column) {
-        return isInsertableColumn(column) && (pk.isEmpty() || !pk.get().columns.contains(column.name));
+    boolean isUpdatableColumn(PrimaryKey pk, ColumnInfo column) {
+        return isInsertableColumn(column) && !pk.columns.contains(column.name);
     }
 
     java.util.Map<String, Object> fetchInsert(TableInfo table, DataFetchingEnvironment environment) throws Exception {
@@ -231,17 +247,10 @@ public class GraphQLMutation {
     }
 
     Option<Tuple2<String, Inject>> getInject(TableInfo table, String columnName, Object value) {
-        Option<ColumnInfo> column = table.columns.get(columnName);
-        if (column.isEmpty()) {
-            return Option.none();
-        }
+        ColumnInfo               column   = table.columns.get(columnName).get();
+        Function<Object, Inject> injector = mapping.injectors.get(column.type).get();
 
-        Option<Function<Object, Inject>> injector = mapping.injectors.get(column.get().type);
-        if (injector.isEmpty()) {
-            return Option.none();
-        }
-
-        return Option.of(new Tuple2<>(columnName, injector.get().apply(value)));
+        return Option.of(new Tuple2<>(columnName, injector.apply(value)));
     }
 
     Map<String, Extract<?>> returnFields(TableInfo table, DataFetchingEnvironment environment) {
@@ -249,8 +258,6 @@ public class GraphQLMutation {
         return List.ofAll(selectionSet.getImmediateFields())
             .filter(f -> table.columns.containsKey(f.getName()))
             .map(SelectedField::getName)
-            .append(ID_COLUMN)
-            .distinct()
             .map(c -> new Tuple2<>(c, mapping.extract(table.columns.get(c).get().type)))
             .toLinkedMap(t -> t);
     }

@@ -1,23 +1,26 @@
 {
-  "data" : {
-    "first" : [ {
-      "id" : "1",
-      "fk_first_second" : {
-        "int" : 111,
-        "fk_second_third" : {
-          "indx" : 0,
-          "bool" : true
+  "data": {
+    "first": [
+      {
+        "id": "1",
+        "fk_first_second": {
+          "int": 111,
+          "fk_second_third": {
+            "indx": 0,
+            "bool": true
+          }
+        }
+      },
+      {
+        "id": "2",
+        "fk_first_second": {
+          "int": 111,
+          "fk_second_third": {
+            "indx": 0,
+            "bool": true
+          }
         }
       }
-    }, {
-      "id" : "2",
-      "fk_first_second" : {
-        "int" : 111,
-        "fk_second_third" :  {
-          "indx" : 0,
-          "bool" : true
-        }
-      }
-    } ]
+    ]
   }
 }
