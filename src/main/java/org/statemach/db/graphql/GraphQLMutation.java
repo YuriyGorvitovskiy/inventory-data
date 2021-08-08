@@ -77,9 +77,9 @@ public class GraphQLMutation {
                 new Tuple2<>(FieldCoordinates.coordinates(MUTATION_TYPE, naming.getUpsertMutationName(table.name)),
                         (DataFetcher<?>) (e -> fetchUpsert(table, e))),
                 new Tuple2<>(FieldCoordinates.coordinates(MUTATION_TYPE, naming.getUpdateMutationName(table.name)),
-                        (DataFetcher<?>) (e -> fetchUpsert(table, e))),
+                        (DataFetcher<?>) (e -> fetchUpdate(table, e))),
                 new Tuple2<>(FieldCoordinates.coordinates(MUTATION_TYPE, naming.getDeleteMutationName(table.name)),
-                        (DataFetcher<?>) (e -> fetchUpsert(table, e))));
+                        (DataFetcher<?>) (e -> fetchDelete(table, e))));
     }
 
     List<GraphQLFieldDefinition> buildMutationFields(TableInfo table) {
@@ -230,9 +230,7 @@ public class GraphQLMutation {
     }
 
     Map<String, Inject> primaryKey(TableInfo table, DataFetchingEnvironment environment) {
-        return table.primary.isEmpty()
-                ? HashMap.empty()
-                : table.primary.get().columns.map(c -> columnInject(table, c, environment)).toMap(t -> t);
+        return table.primary.get().columns.map(c -> columnInject(table, c, environment)).toMap(t -> t);
     }
 
     Tuple2<String, Inject> columnInject(TableInfo table, String columnName, DataFetchingEnvironment environment) {

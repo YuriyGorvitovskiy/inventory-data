@@ -1,0 +1,12 @@
+{
+  "data": {
+    "upsert_third": {
+      "name": "Name 4",
+      "indx": 3,
+      "first": null,
+      "second": null,
+      "bool": null,
+      "time": "${0}"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+mutation {
+    upsert_first(
+        id: 2,
+        first: {
+            second: "${0}",
+            third_name: "Name2",
+            third_indx: 1,
+            fixed: "Fixed 7",
+            varying: "Varying 7",
+            unlimited: "Unlimited 7",
+        }
+    ) {
+        id
+    }
+}

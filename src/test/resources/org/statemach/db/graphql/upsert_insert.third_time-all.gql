@@ -1,0 +1,16 @@
+mutation {
+    upsert_third(
+        name: "Name 4",
+        indx: 3,
+        third: {
+            time: "${0}"
+        }
+    ) {
+        name
+        indx
+        first
+        second
+        bool
+        time
+    }
+}

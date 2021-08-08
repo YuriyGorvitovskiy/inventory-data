@@ -1,0 +1,13 @@
+{
+  "data": {
+    "upsert_first": {
+      "id": "6",
+      "second": "${0}",
+      "third_name": "Name1",
+      "third_indx": 0,
+      "fixed": "Fixed 6                                                                                                                                                                                                                                                         ",
+      "varying": "Varying 6",
+      "unlimited": "Unlimited 6"
+    }
+  }
+}

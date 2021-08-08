@@ -1,0 +1,19 @@
+mutation {
+    upsert_second(
+        id: "${0}",
+        second: {
+            short: 34
+        }
+    ) {
+        id
+        first
+        one
+        two
+        third_name
+        third_indx
+        double
+        int
+        short
+        long
+    }
+}
