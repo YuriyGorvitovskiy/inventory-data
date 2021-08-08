@@ -117,17 +117,17 @@ public class TestDB {
         jdbc.execute(Java.format(SQL.TRUNCATE, schema, TestSchema.TABLE_NAME_THIRD), ps -> {});
     }
 
-    static void insert(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
+    public static void insert(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
         da.insert(table.name, TestData.toInject(table, pk.merge(values)));
     }
 
-    static void update(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
+    public static void update(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
         da.update(table.name,
                 TestData.toInject(table, pk),
                 TestData.toInject(table, values));
     }
 
-    static void merge(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
+    public static void merge(TableInfo table, Map<String, Object> pk, Map<String, Object> values) {
         da.merge(table.name,
                 TestData.toInject(table, pk),
                 TestData.toInject(table, values));
@@ -159,7 +159,7 @@ public class TestDB {
         update(TestSchema.TABLE_INFO_THIRD, TestData.THIRD_ROW_3_PK, TestData.THIRD_ROW_3_REF);
     }
 
-    static void updateAllTablesRow1() {
+    public static void updateAllTablesRow1() {
         update(TestSchema.TABLE_INFO_FIRST,
                 TestData.FIRST_ROW_1_PK,
                 TestData.FIRST_ROW_1_VAL.merge(TestData.FIRST_ROW_1_REF));
@@ -171,7 +171,7 @@ public class TestDB {
                 TestData.THIRD_ROW_1_VAL.merge(TestData.THIRD_ROW_1_REF));
     }
 
-    static void restoreAllTablesRow2() {
+    public static void restoreAllTablesRow2() {
         merge(TestSchema.TABLE_INFO_FIRST,
                 TestData.FIRST_ROW_2_PK,
                 TestData.FIRST_ROW_2_VAL.merge(TestData.FIRST_ROW_2_REF));

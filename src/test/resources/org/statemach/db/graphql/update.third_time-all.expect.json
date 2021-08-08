@@ -1,0 +1,12 @@
+{
+  "data": {
+    "update_third": {
+      "name": "Name2",
+      "indx": 1,
+      "first": "1",
+      "second": "${1}",
+      "bool": false,
+      "time": "${0}"
+    }
+  }
+}

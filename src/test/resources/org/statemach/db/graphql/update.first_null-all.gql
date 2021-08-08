@@ -1,0 +1,21 @@
+mutation {
+    update_first(
+        id: 2,
+        first: {
+            second: null,
+            third_name: null,
+            third_indx: null,
+            fixed: null,
+            varying: null,
+            unlimited: null,
+        }
+    ) {
+        id
+        second
+        third_name
+        third_indx
+        fixed
+        varying
+        unlimited
+    }
+}

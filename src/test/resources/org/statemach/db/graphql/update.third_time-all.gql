@@ -1,0 +1,16 @@
+mutation {
+    update_third(
+        name: "Name2",
+        indx: 1,
+        third: {
+            time: "${0}"
+        }
+    ) {
+        name
+        indx
+        first
+        second
+        bool
+        time
+    }
+}
