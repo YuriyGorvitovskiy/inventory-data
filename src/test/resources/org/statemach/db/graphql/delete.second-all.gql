@@ -1,0 +1,14 @@
+mutation {
+    delete_second(id: "${0}") {
+        id
+        first
+        one
+        two
+        third_name
+        third_indx
+        double
+        int
+        short
+        long
+    }
+}

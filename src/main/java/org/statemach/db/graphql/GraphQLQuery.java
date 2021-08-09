@@ -84,8 +84,11 @@ public class GraphQLQuery {
         List<CompositeType> existing = schemaAccess.getAllCompositeTypes();
         List<CompositeType> required = requiredCompositeTypes();
 
+        // Avoid creating Composite Type, that exactly match required
         List<CompositeType> create = required.removeAll(existing);
-        List<String>        delete = create.map(c -> c.name).retainAll(existing.map(c -> c.name));
+
+        // Delete, not matching existing Composite Type, that has the same name as required
+        List<String> delete = create.map(c -> c.name).retainAll(existing.map(c -> c.name));
 
         delete.forEach(c -> schemaAccess.dropCompositeType(c));
         create.forEach(c -> schemaAccess.createCompositeType(c));

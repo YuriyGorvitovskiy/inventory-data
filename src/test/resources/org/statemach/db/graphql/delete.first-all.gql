@@ -1,0 +1,11 @@
+mutation {
+    delete_first(id: 2) {
+        id
+        second
+        third_name
+        third_indx
+        fixed
+        varying
+        unlimited
+    }
+}

@@ -1,0 +1,5 @@
+mutation {
+    delete_first(id: 2) {
+        varying
+    }
+}

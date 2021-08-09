@@ -1,0 +1,5 @@
+mutation {
+    delete_second(id: "${0}") {
+        int
+    }
+}

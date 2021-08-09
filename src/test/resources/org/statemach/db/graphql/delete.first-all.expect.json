@@ -1,0 +1,13 @@
+{
+  "data": {
+    "delete_first": {
+      "id": "2",
+      "second": "${0}",
+      "third_name": "Name1",
+      "third_indx": 0,
+      "fixed": "Fixed 2                                                                                                                                                                                                                                                         ",
+      "varying": "Varying 2",
+      "unlimited": "Unlimited 2"
+    }
+  }
+}

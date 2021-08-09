@@ -1,0 +1,5 @@
+mutation {
+    delete_third(name: "Name2", indx: 1) {
+        bool
+    }
+}
