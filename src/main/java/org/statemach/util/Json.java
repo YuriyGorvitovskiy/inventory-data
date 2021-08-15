@@ -10,7 +10,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Seq;
 import io.vavr.jackson.datatype.VavrModule;
 
 public interface Json {
@@ -51,13 +50,8 @@ public interface Json {
                 .toLinkedMap(t -> t)
                 .mapValues(Json::alphabetize);
         }
-        if (input instanceof Seq) {
-            return ((Seq<Object>) input)
-                .map(Json::alphabetize)
-                .toList();
-        }
-        if (input instanceof java.util.Collection) {
-            return List.ofAll((java.util.Collection<Object>) input)
+        if (input instanceof Iterable) {
+            return List.ofAll((Iterable<Object>) input)
                 .map(Json::alphabetize);
         }
         return input;

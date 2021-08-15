@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.LinkedHashMap;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
 public class Json_UnitTest {
@@ -67,4 +68,70 @@ public class Json_UnitTest {
         assertNull(result);
     }
 
+    @Test
+    void readAlphabetize() {
+        // Setup
+        String json = Java.resource("deep.json");
+
+        // Execute
+        Object result = Json.readAlphabetize(json);
+
+        // Verify
+        @SuppressWarnings("unchecked")
+        LinkedHashMap<String, Object> expect = LinkedHashMap.ofEntries(
+                new Tuple2<>("boolean", true),
+                new Tuple2<>("string", "Hello"),
+                new Tuple2<>("number", 4.23),
+                new Tuple2<>("null", null),
+                new Tuple2<>("children",
+                        List.of(
+                                LinkedHashMap.ofEntries(
+                                        new Tuple2<>("boolean", false),
+                                        new Tuple2<>("string", "First"),
+                                        new Tuple2<>("number", 1.23)),
+                                LinkedHashMap.ofEntries(
+                                        new Tuple2<>("boolean", true),
+                                        new Tuple2<>("string", "Second"),
+                                        new Tuple2<>("number", 2.34)),
+                                LinkedHashMap.ofEntries(
+                                        new Tuple2<>("boolean", false),
+                                        new Tuple2<>("string", "Third"),
+                                        new Tuple2<>("number", 3.45)))));
+
+        assertEquals(expect, result);
+    }
+
+    @Test
+    void alphabetize() {
+        // Setup
+        String json   = Java.resource("deep.json");
+        Object object = Java.soft(() -> Json.MAPPER.readValue(json, LinkedHashMap.class));
+
+        // Execute
+        Object result = Json.alphabetize(object);
+
+        // Verify
+        @SuppressWarnings("unchecked")
+        LinkedHashMap<String, Object> expect = LinkedHashMap.ofEntries(
+                new Tuple2<>("boolean", true),
+                new Tuple2<>("string", "Hello"),
+                new Tuple2<>("number", 4.23),
+                new Tuple2<>("null", null),
+                new Tuple2<>("children",
+                        List.of(
+                                LinkedHashMap.ofEntries(
+                                        new Tuple2<>("boolean", false),
+                                        new Tuple2<>("string", "First"),
+                                        new Tuple2<>("number", 1.23)),
+                                LinkedHashMap.ofEntries(
+                                        new Tuple2<>("boolean", true),
+                                        new Tuple2<>("string", "Second"),
+                                        new Tuple2<>("number", 2.34)),
+                                LinkedHashMap.ofEntries(
+                                        new Tuple2<>("boolean", false),
+                                        new Tuple2<>("string", "Third"),
+                                        new Tuple2<>("number", 3.45)))));
+
+        assertEquals(expect, result);
+    }
 }

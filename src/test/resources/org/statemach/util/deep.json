@@ -1,0 +1,23 @@
+{
+  "boolean": true,
+  "string": "Hello",
+  "number": 4.23,
+  "null": null,
+  "children": [
+    {
+      "boolean": false,
+      "string": "First",
+      "number": 1.23
+    },
+    {
+      "boolean": true,
+      "string": "Second",
+      "number": 2.34
+    },
+    {
+      "boolean": false,
+      "string": "Third",
+      "number": 3.45
+    }
+  ]
+}

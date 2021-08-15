@@ -130,8 +130,4 @@ public interface Rest {
             }
         };
     }
-
-    static void respondeError(int returnCode, Throwable ex) {
-        Java.toString(ex);
-    }
 }
