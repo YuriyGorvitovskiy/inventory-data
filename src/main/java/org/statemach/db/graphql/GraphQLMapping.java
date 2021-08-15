@@ -73,9 +73,8 @@ public class GraphQLMapping {
     }
 
     public static GraphQLMapping of(Vendor vendor) {
-        switch (vendor) {
-            case POSTGRES:
-                return new GraphQLMapping(POSTGRES_EXTRACTS, POSTGRES_INJECTORS, POSTGRES_TO_SCALAR);
+        if (Vendor.POSTGRES == vendor) {
+            return new GraphQLMapping(POSTGRES_EXTRACTS, POSTGRES_INJECTORS, POSTGRES_TO_SCALAR);
         }
         throw new RuntimeException("Vendor " + vendor + " is not supported");
     }
@@ -103,12 +102,8 @@ public class GraphQLMapping {
                     && column.name.equals(o.matchingColumns.get().from))) {
             return Scalars.GraphQLID;
         }
-        if (table.incoming.values()
-            .exists(o -> 1 == o.matchingColumns.size()
-                    && column.name.equals(o.matchingColumns.get().to))) {
-            return Scalars.GraphQLID;
-        }
-
+        // Foreign Key always referencing to the Primary Key.
+        // There is no need to check incoming relation
         return scalar(column.type);
     }
 

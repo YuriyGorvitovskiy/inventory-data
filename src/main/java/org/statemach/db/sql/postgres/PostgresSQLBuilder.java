@@ -27,7 +27,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
 
     final String schema;
 
-    PostgresSQLBuilder(String schema) {
+    public PostgresSQLBuilder(String schema) {
         this.schema = schema;
     }
 

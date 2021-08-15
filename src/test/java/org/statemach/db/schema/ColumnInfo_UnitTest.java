@@ -61,4 +61,17 @@ public class ColumnInfo_UnitTest {
         assertTrue(result.contains(DATA_TYPE_1.toString()));
         assertTrue(result.contains(SIZE_1.get().toString()));
     }
+
+    @Test
+    void toString_nosize_test() {
+        // Setup
+        final ColumnInfo subject = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1, SIZE_2);
+
+        // Execute
+        String result = subject.toString();
+
+        // Verify
+        assertTrue(result.contains(COLUMN_NAME_1));
+        assertTrue(result.contains(DATA_TYPE_1.toString()));
+    }
 }

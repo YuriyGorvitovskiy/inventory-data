@@ -37,6 +37,6 @@ public class ColumnInfo {
 
     @Override
     public String toString() {
-        return "ColumnInfo@{name: " + name + ", type: " + type + (null != size ? ", size: " + size : "") + "}";
+        return "ColumnInfo@{name: " + name + ", type: " + type + (size.isDefined() ? ", size: " + size : "") + "}";
     }
 }

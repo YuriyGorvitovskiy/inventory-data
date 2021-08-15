@@ -96,10 +96,8 @@ public class GraphQLNaming {
         return foreignKeyName + Suffix.REVERSE;
     }
 
-    public String getForeignKey(String reverse) {
-        return reverse.endsWith(Suffix.REVERSE)
-                ? reverse.substring(0, reverse.length() - Suffix.REVERSE.length())
-                : reverse;
+    public String getForeignKey(String reverseName) {
+        return reverseName.substring(0, reverseName.length() - Suffix.REVERSE.length());
     }
 
     public String getFromType(ForeignKey fk) {

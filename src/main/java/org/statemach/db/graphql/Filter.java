@@ -71,9 +71,9 @@ public class Filter {
                 "}";
     }
 
-    public static Filter of(List<String> path, boolean plural, DataType dataType, Seq<?> values) {
-        boolean acceptNull    = (null == values || values.contains(null));
-        Seq<?>  notNullValues = (null == values ? List.empty() : values).filter(v -> v != null);
+    public static Filter of(List<String> path, boolean plural, DataType dataType, java.util.List<?> values) {
+        boolean acceptNull    = values.contains(null);
+        Seq<?>  notNullValues = List.ofAll(values.stream().filter(v -> v != null));
         int     valuesCount   = notNullValues.size();
 
         if (PostgresDataType.TSVECTOR == dataType) {
@@ -128,25 +128,23 @@ public class Filter {
     public Condition buildCondition(GraphQLMapping mapping, SQLBuilder builder, String tableAlias) {
         var columnAlias = Select.of(tableAlias, path.last(), null);
         var injector    = mapping.injector(dataType);
-        switch (operator) {
-            case EQUAL: {
-                Condition condition = builder.equal(columnAlias, injector.apply(notNullValues.get()));
-                return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
-            }
-            case IN_PARAM: {
-                Condition condition = builder.in(columnAlias, notNullValues.map(injector::apply));
-                return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
-            }
-            case IN_TABLE: {
-                Condition condition = builder.inArray(columnAlias, dataType, notNullValues);
-                return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
-            }
-            case NULL_CHECK: {
-                return acceptNull ? builder.isNull(columnAlias) : builder.isNotNull(columnAlias);
-            }
-            case TEXT_SEARCH: {
-                return builder.textSearch(columnAlias, notNullValues.map(Object::toString));
-            }
+        if (Operator.EQUAL == operator) {
+            Condition condition = builder.equal(columnAlias, injector.apply(notNullValues.get()));
+            return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
+        }
+        if (Operator.IN_PARAM == operator) {
+            Condition condition = builder.in(columnAlias, notNullValues.map(injector::apply));
+            return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
+        }
+        if (Operator.IN_TABLE == operator) {
+            Condition condition = builder.inArray(columnAlias, dataType, notNullValues);
+            return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
+        }
+        if (Operator.NULL_CHECK == operator) {
+            return acceptNull ? builder.isNull(columnAlias) : builder.isNotNull(columnAlias);
+        }
+        if (Operator.TEXT_SEARCH == operator) {
+            return builder.textSearch(columnAlias, notNullValues.map(Object::toString));
         }
         return null;
     }

@@ -1,5 +1,7 @@
 package org.statemach.db.graphql;
 
+import java.util.Collections;
+
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.ForeignKey;
 import org.statemach.db.schema.Schema;
@@ -107,7 +109,9 @@ public class GraphQLQueryFilter {
         path = path.append(field);
         Option<ColumnInfo> column = table.columns.get(field);
         if (column.isDefined()) {
-            List<?> valuesAsList = value instanceof java.util.List<?> ? List.ofAll((java.util.List<?>) value) : List.of(value);
+            java.util.List<?> valuesAsList = value instanceof java.util.List<?>
+                    ? (java.util.List<?>) value
+                    : Collections.singletonList(value);
             return List.of(Filter.of(path, plural, column.get().type, valuesAsList));
         }
 
