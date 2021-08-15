@@ -28,7 +28,6 @@ public class GraphQLHandler implements HttpHandler {
     }
 
     static class Input {
-
         public String              query;
         public String              operationName;
         public Map<String, Object> variables;
