@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
+import org.statemach.db.jdbc.Transform;
 import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.DataType;
@@ -60,27 +61,48 @@ public class GraphQLMapping {
             new Tuple2<>(PostgresDataType.TSVECTOR, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.UUID, Scalars.GraphQLString));
 
+    static final Map<DataType, Function<Object, ?>> POSTGRES_TRANSFORMS = HashMap.ofEntries(
+            new Tuple2<>(PostgresDataType.BIGINT, Transform.NUMBER_TO_LONG),
+            new Tuple2<>(PostgresDataType.BOOLEAN, Transform.BOOLEAN),
+            new Tuple2<>(PostgresDataType.CHARACTER, Transform.STRING),
+            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Transform.STRING),
+            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Transform.NUMBER_TO_DOUBLE),
+            new Tuple2<>(PostgresDataType.INTEGER, Transform.NUMBER_TO_INTEGER),
+            new Tuple2<>(PostgresDataType.NAME, Transform.STRING),
+            new Tuple2<>(PostgresDataType.SMALLINT, Transform.NUMBER_TO_INTEGER),
+            new Tuple2<>(PostgresDataType.TEXT, Transform.STRING),
+            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Transform.ISO8601_TO_TIMESTAMP),
+            new Tuple2<>(PostgresDataType.TSVECTOR, Transform.STRING),
+            new Tuple2<>(PostgresDataType.UUID, Transform.STRING_TO_UUID));
+
     final Map<DataType, Extract<?>>               extracts;
     final Map<DataType, Function<Object, Inject>> injectors;
     final Map<DataType, GraphQLScalarType>        scalars;
+    final Map<DataType, Function<Object, ?>>      transforms;
 
     GraphQLMapping(Map<DataType, Extract<?>> extracts,
                    Map<DataType, Function<Object, Inject>> injectors,
+                   Map<DataType, Function<Object, ?>> transforms,
                    Map<DataType, GraphQLScalarType> scalars) {
         this.extracts = extracts;
         this.injectors = injectors;
+        this.transforms = transforms;
         this.scalars = scalars;
     }
 
     public static GraphQLMapping of(Vendor vendor) {
         if (Vendor.POSTGRES == vendor) {
-            return new GraphQLMapping(POSTGRES_EXTRACTS, POSTGRES_INJECTORS, POSTGRES_TO_SCALAR);
+            return new GraphQLMapping(POSTGRES_EXTRACTS, POSTGRES_INJECTORS, POSTGRES_TRANSFORMS, POSTGRES_TO_SCALAR);
         }
         throw new RuntimeException("Vendor " + vendor + " is not supported");
     }
 
     public Function<Object, Inject> injector(DataType type) {
         return injectors.get(type).get();
+    }
+
+    public Function<Object, ?> transform(DataType type) {
+        return transforms.get(type).get();
     }
 
     public GraphQLScalarType scalar(DataType type) {

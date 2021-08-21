@@ -21,9 +21,9 @@ public interface SQLBuilder {
         return or(List.of(child));
     }
 
-    public Condition and(List<Condition> child);
+    public Condition and(Traversable<Condition> child);
 
-    public Condition or(List<Condition> child);
+    public Condition or(Traversable<Condition> child);
 
     public Condition not(Condition child);
 

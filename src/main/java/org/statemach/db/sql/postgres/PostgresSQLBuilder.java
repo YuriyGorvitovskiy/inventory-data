@@ -37,7 +37,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
     }
 
     @Override
-    public Condition and(List<Condition> child) {
+    public Condition and(Traversable<Condition> child) {
         if (child.isEmpty()) {
             return Condition.NONE;
         }
@@ -50,7 +50,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
     }
 
     @Override
-    public Condition or(List<Condition> child) {
+    public Condition or(Traversable<Condition> child) {
         if (child.isEmpty()) {
             return Condition.NONE;
         }

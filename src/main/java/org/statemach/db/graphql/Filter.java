@@ -1,6 +1,7 @@
 package org.statemach.db.graphql;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.statemach.db.schema.DataType;
 import org.statemach.db.sql.Condition;
@@ -22,7 +23,7 @@ public class Filter {
         TEXT_SEARCH,
     }
 
-    static final int PARAM_LIMIT = 7;
+    static final int IN_PARAM_LIMIT = 7;
 
     final List<String> path;
     final boolean      plural;
@@ -106,7 +107,7 @@ public class Filter {
                     notNullValues);
         }
 
-        if (PARAM_LIMIT > valuesCount) {
+        if (IN_PARAM_LIMIT > valuesCount) {
             return new Filter(
                     path,
                     plural,
@@ -122,7 +123,7 @@ public class Filter {
                 dataType,
                 acceptNull,
                 Operator.IN_TABLE,
-                notNullValues);
+                notNullValues.map(null));
     }
 
     public Condition buildCondition(GraphQLMapping mapping, SQLBuilder builder, String tableAlias) {
@@ -137,7 +138,8 @@ public class Filter {
             return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
         }
         if (Operator.IN_TABLE == operator) {
-            Condition condition = builder.inArray(columnAlias, dataType, notNullValues);
+            Function<Object, ?> transform = mapping.transform(dataType);
+            Condition           condition = builder.inArray(columnAlias, dataType, notNullValues.map(transform));
             return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
         }
         if (Operator.NULL_CHECK == operator) {
