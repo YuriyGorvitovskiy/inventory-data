@@ -1,16 +1,10 @@
 package org.statemach.db.graphql;
 
-import java.util.function.Function;
-
-import org.statemach.db.jdbc.Extract;
-import org.statemach.db.jdbc.Inject;
-import org.statemach.db.jdbc.Transform;
 import org.statemach.db.jdbc.Vendor;
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.DataType;
 import org.statemach.db.schema.TableInfo;
 import org.statemach.db.sql.postgres.PostgresDataType;
-import org.statemach.util.Java;
 
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;
@@ -19,33 +13,6 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 
 public class GraphQLMapping {
-
-    static final Map<DataType, Extract<?>> POSTGRES_EXTRACTS = HashMap.ofEntries(
-            new Tuple2<>(PostgresDataType.BIGINT, Extract.LONG_AS_STRING),
-            new Tuple2<>(PostgresDataType.BOOLEAN, Extract.BOOLEAN),
-            new Tuple2<>(PostgresDataType.CHARACTER, Extract.STRING),
-            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Extract.STRING),
-            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Extract.DOUBLE),
-            new Tuple2<>(PostgresDataType.INTEGER, Extract.INTEGER),
-            new Tuple2<>(PostgresDataType.NAME, Extract.STRING),
-            new Tuple2<>(PostgresDataType.SMALLINT, Extract.INTEGER),
-            new Tuple2<>(PostgresDataType.TEXT, Extract.STRING),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Extract.TIMESTAMP_AS_ISO8601),
-            new Tuple2<>(PostgresDataType.UUID, Extract.OBJECT_AS_UUID_STRING));
-
-    static final Map<DataType, Function<Object, Inject>> POSTGRES_INJECTORS = HashMap.ofEntries(
-            new Tuple2<>(PostgresDataType.BIGINT, Java.asString(Inject.STRING_AS_LONG)),
-            new Tuple2<>(PostgresDataType.BOOLEAN, Java.asBoolean(Inject.BOOLEAN)),
-            new Tuple2<>(PostgresDataType.CHARACTER, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Java.asNumber(Inject.DOUBLE)),
-            new Tuple2<>(PostgresDataType.INTEGER, Java.asNumber(Inject.INTEGER)),
-            new Tuple2<>(PostgresDataType.NAME, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.SMALLINT, Java.asNumber(Inject.INTEGER)),
-            new Tuple2<>(PostgresDataType.TEXT, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Java.asString(Inject.ISO8601_AS_TIMESTAMP)),
-            new Tuple2<>(PostgresDataType.TSVECTOR, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.UUID, Java.asString(Inject.STRING_AS_UUID_OBJECT)));
 
     static final Map<DataType, GraphQLScalarType> POSTGRES_TO_SCALAR = HashMap.ofEntries(
             new Tuple2<>(PostgresDataType.BIGINT, Scalars.GraphQLString),
@@ -57,52 +24,21 @@ public class GraphQLMapping {
             new Tuple2<>(PostgresDataType.NAME, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.SMALLINT, Scalars.GraphQLInt),
             new Tuple2<>(PostgresDataType.TEXT, Scalars.GraphQLString),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Scalars.GraphQLString),
+            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIMEZONE, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.TSVECTOR, Scalars.GraphQLString),
             new Tuple2<>(PostgresDataType.UUID, Scalars.GraphQLString));
 
-    static final Map<DataType, Function<Object, ?>> POSTGRES_TRANSFORMS = HashMap.ofEntries(
-            new Tuple2<>(PostgresDataType.BIGINT, Transform.NUMBER_TO_LONG),
-            new Tuple2<>(PostgresDataType.BOOLEAN, Transform.BOOLEAN),
-            new Tuple2<>(PostgresDataType.CHARACTER, Transform.STRING),
-            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Transform.STRING),
-            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Transform.NUMBER_TO_DOUBLE),
-            new Tuple2<>(PostgresDataType.INTEGER, Transform.NUMBER_TO_INTEGER),
-            new Tuple2<>(PostgresDataType.NAME, Transform.STRING),
-            new Tuple2<>(PostgresDataType.SMALLINT, Transform.NUMBER_TO_INTEGER),
-            new Tuple2<>(PostgresDataType.TEXT, Transform.STRING),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Transform.ISO8601_TO_TIMESTAMP),
-            new Tuple2<>(PostgresDataType.TSVECTOR, Transform.STRING),
-            new Tuple2<>(PostgresDataType.UUID, Transform.STRING_TO_UUID));
+    final Map<DataType, GraphQLScalarType> scalars;
 
-    final Map<DataType, Extract<?>>               extracts;
-    final Map<DataType, Function<Object, Inject>> injectors;
-    final Map<DataType, GraphQLScalarType>        scalars;
-    final Map<DataType, Function<Object, ?>>      transforms;
-
-    GraphQLMapping(Map<DataType, Extract<?>> extracts,
-                   Map<DataType, Function<Object, Inject>> injectors,
-                   Map<DataType, Function<Object, ?>> transforms,
-                   Map<DataType, GraphQLScalarType> scalars) {
-        this.extracts = extracts;
-        this.injectors = injectors;
-        this.transforms = transforms;
+    GraphQLMapping(Map<DataType, GraphQLScalarType> scalars) {
         this.scalars = scalars;
     }
 
     public static GraphQLMapping of(Vendor vendor) {
         if (Vendor.POSTGRES == vendor) {
-            return new GraphQLMapping(POSTGRES_EXTRACTS, POSTGRES_INJECTORS, POSTGRES_TRANSFORMS, POSTGRES_TO_SCALAR);
+            return new GraphQLMapping(POSTGRES_TO_SCALAR);
         }
         throw new RuntimeException("Vendor " + vendor + " is not supported");
-    }
-
-    public Function<Object, Inject> injector(DataType type) {
-        return injectors.get(type).get();
-    }
-
-    public Function<Object, ?> transform(DataType type) {
-        return transforms.get(type).get();
     }
 
     public GraphQLScalarType scalar(DataType type) {
@@ -127,22 +63,6 @@ public class GraphQLMapping {
         // Foreign Key always referencing to the Primary Key.
         // There is no need to check incoming relation
         return scalar(column.type);
-    }
-
-    public Extract<?> extract(DataType type) {
-        return extracts.get(type).get();
-    }
-
-    public boolean isExtractable(DataType type) {
-        return extracts.containsKey(type);
-    }
-
-    public boolean isFilterable(DataType type) {
-        return injectors.containsKey(type);
-    }
-
-    public boolean isMutable(DataType type) {
-        return extracts.containsKey(type);
     }
 
 }

@@ -1,9 +1,8 @@
 package org.statemach.db.graphql;
 
-import java.util.function.Function;
-
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
+import org.statemach.db.jdbc.Injector;
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.PrimaryKey;
 import org.statemach.db.schema.Schema;
@@ -157,7 +156,7 @@ public class GraphQLMutation {
 
     java.util.List<GraphQLFieldDefinition> buildScalarFields(TableInfo table) {
         return table.columns.values()
-            .filter(c -> mapping.isExtractable(c.type))
+            .filter(c -> c.type.isExtractable)
             .map(c -> buildScalarField(table, c))
             .toJavaList();
     }
@@ -197,7 +196,7 @@ public class GraphQLMutation {
     }
 
     boolean isInsertableColumn(ColumnInfo column) {
-        return mapping.isMutable(column.type);
+        return column.type.isMutable;
     }
 
     boolean isUpdatableColumn(PrimaryKey pk, ColumnInfo column) {
@@ -245,10 +244,10 @@ public class GraphQLMutation {
     }
 
     Option<Tuple2<String, Inject>> getInject(TableInfo table, String columnName, Object value) {
-        ColumnInfo               column   = table.columns.get(columnName).get();
-        Function<Object, Inject> injector = mapping.injectors.get(column.type).get();
+        ColumnInfo       column   = table.columns.get(columnName).get();
+        Injector<Object> injector = column.type.injectJsonValue;
 
-        return Option.of(new Tuple2<>(columnName, injector.apply(value)));
+        return Option.of(new Tuple2<>(columnName, injector.prepare(value)));
     }
 
     Map<String, Extract<?>> returnFields(TableInfo table, DataFetchingEnvironment environment) {
@@ -256,7 +255,7 @@ public class GraphQLMutation {
         return List.ofAll(selectionSet.getImmediateFields())
             .filter(f -> table.columns.containsKey(f.getName()))
             .map(SelectedField::getName)
-            .map(c -> new Tuple2<>(c, mapping.extract(table.columns.get(c).get().type)))
+            .map(c -> new Tuple2<>(c, table.columns.get(c).get().type.extractJsonValue))
             .toLinkedMap(t -> t);
     }
 

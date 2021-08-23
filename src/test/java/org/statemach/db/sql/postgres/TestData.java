@@ -2,10 +2,10 @@ package org.statemach.db.sql.postgres;
 
 import java.time.Instant;
 import java.util.UUID;
-import java.util.function.Function;
 
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
+import org.statemach.db.jdbc.Injector;
 import org.statemach.db.schema.DataType;
 import org.statemach.db.schema.TableInfo;
 
@@ -228,18 +228,18 @@ public interface TestData {
             new Tuple2<>(TestSchema.COLUMN_THIRD_FIRST.name, null),
             new Tuple2<>(TestSchema.COLUMN_THIRD_SECOND.name, null));
 
-    static final Map<DataType, Function<?, Inject>> INGECTORS = List.of(
-            new Tuple2<>(PostgresDataType.BIGINT, Inject.LONG),
-            new Tuple2<>(PostgresDataType.BOOLEAN, Inject.BOOLEAN),
-            new Tuple2<>(PostgresDataType.CHARACTER, Inject.STRING),
-            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Inject.STRING),
-            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Inject.DOUBLE),
-            new Tuple2<>(PostgresDataType.INTEGER, Inject.INTEGER),
-            new Tuple2<>(PostgresDataType.NAME, Inject.STRING),
-            new Tuple2<>(PostgresDataType.SMALLINT, Inject.INTEGER),
-            new Tuple2<>(PostgresDataType.TEXT, Inject.STRING),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Inject.INSTANT_AS_TIMESTAMP),
-            new Tuple2<>(PostgresDataType.UUID, Inject.UUID_AS_OBJECT))
+    static final Map<DataType, Injector<?>> INGECTORS = List.of(
+            new Tuple2<>(PostgresDataType.BIGINT, Injector.LONG),
+            new Tuple2<>(PostgresDataType.BOOLEAN, Injector.BOOLEAN),
+            new Tuple2<>(PostgresDataType.CHARACTER, Injector.STRING),
+            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Injector.STRING),
+            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Injector.DOUBLE),
+            new Tuple2<>(PostgresDataType.INTEGER, Injector.INTEGER),
+            new Tuple2<>(PostgresDataType.NAME, Injector.STRING),
+            new Tuple2<>(PostgresDataType.SMALLINT, Injector.INTEGER),
+            new Tuple2<>(PostgresDataType.TEXT, Injector.STRING),
+            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIMEZONE, Injector.INSTANT),
+            new Tuple2<>(PostgresDataType.UUID, Injector.UUID))
         .toMap(t -> t);
 
     static final Map<String, Extract<?>> FIRST_EXTRACT = HashMap.ofEntries(

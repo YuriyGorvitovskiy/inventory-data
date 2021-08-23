@@ -14,8 +14,6 @@ public class GraphQLMapping_UnitTest {
         GraphQLMapping result = GraphQLMapping.of(Vendor.POSTGRES);
 
         // Verify
-        assertSame(GraphQLMapping.POSTGRES_EXTRACTS, result.extracts);
-        assertSame(GraphQLMapping.POSTGRES_INJECTORS, result.injectors);
         assertSame(GraphQLMapping.POSTGRES_TO_SCALAR, result.scalars);
     }
 

@@ -19,9 +19,9 @@ public class TableInfo_UnitTest {
     final String COLUMN_NAME_2 = "Column2";
     final String COLUMN_NAME_3 = "Column3";
 
-    final DataType DATA_TYPE_1 = new DataType("DataType1");
-    final DataType DATA_TYPE_2 = new DataType("DataType2");
-    final DataType DATA_TYPE_3 = new DataType("DataType3");
+    final DataType DATA_TYPE_1 = DataType.unsupported("DataType1");
+    final DataType DATA_TYPE_2 = DataType.unsupported("DataType2");
+    final DataType DATA_TYPE_3 = DataType.unsupported("DataType3");
 
     final ColumnInfo COLUMN_1 = new ColumnInfo(COLUMN_NAME_1, DATA_TYPE_1, null);
     final ColumnInfo COLUMN_2 = new ColumnInfo(COLUMN_NAME_2, DATA_TYPE_2, null);

@@ -52,7 +52,7 @@ public class GraphQLQueryFilter {
 
     java.util.List<GraphQLInputObjectField> buildScalarFields(TableInfo table) {
         return table.columns.values()
-            .filter(c -> mapping.isFilterable(c.type))
+            .filter(c -> c.type.isFilterable)
             .map(c -> buildScalarField(table, c))
             .toJavaList();
     }

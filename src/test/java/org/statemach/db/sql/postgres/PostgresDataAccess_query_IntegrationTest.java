@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
+import org.statemach.db.jdbc.Injector;
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.sql.Condition;
 import org.statemach.db.sql.From;
@@ -94,9 +95,9 @@ public class PostgresDataAccess_query_IntegrationTest {
                 NodeLinkTree.<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1)),
                 subject.builder().not(
                         subject.builder().in(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name),
-                                List.of(Inject.LONG.apply(TestData.FIRST_ROW_2_ID),
-                                        Inject.LONG.apply(TestData.FIRST_ROW_3_ID),
-                                        Inject.LONG.apply(-1)))),
+                                List.of(Injector.LONG.prepare(TestData.FIRST_ROW_2_ID),
+                                        Injector.LONG.prepare(TestData.FIRST_ROW_3_ID),
+                                        Injector.LONG.prepare(-1L)))),
                 List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
                 List.of(
                         Select.of(ALIAS_1,
@@ -371,7 +372,7 @@ public class PostgresDataAccess_query_IntegrationTest {
                 subject.builder().or(
                         subject.builder().equal(
                                 Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name),
-                                Inject.DOUBLE.apply(TestData.SECOND_ROW_1_DOUBLE)),
+                                Injector.DOUBLE.prepare(TestData.SECOND_ROW_1_DOUBLE)),
                         subject.builder().isNull(
                                 Select.of(ALIAS_3, TestSchema.COLUMN_SECOND_DOUBLE.name))),
                 List.empty(),
@@ -451,7 +452,7 @@ public class PostgresDataAccess_query_IntegrationTest {
     void arrayAsTable_singleColumn() {
         // Setup
         ColumnInfo   info = ColumnInfo.of("id", PostgresDataType.UUID);
-        List<Object> data = List.of(TestData.SECOND_ROW_1_ID, TestData.SECOND_ROW_2_ID, null);
+        List<Object> data = List.of(TestData.SECOND_ROW_1_ID.toString(), TestData.SECOND_ROW_2_ID.toString(), null);
 
         TableLike from = subject.builder.arrayAsTable(info, data);
         String    sql  = "SELECT a.id FROM " + from.sql + " a";

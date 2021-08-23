@@ -34,7 +34,7 @@ public class PostgresSQLBuilder_UnitTest {
     @Test
     void and_single() {
         // Setup
-        Condition some = subject.equal(Select.of("t", "column", null), Inject.STRING.apply("value"));
+        Condition some = subject.equal(Select.of("t", "column", null), Inject.NOTHING);
 
         // Execute
         Condition result = subject.and(some);
@@ -55,7 +55,7 @@ public class PostgresSQLBuilder_UnitTest {
     @Test
     void or_single() {
         // Setup
-        Condition some = subject.equal(Select.of("t", "column", null), Inject.STRING.apply("value"));
+        Condition some = subject.equal(Select.of("t", "column", null), Inject.NOTHING);
 
         // Execute
         Condition result = subject.or(some);

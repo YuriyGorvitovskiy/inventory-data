@@ -332,7 +332,7 @@ public class GraphQLQuery {
             return sqlBuilder.arrayAsTable(columns.get(), ids.map(m -> m.get(column.name).getOrNull()));
         }
 
-        DataType type = new DataType(naming.getToType(fk));
+        DataType type = DataType.unsupported(naming.getToType(fk));
         return sqlBuilder.arrayAsTable(type, columns, ids);
     }
 

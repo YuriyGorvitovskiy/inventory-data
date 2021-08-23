@@ -106,7 +106,7 @@ public class GraphQLQueryExtract {
     }
 
     boolean isExtractableColumn(ColumnInfo column) {
-        return mapping.isExtractable(column.type);
+        return column.type.isExtractable;
     }
 
     public ExtractPortion parse(TableInfo table,
@@ -190,7 +190,7 @@ public class GraphQLQueryExtract {
                                                     ExtractValue extract) {
         String alias  = joinTree.getNode(extract.path.dropRight(1)).get().alias;
         String column = extract.path.last();
-        return Select.of(alias, column, new Tuple2<>(extract.name, mapping.extract(extract.type)));
+        return Select.of(alias, column, new Tuple2<>(extract.name, (extract.type.extractJsonValue)));
     }
 
 }

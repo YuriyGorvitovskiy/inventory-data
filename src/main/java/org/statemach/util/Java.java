@@ -98,18 +98,6 @@ public interface Java {
         return null != value ? value : inCaseValueIsNull;
     }
 
-    static <R> Function<Object, R> asString(Function<String, R> f) {
-        return o -> f.apply((String) o);
-    }
-
-    static <R> Function<Object, R> asNumber(Function<Number, R> f) {
-        return o -> f.apply((Number) o);
-    }
-
-    static <R> Function<Object, R> asBoolean(Function<Boolean, R> f) {
-        return o -> f.apply((Boolean) o);
-    }
-
     @SafeVarargs
     static <T> boolean in(T value, T... checks) {
         for (T check : checks) {

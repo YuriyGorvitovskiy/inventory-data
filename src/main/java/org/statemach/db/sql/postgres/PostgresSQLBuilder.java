@@ -98,13 +98,13 @@ public class PostgresSQLBuilder implements SQLBuilder {
         return new Condition(column.sql() + SQL.IN_OPEN + SQL.SELECT +
                 SQL.UNNEST_PARAM_OPEN + elementType.name + SQL.ARRAY + SQL.CLOSE +
                 SQL.CLOSE,
-                Inject.ARRAY.apply(elementType, array));
+                elementType.injectJsonArray.prepare(array));
     }
 
     @Override
     public Condition textSearch(Select<?> column, Traversable<String> values) {
         return new Condition(SQL.WEB_SEARCH + column.sql(),
-                Inject.STRING.apply(values.mkString(" ")));
+                PostgresDataType.TSVECTOR.injectStringValue.prepare(values.mkString(" ")));
     }
 
     String querySql(List<View<String>> commonTableExpressions, View<Tuple2<String, Extract<?>>> query) {
@@ -214,7 +214,7 @@ public class PostgresSQLBuilder implements SQLBuilder {
                 + SQL.CLOSE;
 
         String json   = Java.soft(() -> Json.MAPPER.writeValueAsString(values));
-        Inject inject = Inject.STRING.apply(json);
+        Inject inject = PostgresDataType.TEXT.injectStringValue.prepare(json);
 
         return TableLike.of(sql, inject);
     }
@@ -227,6 +227,6 @@ public class PostgresSQLBuilder implements SQLBuilder {
                 + SQL.AS + column.name
                 + SQL.CLOSE;
 
-        return TableLike.of(sql, Inject.ARRAY.apply(column.type, values));
+        return TableLike.of(sql, column.type.injectJsonArray.prepare(values));
     }
 }

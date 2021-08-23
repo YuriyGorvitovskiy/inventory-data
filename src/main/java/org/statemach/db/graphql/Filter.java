@@ -1,7 +1,6 @@
 package org.statemach.db.graphql;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 import org.statemach.db.schema.DataType;
 import org.statemach.db.sql.Condition;
@@ -123,23 +122,22 @@ public class Filter {
                 dataType,
                 acceptNull,
                 Operator.IN_TABLE,
-                notNullValues.map(null));
+                notNullValues);
     }
 
     public Condition buildCondition(GraphQLMapping mapping, SQLBuilder builder, String tableAlias) {
         var columnAlias = Select.of(tableAlias, path.last(), null);
-        var injector    = mapping.injector(dataType);
+        var injector    = dataType.injectJsonValue;
         if (Operator.EQUAL == operator) {
-            Condition condition = builder.equal(columnAlias, injector.apply(notNullValues.get()));
+            Condition condition = builder.equal(columnAlias, injector.prepare(notNullValues.get()));
             return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
         }
         if (Operator.IN_PARAM == operator) {
-            Condition condition = builder.in(columnAlias, notNullValues.map(injector::apply));
+            Condition condition = builder.in(columnAlias, notNullValues.map(injector::prepare));
             return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
         }
         if (Operator.IN_TABLE == operator) {
-            Function<Object, ?> transform = mapping.transform(dataType);
-            Condition           condition = builder.inArray(columnAlias, dataType, notNullValues.map(transform));
+            Condition condition = builder.inArray(columnAlias, dataType, notNullValues);
             return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
         }
         if (Operator.NULL_CHECK == operator) {

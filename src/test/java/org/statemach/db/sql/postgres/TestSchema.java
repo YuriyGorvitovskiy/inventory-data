@@ -86,7 +86,7 @@ public interface TestSchema {
     static final ColumnInfo COLUMN_THIRD_FIRST       = ColumnInfo.of("first", PostgresDataType.BIGINT);
     static final ColumnInfo COLUMN_THIRD_SECOND      = ColumnInfo.of("second", PostgresDataType.UUID);
     static final ColumnInfo COLUMN_THIRD_BOOL        = ColumnInfo.of("bool", PostgresDataType.BOOLEAN);
-    static final ColumnInfo COLUMN_THIRD_TIME        = ColumnInfo.of("time", PostgresDataType.TIMESTAMP_WITH_TIME_ZONE);
+    static final ColumnInfo COLUMN_THIRD_TIME        = ColumnInfo.of("time", PostgresDataType.TIMESTAMP_WITH_TIMEZONE);
     static final ColumnInfo COLUMN_THIRD_UNSUPPORTED = ColumnInfo.of(
             "unsupported",
             DataType.unsupported("timestamp without time zone"));
@@ -96,7 +96,7 @@ public interface TestSchema {
 
     static final ColumnInfo COLUMN_CUSTOM_STR  = ColumnInfo.of("str", PostgresDataType.CHARACTER_VARYING, 256);
     static final ColumnInfo COLUMN_CUSTOM_NUM  = ColumnInfo.of("num", PostgresDataType.BIGINT);
-    static final ColumnInfo COLUMN_CUSTOM_TIME = ColumnInfo.of("time", PostgresDataType.TIMESTAMP_WITH_TIME_ZONE);
+    static final ColumnInfo COLUMN_CUSTOM_TIME = ColumnInfo.of("time", PostgresDataType.TIMESTAMP_WITH_TIMEZONE);
 
     static final List<ColumnInfo> FIRST_COLUMNS   = List.of(
             COLUMN_FIRST_ID,
@@ -182,7 +182,7 @@ public interface TestSchema {
             HashMap.empty(),
             HashMap.empty());
 
-    static final DataType TYPE_CUSTOM = new DataType(TYPE_NAME_CUSTOM);
+    static final DataType TYPE_CUSTOM = DataType.unsupported(TYPE_NAME_CUSTOM);
 
     static final Map<String, TableInfo> ALL_TABLE_INFO_MAP = List.of(
             TABLE_INFO_FIRST,

@@ -11,9 +11,9 @@ public class DataType_UnitTest {
     final String TYPE_NAME_1 = "DataType1";
     final String TYPE_NAME_2 = "DataType2";
 
-    final DataType subject = new DataType(TYPE_NAME_1);
-    final DataType other1  = new DataType(TYPE_NAME_1);
-    final DataType other2  = new DataType(TYPE_NAME_2);
+    final DataType subject = DataType.unsupported(TYPE_NAME_1);
+    final DataType other1  = DataType.unsupported(TYPE_NAME_1);
+    final DataType other2  = DataType.unsupported(TYPE_NAME_2);
 
     @Test
     void unsupported() {

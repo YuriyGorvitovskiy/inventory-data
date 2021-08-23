@@ -4,15 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.sql.Timestamp;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.statemach.db.jdbc.Inject;
+import org.statemach.db.jdbc.Injector;
 import org.statemach.db.schema.TableInfo;
-import org.statemach.util.Json;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -326,11 +324,11 @@ public class PostgresDataAccess_update_IntegrationTest {
         final Map<String, Inject> PK     = TestData.pkToInject(table, ROW);
         final Map<String, Inject> INJECT = TestData.toInject(table, ROW)
             .removeAll(PK.keySet())
-            .put(TestSchema.COLUMN_SECOND_TWO.name, Inject.STRING_AS_UUID_OBJECT.apply(null))
-            .put(TestSchema.COLUMN_SECOND_DOUBLE.name, Inject.STRING_AS_DOUBLE.apply(null))
-            .put(TestSchema.COLUMN_SECOND_INT.name, Inject.STRING_AS_INTEGER.apply(null))
-            .put(TestSchema.COLUMN_SECOND_SHORT.name, Inject.STRING_AS_INTEGER.apply(null))
-            .put(TestSchema.COLUMN_SECOND_LONG.name, Inject.STRING_AS_LONG.apply(null));
+            .put(TestSchema.COLUMN_SECOND_TWO.name, Injector.UUID.prepare(null))
+            .put(TestSchema.COLUMN_SECOND_DOUBLE.name, Injector.DOUBLE.prepare(null))
+            .put(TestSchema.COLUMN_SECOND_INT.name, Injector.INTEGER.prepare(null))
+            .put(TestSchema.COLUMN_SECOND_SHORT.name, Injector.INTEGER.prepare(null))
+            .put(TestSchema.COLUMN_SECOND_LONG.name, Injector.LONG.prepare(null));
 
         // Execute
         subject.update(table.name, PK, INJECT);
@@ -387,11 +385,11 @@ public class PostgresDataAccess_update_IntegrationTest {
         final Map<String, Inject> PK     = TestData.pkToInject(table, ROW);
         final Map<String, Inject> INJECT = TestData.toInject(table, ROW)
             .removeAll(PK.keySet())
-            .put(TestSchema.COLUMN_SECOND_TWO.name, Inject.STRING_AS_UUID_OBJECT.apply("" + TestData.SECOND_ROW_1_ID))
-            .put(TestSchema.COLUMN_SECOND_DOUBLE.name, Inject.STRING_AS_DOUBLE.apply("" + TestData.SECOND_ROW_2_DOUBLE))
-            .put(TestSchema.COLUMN_SECOND_INT.name, Inject.STRING_AS_INTEGER.apply("" + TestData.SECOND_ROW_2_INT))
-            .put(TestSchema.COLUMN_SECOND_SHORT.name, Inject.STRING_AS_INTEGER.apply("" + TestData.SECOND_ROW_2_SHORT))
-            .put(TestSchema.COLUMN_SECOND_LONG.name, Inject.STRING_AS_LONG.apply("" + TestData.SECOND_ROW_2_LONG));
+            .put(TestSchema.COLUMN_SECOND_TWO.name, Injector.UUID.prepare(TestData.SECOND_ROW_1_ID))
+            .put(TestSchema.COLUMN_SECOND_DOUBLE.name, Injector.DOUBLE.prepare(TestData.SECOND_ROW_2_DOUBLE))
+            .put(TestSchema.COLUMN_SECOND_INT.name, Injector.INTEGER.prepare(TestData.SECOND_ROW_2_INT))
+            .put(TestSchema.COLUMN_SECOND_SHORT.name, Injector.INTEGER.prepare(TestData.SECOND_ROW_2_SHORT))
+            .put(TestSchema.COLUMN_SECOND_LONG.name, Injector.LONG.prepare(TestData.SECOND_ROW_2_LONG));
 
         // Execute
         subject.update(table.name, PK, INJECT);
@@ -481,8 +479,7 @@ public class PostgresDataAccess_update_IntegrationTest {
 
         final Map<String, Inject> PK     = TestData.toInject(table, TestData.THIRD_ROW_1_PK);
         final Map<String, Inject> INJECT = TestData.toInject(table, UPDATE)
-            .put(TestSchema.COLUMN_THIRD_TIME.name,
-                    Inject.TIMESTAMP.apply(new Timestamp(TestData.THIRD_ROW_2_TIME.toEpochMilli())));
+            .put(TestSchema.COLUMN_THIRD_TIME.name, Injector.INSTANT.prepare(TestData.THIRD_ROW_2_TIME));
 
         // Execute
         subject.update(table.name, PK, INJECT);
@@ -531,8 +528,8 @@ public class PostgresDataAccess_update_IntegrationTest {
         final Map<String, Inject> PK     = TestData.pkToInject(table, ROW);
         final Map<String, Inject> INJECT = TestData.toInject(table, ROW)
             .removeAll(PK.keySet())
-            .put(TestSchema.COLUMN_THIRD_BOOL.name, Inject.STRING_AS_BOOLEAN.apply(null))
-            .put(TestSchema.COLUMN_THIRD_TIME.name, Inject.ISO8601_AS_TIMESTAMP.apply(null));
+            .put(TestSchema.COLUMN_THIRD_BOOL.name, Injector.BOOLEAN.prepare(null))
+            .put(TestSchema.COLUMN_THIRD_TIME.name, Injector.INSTANT.prepare(null));
 
         // Execute
         subject.update(table.name, PK, INJECT);
@@ -557,7 +554,7 @@ public class PostgresDataAccess_update_IntegrationTest {
         final Map<String, Inject> PK     = TestData.pkToInject(table, ROW);
         final Map<String, Inject> INJECT = TestData.toInject(table, ROW)
             .removeAll(PK.keySet())
-            .put(TestSchema.COLUMN_THIRD_TIME.name, Inject.TIMESTAMP.apply(null));
+            .put(TestSchema.COLUMN_THIRD_TIME.name, Injector.INSTANT.prepare(null));
 
         // Execute
         Map<String, Object> result1 = subject.update(table.name, PK, INJECT, TestData.THIRD_EXTRACT).get();
@@ -583,10 +580,8 @@ public class PostgresDataAccess_update_IntegrationTest {
         final Map<String, Inject> PK     = TestData.pkToInject(table, ROW);
         final Map<String, Inject> INJECT = TestData.toInject(table, ROW)
             .removeAll(PK.keySet())
-            .put(TestSchema.COLUMN_THIRD_BOOL.name,
-                    Inject.STRING_AS_BOOLEAN.apply("" + TestData.THIRD_ROW_2_BOOL))
-            .put(TestSchema.COLUMN_THIRD_TIME.name,
-                    Inject.ISO8601_AS_TIMESTAMP.apply(Json.toISO8601(TestData.THIRD_ROW_2_TIME)));
+            .put(TestSchema.COLUMN_THIRD_BOOL.name, Injector.BOOLEAN.prepare(TestData.THIRD_ROW_2_BOOL))
+            .put(TestSchema.COLUMN_THIRD_TIME.name, Injector.INSTANT.prepare(TestData.THIRD_ROW_2_TIME));
 
         // Execute
         subject.update(table.name, PK, INJECT);

@@ -1,10 +1,7 @@
 package org.statemach.db.rest;
 
-import java.util.function.Function;
-
 import org.statemach.db.jdbc.Extract;
 import org.statemach.db.jdbc.Inject;
-import org.statemach.db.jdbc.Transform;
 import org.statemach.db.schema.ColumnInfo;
 import org.statemach.db.schema.DataType;
 import org.statemach.db.schema.PrimaryKey;
@@ -50,82 +47,16 @@ public class RestHandler implements HttpHandler {
     static final int    DEFAULT_LIMIT  = 10;
     static final int    IN_PARAM_LIMIT = 7;
 
-    static final Map<DataType, Function<String, Inject>> POSTGRES_STRING_INJECTORS = HashMap.ofEntries(
-            new Tuple2<>(PostgresDataType.BIGINT, Inject.STRING_AS_LONG),
-            new Tuple2<>(PostgresDataType.BOOLEAN, Inject.STRING_AS_BOOLEAN),
-            new Tuple2<>(PostgresDataType.CHARACTER, Inject.STRING),
-            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Inject.STRING),
-            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Inject.STRING_AS_DOUBLE),
-            new Tuple2<>(PostgresDataType.INTEGER, Inject.STRING_AS_INTEGER),
-            new Tuple2<>(PostgresDataType.NAME, Inject.STRING),
-            new Tuple2<>(PostgresDataType.SMALLINT, Inject.STRING_AS_INTEGER),
-            new Tuple2<>(PostgresDataType.TEXT, Inject.STRING),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Inject.ISO8601_AS_TIMESTAMP),
-            new Tuple2<>(PostgresDataType.TSVECTOR, Inject.STRING),
-            new Tuple2<>(PostgresDataType.UUID, Inject.STRING_AS_UUID_OBJECT));
-
-    static final Map<DataType, Function<Object, ?>> POSTGRES_STRING_TRANSFORMS = HashMap.ofEntries(
-            new Tuple2<>(PostgresDataType.BIGINT, Transform.STRING_TO_LONG),
-            new Tuple2<>(PostgresDataType.BOOLEAN, Transform.STRING_TO_BOOLEAN),
-            new Tuple2<>(PostgresDataType.CHARACTER, Transform.STRING),
-            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Transform.STRING),
-            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Transform.STRING_TO_DOUBLE),
-            new Tuple2<>(PostgresDataType.INTEGER, Transform.STRING_TO_INTEGER),
-            new Tuple2<>(PostgresDataType.NAME, Transform.STRING),
-            new Tuple2<>(PostgresDataType.SMALLINT, Transform.STRING_TO_INTEGER),
-            new Tuple2<>(PostgresDataType.TEXT, Transform.STRING),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Transform.ISO8601_TO_TIMESTAMP),
-            new Tuple2<>(PostgresDataType.TSVECTOR, Transform.STRING),
-            new Tuple2<>(PostgresDataType.UUID, Transform.STRING_TO_UUID));
-
-    static final Map<DataType, Function<Object, Inject>> POSTGRES_INJECTORS = HashMap.ofEntries(
-            new Tuple2<>(PostgresDataType.BIGINT, Java.asString(Inject.STRING_AS_LONG)),
-            new Tuple2<>(PostgresDataType.BOOLEAN, Java.asBoolean(Inject.BOOLEAN)),
-            new Tuple2<>(PostgresDataType.CHARACTER, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Java.asNumber(Inject.DOUBLE)),
-            new Tuple2<>(PostgresDataType.INTEGER, Java.asNumber(Inject.INTEGER)),
-            new Tuple2<>(PostgresDataType.NAME, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.SMALLINT, Java.asNumber(Inject.INTEGER)),
-            new Tuple2<>(PostgresDataType.TEXT, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Java.asString(Inject.ISO8601_AS_TIMESTAMP)),
-            new Tuple2<>(PostgresDataType.TSVECTOR, Java.asString(Inject.STRING)),
-            new Tuple2<>(PostgresDataType.UUID, Java.asString(Inject.STRING_AS_UUID_OBJECT)));
-
-    static final Map<DataType, Extract<?>>        POSTGRES_EXTRACTS = HashMap.ofEntries(
-            new Tuple2<>(PostgresDataType.BIGINT, Extract.LONG_AS_STRING),
-            new Tuple2<>(PostgresDataType.BOOLEAN, Extract.BOOLEAN),
-            new Tuple2<>(PostgresDataType.CHARACTER, Extract.STRING),
-            new Tuple2<>(PostgresDataType.CHARACTER_VARYING, Extract.STRING),
-            new Tuple2<>(PostgresDataType.DOUBLE_PRECISION, Extract.DOUBLE),
-            new Tuple2<>(PostgresDataType.INTEGER, Extract.INTEGER),
-            new Tuple2<>(PostgresDataType.NAME, Extract.STRING),
-            new Tuple2<>(PostgresDataType.SMALLINT, Extract.INTEGER),
-            new Tuple2<>(PostgresDataType.TEXT, Extract.STRING),
-            new Tuple2<>(PostgresDataType.TIMESTAMP_WITH_TIME_ZONE, Extract.TIMESTAMP_AS_ISO8601),
-            new Tuple2<>(PostgresDataType.UUID, Extract.OBJECT_AS_UUID_STRING));
-    final Schema                                  schema;
-    final DataAccess                              dataAccess;
-    final SQLBuilder                              sqlBuilder;
-    final Map<DataType, Function<String, Inject>> stringInjectors;
-    final Map<DataType, Function<String, ?>>      stringTransforms;
-    final Map<DataType, Function<Object, Inject>> jsonInjectors;
-    final Map<DataType, Extract<?>>               jsonExtracts;
+    final Schema     schema;
+    final DataAccess dataAccess;
+    final SQLBuilder sqlBuilder;
 
     public RestHandler(Schema schema,
                        DataAccess dataAccess,
-                       SQLBuilder sqlBuilder,
-                       Map<DataType, Function<String, Inject>> stringInjectors,
-                       Map<DataType, Function<String, ?>> stringTransforms,
-                       Map<DataType, Function<Object, Inject>> jsonInjectors,
-                       Map<DataType, Extract<?>> jsonExtracts) {
+                       SQLBuilder sqlBuilder) {
         this.schema = schema;
         this.dataAccess = dataAccess;
         this.sqlBuilder = sqlBuilder;
-        this.stringInjectors = stringInjectors;
-        this.stringTransforms = stringTransforms;
-        this.jsonInjectors = jsonInjectors;
-        this.jsonExtracts = jsonExtracts;
     }
 
     @Override
@@ -254,12 +185,12 @@ public class RestHandler implements HttpHandler {
             return Option.none();
         }
 
-        Option<Function<Object, Inject>> injector = jsonInjectors.get(column.get().type);
-        if (injector.isEmpty()) {
+        DataType type = column.get().type;
+        if (!type.isMutable) {
             return Option.none();
         }
 
-        return Option.of(new Tuple2<>(column.get().name, injector.get().apply(value)));
+        return Option.of(new Tuple2<>(column.get().name, type.injectJsonValue.prepare(value)));
     }
 
     void getListOfTables(HttpExchange exchange) {
@@ -324,9 +255,9 @@ public class RestHandler implements HttpHandler {
     }
 
     Option<Tuple2<String, Extract<?>>> getExtract(ColumnInfo column) {
-        DataType dataType = column.type;
-        return jsonExtracts.get(dataType)
-            .map(e -> new Tuple2<>(column.name, e));
+        return column.type.isExtractable
+                ? Option.of(new Tuple2<>(column.name, column.type.extractJsonValue))
+                : Option.none();
     }
 
     Condition getConditions(Map<String, List<String>> query, TableInfo table) {
@@ -391,9 +322,10 @@ public class RestHandler implements HttpHandler {
     }
 
     Condition conditionFrom(TableInfo table, String columnName, List<String> values) {
-        ColumnInfo               column   = getColumn(table, columnName);
-        Function<String, Inject> injector = stringInjectors.get(column.type).get();
-
+        ColumnInfo column = getColumn(table, columnName);
+        if (!column.type.isFilterable) {
+            return Condition.NONE;
+        }
         if (PostgresDataType.TSVECTOR == column.type) {
             return sqlBuilder.textSearch(Select.of(ALIAS, column.name), values);
         }
@@ -403,20 +335,18 @@ public class RestHandler implements HttpHandler {
         }
 
         if (1 == values.size()) {
-            return sqlBuilder.equal(Select.of(ALIAS, column.name), injector.apply(values.get()));
+            return sqlBuilder.equal(Select.of(ALIAS, column.name), column.type.injectStringValue.prepare(values.get()));
         }
 
         if (IN_PARAM_LIMIT > values.size()) {
-            return sqlBuilder.in(Select.of(ALIAS, column.name), values.map(injector));
+            return sqlBuilder.in(Select.of(ALIAS, column.name), values.map(column.type.injectStringValue::prepare));
         }
-        Function<String, ?> mapping = stringTransforms.get(column.type).get();
-        return sqlBuilder.inArray(Select.of(ALIAS, column.name), column.type, values.map(mapping));
+        return sqlBuilder.inArray(Select.of(ALIAS, column.name), column.type, values);
     }
 
     Inject injectFrom(TableInfo table, String columnName, String value) {
-        ColumnInfo               column   = getColumn(table, columnName);
-        Function<String, Inject> injector = stringInjectors.get(column.type).get();
-        return injector.apply(value);
+        ColumnInfo column = getColumn(table, columnName);
+        return column.type.injectStringValue.prepare(value);
     }
 
     TableInfo getTable(String tableName) {
