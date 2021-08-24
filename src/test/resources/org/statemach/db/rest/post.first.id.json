@@ -1,0 +1,9 @@
+{
+  "id": 7,
+  "second": "${0}",
+  "third_name": "Name1",
+  "third_indx": 0,
+  "fixed": "Fixed 7",
+  "varying": "Varying 7",
+  "unlimited": "Unlimited 7"
+}

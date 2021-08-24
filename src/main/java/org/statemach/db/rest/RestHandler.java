@@ -107,7 +107,7 @@ public class RestHandler implements HttpHandler {
         Map<String, Object> entity = Http.extract(exchange, Map.class);
         Map<String, Inject> values = entity.flatMap(t -> getInject(table, t._1, t._2)).toMap(t -> t);
 
-        Http.json(exchange, dataAccess.insert(table.name, values, returning).get());
+        Http.json(exchange, dataAccess.insert(table.name, values, returning));
     }
 
     void merge(HttpExchange exchange) {

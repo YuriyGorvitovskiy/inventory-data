@@ -17,7 +17,7 @@ public interface PostgresDataType {
             Transform.Str.LONG,
             Transform.Jsn.LONG,
             Setter.LONG,
-            Extract.LONG);
+            Extract.LONG_AS_STRING);
     static final DataType BOOLEAN                 = DataType.of("boolean",
             Types.BOOLEAN,
             Transform.Str.BOOLEAN,
