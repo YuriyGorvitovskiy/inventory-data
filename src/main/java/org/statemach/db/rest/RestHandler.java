@@ -40,7 +40,7 @@ public class RestHandler implements HttpHandler {
         static final String LIMIT       = "$limit";
         static final String AUX_PREFIX  = "$";
         static final String DESC_PREFIX = "-";
-        static final String ID_DIVIDER  = "|";
+        static final String ID_DIVIDER  = ":";
     }
 
     static final String ALIAS          = "t";

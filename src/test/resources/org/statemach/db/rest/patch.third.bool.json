@@ -1,0 +1,6 @@
+{
+  "first": 2,
+  "second": "${0}",
+  "bool": true,
+  "time": "${1}"
+}
