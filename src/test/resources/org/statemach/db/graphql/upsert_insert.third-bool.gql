@@ -1,7 +1,7 @@
 mutation {
     upsert_third(
-        name: "Name 8",
-        indx: 7,
+        name: "Name8",
+        indx: 8,
         third: {
             first: 2,
             second: "${0}",

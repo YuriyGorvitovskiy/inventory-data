@@ -1,0 +1,8 @@
+{
+  "name": "Name6",
+  "indx": 6,
+  "first": "2",
+  "second": "${0}",
+  "bool": true,
+  "time": "${1}"
+}

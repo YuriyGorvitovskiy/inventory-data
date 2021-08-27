@@ -1,8 +1,8 @@
 {
   "data": {
     "upsert_third": {
-      "name": "Name 6",
-      "indx": 5,
+      "name": "Name6",
+      "indx": 6,
       "first": "2",
       "second": "${0}",
       "bool": true,
