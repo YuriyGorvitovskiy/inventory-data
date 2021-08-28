@@ -1,0 +1,37 @@
+{
+  "first" : {
+    "id" : "bigint",
+    "second" : "uuid",
+    "third_name" : "name",
+    "third_indx" : "integer",
+    "fixed" : "character",
+    "varying" : "character varying",
+    "unlimited" : "text",
+    "search" : "tsvector"
+  },
+  "second" : {
+    "id" : "uuid",
+    "first" : "bigint",
+    "one" : "uuid",
+    "two" : "uuid",
+    "third_name" : "name",
+    "third_indx" : "integer",
+    "double" : "double precision",
+    "int" : "integer",
+    "short" : "smallint",
+    "long" : "bigint"
+  },
+  "third" : {
+    "name" : "name",
+    "indx" : "integer",
+    "first" : "bigint",
+    "second" : "uuid",
+    "bool" : "boolean",
+    "time" : "timestamp with time zone",
+    "unsupported" : "timestamp without time zone"
+  },
+  "version" : {
+    "product" : "character varying",
+    "version" : "character varying"
+  }
+}

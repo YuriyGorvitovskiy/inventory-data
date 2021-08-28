@@ -1,0 +1,34 @@
+[ {
+  "double" : 1.2,
+  "one" : "${0}",
+  "third_indx" : 0,
+  "short" : 11,
+  "third_name" : "Name1",
+  "id" : "${0}",
+  "two" : "${1}",
+  "int" : 111,
+  "first" : "1",
+  "long" : "11111"
+}, {
+  "double" : 3.4,
+  "one" : "${1}",
+  "third_indx" : 0,
+  "short" : 22,
+  "third_name" : "Name1",
+  "id" : "${1}",
+  "two" : "${2}",
+  "int" : 222,
+  "first" : "1",
+  "long" : "22222"
+}, {
+  "double" : null,
+  "one" : "${2}",
+  "third_indx" : null,
+  "short" : null,
+  "third_name" : null,
+  "id" : "${2}",
+  "two" : null,
+  "int" : null,
+  "first" : null,
+  "long" : null
+} ]

@@ -1,0 +1,12 @@
+{
+  "id" : "${0}",
+  "first" : "1",
+  "third_name" : "Name1",
+  "third_indx" : 0,
+  "one" : "${0}",
+  "two" : "${1}",
+  "short" : 22,
+  "int" : 222,
+  "long" : "22222",
+  "double" : 3.4
+}

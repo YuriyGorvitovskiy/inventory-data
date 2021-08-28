@@ -194,7 +194,7 @@ public class RestHandler implements HttpHandler {
     }
 
     void getListOfTables(HttpExchange exchange) {
-        Http.json(exchange, schema.tables);
+        Http.json(exchange, schema.tables.mapValues(t -> t.columns.mapValues(c -> c.type.name)));
     }
 
     void queryTable(HttpExchange exchange, String tableName) {
