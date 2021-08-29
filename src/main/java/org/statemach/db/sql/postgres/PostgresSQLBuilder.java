@@ -94,11 +94,19 @@ public class PostgresSQLBuilder implements SQLBuilder {
     }
 
     @Override
-    public Condition inArray(Select<?> column, DataType elementType, Traversable<?> array) {
+    public Condition inJsonArray(Select<?> column, DataType elementType, Traversable<?> array) {
         return new Condition(column.sql() + SQL.IN_OPEN + SQL.SELECT +
                 SQL.UNNEST_PARAM_OPEN + elementType.name + SQL.ARRAY + SQL.CLOSE +
                 SQL.CLOSE,
                 elementType.injectJsonArray.prepare(array));
+    }
+
+    @Override
+    public Condition inStringArray(Select<?> column, DataType elementType, Traversable<String> array) {
+        return new Condition(column.sql() + SQL.IN_OPEN + SQL.SELECT +
+                SQL.UNNEST_PARAM_OPEN + elementType.name + SQL.ARRAY + SQL.CLOSE +
+                SQL.CLOSE,
+                elementType.injectStringArray.prepare(array));
     }
 
     @Override

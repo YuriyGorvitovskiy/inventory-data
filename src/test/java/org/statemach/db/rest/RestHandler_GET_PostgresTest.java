@@ -1,9 +1,14 @@
 package org.statemach.db.rest;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.statemach.db.sql.postgres.TestDB;
 import org.statemach.db.sql.postgres.TestData;
+import org.statemach.util.Http;
 
 @EnabledIfEnvironmentVariable(named = "TEST_DATABASE", matches = "POSTGRES")
 public class RestHandler_GET_PostgresTest extends RestHandler_Common_PostgresTest {
@@ -18,8 +23,25 @@ public class RestHandler_GET_PostgresTest extends RestHandler_Common_PostgresTes
     }
 
     @Test
+    void table_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runTest("get", "other", "empty.json", 400, "empty.json"));
+    }
+
+    @Test
+    void table_id_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runTest("get", "other/22", "empty.json", 400, "empty.json"));
+    }
+
+    @Test
     void first_all() {
         runGetTest("first", "get.first.all.expect.json", TestData.SECOND_ROW_1_ID);
+    }
+
+    @Test
+    void first_skip_limit() {
+        runGetTest("first?$skip=1&$limit=1", "get.first.skip-limit.expect.json", TestData.SECOND_ROW_1_ID);
     }
 
     @Test
@@ -43,8 +65,20 @@ public class RestHandler_GET_PostgresTest extends RestHandler_Common_PostgresTes
     }
 
     @Test
+    void first_select_not_extractable() {
+        assertThrows(Http.Error.class,
+                () -> runGetTest("first?$select=id,search", "empty.json"));
+    }
+
+    @Test
     void first_id() {
         runGetTest("first/1", "get.first.id.expect.json", TestData.SECOND_ROW_1_ID);
+    }
+
+    @Test
+    void first_id_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runGetTest("first/22", "empty.json"));
     }
 
     @Test
@@ -58,7 +92,9 @@ public class RestHandler_GET_PostgresTest extends RestHandler_Common_PostgresTes
 
     @Test
     void second_short() {
-        runGetTest("second?short=11&$select=id,short", "get.second.short.expect.json", TestData.SECOND_ROW_1_ID);
+        runGetTest("second?short=11&short=12&short=13&short=13&short=14&short=15&short=16&short=17&short=18&$select=id,short",
+                "get.second.short.expect.json",
+                TestData.SECOND_ROW_1_ID);
     }
 
     @Test
@@ -84,11 +120,24 @@ public class RestHandler_GET_PostgresTest extends RestHandler_Common_PostgresTes
     }
 
     @Test
+    void second_order_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runGetTest("third?$order=id,other", "empty.json"));
+    }
+
+    @Test
     void second_id() {
         runGetTest("second/${0}",
                 "get.second.id.expect.json",
                 TestData.SECOND_ROW_2_ID,
                 TestData.SECOND_ROW_3_ID);
+    }
+
+    @Test
+    void second_id_not_exists() {
+        UUID uuid = UUID.randomUUID();
+        assertThrows(Http.Error.class,
+                () -> runGetTest("second/${0}", "empty.json", uuid));
     }
 
     @Test
@@ -116,8 +165,38 @@ public class RestHandler_GET_PostgresTest extends RestHandler_Common_PostgresTes
     }
 
     @Test
+    void third_select_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runGetTest("third?$select=id,other", "empty.json"));
+    }
+
+    @Test
+    void third_filter_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runGetTest("third?$select=id&other=2", "empty.json"));
+    }
+
+    @Test
+    void third_filter_unsupported() {
+        assertThrows(Http.Error.class,
+                () -> runGetTest("third?$select=id&unsupported=12", "empty.json"));
+    }
+
+    @Test
     void third_id() {
         runGetTest("third/Name3:2?$select=name,indx&$select=bool,time", "get.third.id.expect.json");
+    }
+
+    @Test
+    void third_id_missing_part() {
+        assertThrows(Http.Error.class,
+                () -> runGetTest("third/Name3", "empty.json"));
+    }
+
+    @Test
+    void third_id_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runGetTest("third/Name3:5", "empty.json"));
     }
 
     @Test
@@ -125,4 +204,8 @@ public class RestHandler_GET_PostgresTest extends RestHandler_Common_PostgresTes
         runGetTest("version", "get.version.expect.json", TestDB.version);
     }
 
+    @Test
+    void version_id() {
+        assertThrows(Http.Error.class, () -> runGetTest("version/something", "empty.json"));
+    }
 }

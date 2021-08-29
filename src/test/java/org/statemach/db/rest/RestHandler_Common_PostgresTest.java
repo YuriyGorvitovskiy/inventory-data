@@ -48,7 +48,6 @@ public class RestHandler_Common_PostgresTest {
     final HttpContext  context         = mock(HttpContext.class);
     final Headers      responseHeaders = mock(Headers.class);
 
-    final URI    ctxUri  = Java.soft(() -> new URI("http://example.com/rest/"));
     final String ctxPath = "/rest/";
 
     final ByteArrayOutputStream         output       = new ByteArrayOutputStream();

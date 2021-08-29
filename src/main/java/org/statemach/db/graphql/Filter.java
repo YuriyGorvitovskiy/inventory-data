@@ -137,7 +137,7 @@ public class Filter {
             return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
         }
         if (Operator.IN_TABLE == operator) {
-            Condition condition = builder.inArray(columnAlias, dataType, notNullValues);
+            Condition condition = builder.inJsonArray(columnAlias, dataType, notNullValues);
             return acceptNull ? builder.or(builder.isNull(columnAlias), condition) : condition;
         }
         if (Operator.NULL_CHECK == operator) {

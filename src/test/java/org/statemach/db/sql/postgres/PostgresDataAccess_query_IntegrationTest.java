@@ -121,7 +121,7 @@ public class PostgresDataAccess_query_IntegrationTest {
         // Setup
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 NodeLinkTree.<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1)),
-                subject.builder().inArray(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
+                subject.builder().inJsonArray(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
                         PostgresDataType.BIGINT,
                         List.of(TestData.FIRST_ROW_2_ID, TestData.FIRST_ROW_3_ID, -1)),
                 List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),
@@ -147,7 +147,7 @@ public class PostgresDataAccess_query_IntegrationTest {
         // Setup
         View<Tuple2<String, Extract<?>>> query = new View<Tuple2<String, Extract<?>>>("",
                 NodeLinkTree.<String, From, Join>of(new From(TABLE_FIRST, ALIAS_1)),
-                subject.builder().inArray(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
+                subject.builder().inJsonArray(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, null),
                         PostgresDataType.BIGINT,
                         null),
                 List.of(Select.of(ALIAS_1, TestSchema.COLUMN_FIRST_ID.name, Boolean.TRUE)),

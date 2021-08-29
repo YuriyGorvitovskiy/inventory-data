@@ -4,5 +4,7 @@
   "third_indx": 1,
   "fixed": "Fixed 6",
   "varying": "Varying 6",
-  "unlimited": "Unlimited 6"
+  "unlimited": "Unlimited 6",
+  "other": "something",
+  "search": "something"
 }

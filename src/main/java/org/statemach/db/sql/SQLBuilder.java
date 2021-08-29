@@ -37,7 +37,9 @@ public interface SQLBuilder {
 
     public Condition in(Select<?> column, Traversable<Inject> values);
 
-    public Condition inArray(Select<?> column, DataType elementType, Traversable<?> array);
+    public Condition inJsonArray(Select<?> column, DataType elementType, Traversable<?> array);
+
+    public Condition inStringArray(Select<?> column, DataType elementType, Traversable<String> array);
 
     public Condition textSearch(Select<?> column, Traversable<String> values);
 

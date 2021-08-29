@@ -86,7 +86,7 @@ public class RestHandler implements HttpHandler {
         String path = Http.subContextPath(exchange);
 
         String[] items = path.split("/", 2);
-        if (0 == items.length || Java.isEmpty(items[0])) {
+        if (Java.isEmpty(items[0])) {
             getListOfTables(exchange);
             return;
         }
@@ -301,7 +301,9 @@ public class RestHandler implements HttpHandler {
 
     Map<String, Inject> parseId(TableInfo table, String id) {
         if (table.primary.isEmpty()) {
-            return HashMap.empty();
+            throw new Error(ErrorCode.BAD_REQUEST,
+                    "Get by id is not supported by table ${0}",
+                    table.name);
         }
         PrimaryKey pk = table.primary.get();
         if (pk.columns.size() == 1) {
@@ -324,14 +326,14 @@ public class RestHandler implements HttpHandler {
     Condition conditionFrom(TableInfo table, String columnName, List<String> values) {
         ColumnInfo column = getColumn(table, columnName);
         if (!column.type.isFilterable) {
-            return Condition.NONE;
-        }
-        if (PostgresDataType.TSVECTOR == column.type) {
-            return sqlBuilder.textSearch(Select.of(ALIAS, column.name), values);
+            throw new Http.Error(Http.ErrorCode.BAD_REQUEST,
+                    "Table ${0} is not supporting filtering for ${1} column.",
+                    table.name,
+                    columnName);
         }
 
-        if (values.isEmpty()) {
-            return sqlBuilder.isNull(Select.of(ALIAS, column.name));
+        if (PostgresDataType.TSVECTOR == column.type) {
+            return sqlBuilder.textSearch(Select.of(ALIAS, column.name), values);
         }
 
         if (1 == values.size()) {
@@ -341,7 +343,8 @@ public class RestHandler implements HttpHandler {
         if (IN_PARAM_LIMIT > values.size()) {
             return sqlBuilder.in(Select.of(ALIAS, column.name), values.map(column.type.injectStringValue::prepare));
         }
-        return sqlBuilder.inArray(Select.of(ALIAS, column.name), column.type, values);
+
+        return sqlBuilder.inStringArray(Select.of(ALIAS, column.name), column.type, values);
     }
 
     Inject injectFrom(TableInfo table, String columnName, String value) {

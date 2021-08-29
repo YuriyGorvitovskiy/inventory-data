@@ -1,11 +1,16 @@
 package org.statemach.db.rest;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.statemach.db.sql.postgres.TestDB;
 import org.statemach.db.sql.postgres.TestData;
 import org.statemach.db.sql.postgres.TestSchema;
+import org.statemach.util.Http;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -53,6 +58,12 @@ public class RestHandler_DELETE_PostgresTest extends RestHandler_Common_Postgres
     }
 
     @Test
+    void first_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runTest("delete", "first/22", "empty.json", 404, "empty.json"));
+    }
+
+    @Test
     void second_all() {
         // Remove FK constraint to SECOND_ROW_2
         TestDB.update(TestSchema.TABLE_INFO_SECOND, TestData.SECOND_ROW_1_PK, SECOND_ROW_1_TWO);
@@ -94,6 +105,13 @@ public class RestHandler_DELETE_PostgresTest extends RestHandler_Common_Postgres
     }
 
     @Test
+    void second_not_exists() {
+        UUID uuid = UUID.randomUUID();
+        assertThrows(Http.Error.class,
+                () -> runTest("delete", "second/${0}", "empty.json", 404, "empty.json", uuid));
+    }
+
+    @Test
     void third_all() {
         runTest("delete",
                 "third/" + TestData.THIRD_ROW_2_NAME + ":" + TestData.THIRD_ROW_2_INDX,
@@ -120,6 +138,12 @@ public class RestHandler_DELETE_PostgresTest extends RestHandler_Common_Postgres
                 "empty.json",
                 200,
                 "delete.third.bool.expect.json");
+    }
+
+    @Test
+    void third_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runTest("delete", "third/Hello:2", "empty.json", 404, "empty.json"));
     }
 
 }

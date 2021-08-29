@@ -1,10 +1,15 @@
 package org.statemach.db.rest;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.statemach.db.sql.postgres.TestDB;
 import org.statemach.db.sql.postgres.TestData;
+import org.statemach.util.Http;
 
 @EnabledIfEnvironmentVariable(named = "TEST_DATABASE", matches = "POSTGRES")
 public class RestHandler_PATCH_PostgresTest extends RestHandler_Common_PostgresTest {
@@ -61,6 +66,12 @@ public class RestHandler_PATCH_PostgresTest extends RestHandler_Common_PostgresT
                 200,
                 "patch.first.varying.expect.json",
                 TestData.SECOND_ROW_2_ID);
+    }
+
+    @Test
+    void first_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runTest("patch", "first/22", "patch.first.not-exists.json", 404, "empty.json"));
     }
 
     @Test
@@ -121,6 +132,13 @@ public class RestHandler_PATCH_PostgresTest extends RestHandler_Common_PostgresT
     }
 
     @Test
+    void second_not_exists() {
+        UUID uuid = UUID.randomUUID();
+        assertThrows(Http.Error.class,
+                () -> runTest("patch", "second/${0}", "patch.second.not-exists.json", 404, "empty.json", uuid));
+    }
+
+    @Test
     void third_time_all() {
         runTest("patch",
                 "third/" + TestData.THIRD_ROW_2_NAME + ":" + TestData.THIRD_ROW_2_INDX,
@@ -171,6 +189,12 @@ public class RestHandler_PATCH_PostgresTest extends RestHandler_Common_PostgresT
                 "patch.third.bool.expect.json",
                 TestData.SECOND_ROW_2_ID,
                 TestData.THIRD_ROW_2_TIME);
+    }
+
+    @Test
+    void third_not_exists() {
+        assertThrows(Http.Error.class,
+                () -> runTest("patch", "third/Hello:2", "patch.third.not-exists.json", 404, "empty.json"));
     }
 
 }
