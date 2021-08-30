@@ -10,6 +10,6 @@ docker build -f Dockerfile -t "yuriyg/statemach-data:1.0.0" -t "yuriyg/statemach
 #
 
 # publish to Docker hub
-# docker login --username=yuriyg
-# docker push yuriyg/statemach-data:1.0.0 && docker push yuriyg/statemach-data:latest
+docker login --username=yuriyg
+docker push yuriyg/statemach-data:1.0.0 && docker push yuriyg/statemach-data:latest
 #
