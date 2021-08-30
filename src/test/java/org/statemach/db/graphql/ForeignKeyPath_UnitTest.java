@@ -6,8 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-
-import com.yg.inventory.model.db.ForeignKey;
+import org.statemach.db.schema.ForeignKey;
 
 import io.vavr.collection.List;
 
