@@ -59,6 +59,10 @@ public class RestHandler implements HttpHandler {
         this.sqlBuilder = sqlBuilder;
     }
 
+    public static RestHandler of(Schema schema, DataAccess dataAccess) {
+        return new RestHandler(schema, dataAccess, dataAccess.builder());
+    }
+
     @Override
     public void handle(HttpExchange exchange) {
         switch (exchange.getRequestMethod().toUpperCase()) {
